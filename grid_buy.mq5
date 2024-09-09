@@ -10,6 +10,11 @@
 //+------------------------------------------------------------------+
 //| EA Buy Grid                                                      |
 //+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
+//| TODO List                                                        |
+//+------------------------------------------------------------------+
+
 // [x] Get account info
 // [x] ACCOUNT_BALANCE
 // [x] ACCOUNT_EQUITY
@@ -22,7 +27,7 @@
 // [x] ACCOUNT_LIMIT_ORDERS
 // [ ] Calculate maximum drawdown
 // [ ] Calcualte Pip value
-// [ ] Define Min-Max price range
+// [x] Define Min-Max price range
 // [ ] Define Entry distant
 // [ ] Calcualte maximun lot size
 // [ ] Create array list all price in range
@@ -33,26 +38,41 @@
 // range
 
 //+------------------------------------------------------------------+
+//| input                                                            |
+//+------------------------------------------------------------------+
+input double MaxPrice = NULL;
+input double MinPrice = 0;
+
+//+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 
 int OnInit() {
 
-  printf("ACCOUNT_BALANCE =  %G", AccountInfoDouble(ACCOUNT_BALANCE));
-  printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
-  printf("ACCOUNT_MARGIN =  %G", AccountInfoDouble(ACCOUNT_MARGIN));
-  printf("ACCOUNT_MARGIN_FREE =  %G", AccountInfoDouble(ACCOUNT_MARGIN_FREE));
-  printf("ACCOUNT_MARGIN_LEVEL =  %G", AccountInfoDouble(ACCOUNT_MARGIN_LEVEL));
-  printf("ACCOUNT_MARGIN_SO_CALL = %G",
-         AccountInfoDouble(ACCOUNT_MARGIN_SO_CALL));
-  printf("ACCOUNT_MARGIN_SO_SO = %G", AccountInfoDouble(ACCOUNT_MARGIN_SO_SO));
-  printf("ACCOUNT_LEVERAGE =  %d", AccountInfoInteger(ACCOUNT_LEVERAGE));
-  printf("ACCOUNT_LIMIT_ORDERS =  %d",
-         AccountInfoInteger(ACCOUNT_LIMIT_ORDERS));
+  ValidateInput();
+
+  //--- get the number of decimal places for the current chart symbol
+  int digits = Digits();
+
+  //--- send the obtained data to the journal
+  Print("Number of decimal digits for the current chart symbol: ", digits);
+
+  //   printf("ACCOUNT_BALANCE =  %G", AccountInfoDouble(ACCOUNT_BALANCE));
+  //   printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
+  //   printf("ACCOUNT_MARGIN =  %G", AccountInfoDouble(ACCOUNT_MARGIN));
+  //   printf("ACCOUNT_MARGIN_FREE =  %G",
+  //   AccountInfoDouble(ACCOUNT_MARGIN_FREE)); printf("ACCOUNT_MARGIN_LEVEL =
+  //   %G", AccountInfoDouble(ACCOUNT_MARGIN_LEVEL));
+  //   printf("ACCOUNT_MARGIN_SO_CALL = %G",
+  //          AccountInfoDouble(ACCOUNT_MARGIN_SO_CALL));
+  //   printf("ACCOUNT_MARGIN_SO_SO = %G",
+  //   AccountInfoDouble(ACCOUNT_MARGIN_SO_SO)); printf("ACCOUNT_LEVERAGE = %d",
+  //   AccountInfoInteger(ACCOUNT_LEVERAGE)); printf("ACCOUNT_LIMIT_ORDERS =
+  //   %d",
+  //          AccountInfoInteger(ACCOUNT_LIMIT_ORDERS));
 
   return (INIT_SUCCEEDED);
 }
-
 
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
@@ -65,3 +85,21 @@ void OnDeinit(const int reason) {}
 void OnTick() {}
 
 //+------------------------------------------------------------------+
+
+void ValidateInput() {
+
+  Print("MaxPrice", MaxPrice);
+  Print("MinPrice", MinPrice);
+
+  if (MinPrice < 0)
+    AlertAndExit("MinPrice cannot be less than 0.");
+
+  if (MaxPrice > 0 && MinPrice >= MaxPrice)
+    AlertAndExit("MinPrice must be less than MaxPrice.");
+}
+
+void AlertAndExit(string message) {
+  Alert(message);
+  ExpertRemove();
+  return;
+}
