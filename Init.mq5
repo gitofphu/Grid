@@ -1,15 +1,14 @@
 
-
-// [ ] Get account info
-// [ ] ACCOUNT_BALANCE
-// [ ] ACCOUNT_EQUITY
-// [ ] ACCOUNT_MARGIN
-// [ ] ACCOUNT_MARGIN_FREE
-// [ ] ACCOUNT_MARGIN_LEVEL
-// [ ] ACCOUNT_MARGIN_SO_CALL
-// [ ] ACCOUNT_MARGIN_SO_SO
-// [ ] ACCOUNT_LEVERAGE
-// [ ] ACCOUNT_LIMIT_ORDERS
+// [x] Get account info
+// [x] ACCOUNT_BALANCE
+// [x] ACCOUNT_EQUITY
+// [x] ACCOUNT_MARGIN
+// [x] ACCOUNT_MARGIN_FREE
+// [x] ACCOUNT_MARGIN_LEVEL
+// [x] ACCOUNT_MARGIN_SO_CALL
+// [x] ACCOUNT_MARGIN_SO_SO
+// [x] ACCOUNT_LEVERAGE
+// [x] ACCOUNT_LIMIT_ORDERS
 // [ ] Calculate maximum drawdown
 // [ ] Calcualte Pip value
 // [ ] Define Min-Max price range
@@ -24,8 +23,17 @@
 
 int OnInit() {
 
-  printf("ACCOUNT_CURRENCY_DIGITS= % d ",
-         AccountInfoInteger(ACCOUNT_CURRENCY_DIGITS));
+  printf("ACCOUNT_BALANCE =  %G", AccountInfoDouble(ACCOUNT_BALANCE));
+  printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
+  printf("ACCOUNT_MARGIN =  %G", AccountInfoDouble(ACCOUNT_MARGIN));
+  printf("ACCOUNT_MARGIN_FREE =  %G", AccountInfoDouble(ACCOUNT_MARGIN_FREE));
+  printf("ACCOUNT_MARGIN_LEVEL =  %G", AccountInfoDouble(ACCOUNT_MARGIN_LEVEL));
+  printf("ACCOUNT_MARGIN_SO_CALL = %G",
+         AccountInfoDouble(ACCOUNT_MARGIN_SO_CALL));
+  printf("ACCOUNT_MARGIN_SO_SO = %G", AccountInfoDouble(ACCOUNT_MARGIN_SO_SO));
+  printf("ACCOUNT_LEVERAGE =  %d", AccountInfoInteger(ACCOUNT_LEVERAGE));
+  printf("ACCOUNT_LIMIT_ORDERS =  %d",
+         AccountInfoInteger(ACCOUNT_LIMIT_ORDERS));
 
   return (INIT_SUCCEEDED);
 }
