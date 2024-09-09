@@ -1,4 +1,15 @@
+//+------------------------------------------------------------------+
+//|                                                         grid_buy.mq5 |
+//|                                                  Watsadonramai.W |
+//|                                       Link inMQLHeadStandard |
+//+------------------------------------------------------------------+
+#property copyright "Watsadonramai.W"
+#property link "Link"
+#property version "1.00"
 
+//+------------------------------------------------------------------+
+//| EA Buy Grid                                                      |
+//+------------------------------------------------------------------+
 // [x] Get account info
 // [x] ACCOUNT_BALANCE
 // [x] ACCOUNT_EQUITY
@@ -21,6 +32,10 @@
 // [ ] Create function to modify in case of cannot place all order in price
 // range
 
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+
 int OnInit() {
 
   printf("ACCOUNT_BALANCE =  %G", AccountInfoDouble(ACCOUNT_BALANCE));
@@ -37,3 +52,16 @@ int OnInit() {
 
   return (INIT_SUCCEEDED);
 }
+
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason) {}
+
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick() {}
+
+//+------------------------------------------------------------------+
