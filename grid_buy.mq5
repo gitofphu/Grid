@@ -42,6 +42,8 @@
 //+------------------------------------------------------------------+
 input double MaxPrice = NULL;
 input double MinPrice = 0;
+input int MaxOrders = NULL;
+int limitOrders;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -88,14 +90,30 @@ void OnTick() {}
 
 void ValidateInput() {
 
-  Print("MaxPrice", MaxPrice);
-  Print("MinPrice", MinPrice);
+  Print("MaxPrice ", MaxPrice);
+  Print("MinPrice ", MinPrice);
+  Print("MaxOrders ", MaxOrders);
 
   if (MinPrice < 0)
     AlertAndExit("MinPrice cannot be less than 0.");
 
   if (MaxPrice > 0 && MinPrice >= MaxPrice)
     AlertAndExit("MinPrice must be less than MaxPrice.");
+
+  const int accoutnLimitOrders = AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
+
+  Print("accoutnLimitOrders ", accoutnLimitOrders);
+  Print("MaxOrders == NULL ", MaxOrders == NULL);
+
+  if (MaxOrders == NULL) {
+    limitOrders = accoutnLimitOrders;
+  } else if (MaxOrders > accoutnLimitOrders) {
+    AlertAndExit("MaxOrders must be less than ACCOUNT_LIMIT_ORDERS.");
+  } else {
+    limitOrders = MaxOrders;
+  }
+
+  Print("limitOrders ", limitOrders);
 }
 
 void AlertAndExit(string message) {
