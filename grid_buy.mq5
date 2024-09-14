@@ -31,7 +31,7 @@
 // [ ] Define Entry distant
 // [ ] Calcualte maximun lot size
 // [ ] Create array list all price in range
-// [ ] Check if can trade
+// [x] Check if can trade
 // [ ] Check if possible to place entry on every price in range
 // [ ] Create function to place order on every price in range
 // [ ] Create function to re-place order on tp price
@@ -87,7 +87,7 @@ void OnDeinit(const int reason) {}
 //+------------------------------------------------------------------+
 void OnTick() {
 
-  if (tradeAllowed() == false)
+  if (TradeAllowed() == false)
     return;
 }
 
@@ -127,4 +127,4 @@ void AlertAndExit(string message) {
   return;
 }
 
-int tradeAllowed() { return MQLInfoInteger(MQL_TRADE_ALLOWED); }
+int TradeAllowed() { return MQLInfoInteger(MQL_TRADE_ALLOWED); }
