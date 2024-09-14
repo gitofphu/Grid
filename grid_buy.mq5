@@ -31,6 +31,7 @@
 // [ ] Define Entry distant
 // [ ] Calcualte maximun lot size
 // [ ] Create array list all price in range
+// [ ] Check if can trade
 // [ ] Check if possible to place entry on every price in range
 // [ ] Create function to place order on every price in range
 // [ ] Create function to re-place order on tp price
@@ -51,13 +52,13 @@ int limitOrders;
 
 int OnInit() {
 
-  ValidateInput();
+  // ValidateInput();
 
-  //--- get the number of decimal places for the current chart symbol
-  int digits = Digits();
+  // //--- get the number of decimal places for the current chart symbol
+  // int digits = Digits();
 
-  //--- send the obtained data to the journal
-  Print("Number of decimal digits for the current chart symbol: ", digits);
+  // //--- send the obtained data to the journal
+  // Print("Number of decimal digits for the current chart symbol: ", digits);
 
   //   printf("ACCOUNT_BALANCE =  %G", AccountInfoDouble(ACCOUNT_BALANCE));
   //   printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
@@ -84,7 +85,11 @@ void OnDeinit(const int reason) {}
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
-void OnTick() {}
+void OnTick() {
+
+  if (tradeAllowed() == false)
+    return;
+}
 
 //+------------------------------------------------------------------+
 
@@ -121,3 +126,5 @@ void AlertAndExit(string message) {
   ExpertRemove();
   return;
 }
+
+int tradeAllowed() { return MQLInfoInteger(MQL_TRADE_ALLOWED); }
