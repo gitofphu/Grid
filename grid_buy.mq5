@@ -30,7 +30,7 @@
 // [x] Define Min-Max price range
 // [ ] Define Entry distant
 // [ ] Calcualte maximun lot size
-// [ ] Create array list all price in range
+// [x] Create array list all price in range
 // [x] Check if can trade
 // [ ] Check if possible to place entry on every price in range
 // [ ] Create function to place order on every price in range
@@ -44,7 +44,10 @@
 input double MaxPrice = NULL;
 input double MinPrice = 0;
 input int MaxOrders = NULL;
+input double PriceRange = NULL;
 int limitOrders;
+
+double ArrayPrices[];
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -52,7 +55,13 @@ int limitOrders;
 
 int OnInit() {
 
-  // ValidateInput();
+  ValidateInput();
+
+  GetArrayPrice(ArrayPrices);
+
+  for (int i = 0; i < ArraySize(ArrayPrices); i++) {
+    Print("Price ", i, ": ", ArrayPrices[i]);
+  }
 
   // //--- get the number of decimal places for the current chart symbol
   // int digits = Digits();
@@ -105,6 +114,9 @@ void ValidateInput() {
   if (MaxPrice > 0 && MinPrice >= MaxPrice)
     AlertAndExit("MinPrice must be less than MaxPrice.");
 
+  if (PriceRange == 0)
+    AlertAndExit("PriceRange cannot be 0.");
+
   const int accoutnLimitOrders = AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
 
   Print("accoutnLimitOrders ", accoutnLimitOrders);
@@ -128,3 +140,18 @@ void AlertAndExit(string message) {
 }
 
 int TradeAllowed() { return MQLInfoInteger(MQL_TRADE_ALLOWED); }
+
+void GetArrayPrice(double &array[]) {
+  double prices[];
+  int arraySize = NormalizeDouble((MaxPrice - MinPrice) / PriceRange, _Digits);
+
+  ArrayResize(array, arraySize);
+
+  int index;
+  double price;
+
+  for (index = 0, price = MinPrice; index < arraySize;
+       index++, price += PriceRange) {
+    array[index] = price;
+  }
+}
