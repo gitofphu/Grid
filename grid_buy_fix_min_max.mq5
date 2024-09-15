@@ -30,6 +30,7 @@
 // [x] Define Min-Max price range
 // [ ] Define Entry distant
 // [ ] Calcualte maximun lot size
+// [ ] Check if MaxOrder or OrderNumbers exceed limit orders
 // [x] Create array list all price in range
 // [x] Check if can trade
 // [ ] Check if possible to place entry on every price in range
@@ -63,6 +64,8 @@ int OnInit() {
     Print("Price ", i, ": ", ArrayPrices[i]);
   }
 
+  double lotSize = GetLotsSize(ArrayPrices);
+
   // //--- get the number of decimal places for the current chart symbol
   // int digits = Digits();
 
@@ -70,7 +73,7 @@ int OnInit() {
   // Print("Number of decimal digits for the current chart symbol: ", digits);
 
   //   printf("ACCOUNT_BALANCE =  %G", AccountInfoDouble(ACCOUNT_BALANCE));
-  //   printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
+  printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
   //   printf("ACCOUNT_MARGIN =  %G", AccountInfoDouble(ACCOUNT_MARGIN));
   //   printf("ACCOUNT_MARGIN_FREE =  %G",
   //   AccountInfoDouble(ACCOUNT_MARGIN_FREE)); printf("ACCOUNT_MARGIN_LEVEL =
@@ -154,4 +157,39 @@ void GetArrayPrice(double &array[]) {
        index++, price += PriceRange) {
     array[index] = price;
   }
+}
+
+double GetLotsSize(double &array[]) {
+
+  int OrderNumbers = ArraySize(array);
+
+  double averagePrice = 0;
+
+  for (int i = 0; i < OrderNumbers; i++) {
+
+    if (i == 0 && array[0] == 0) {
+      averagePrice += 1;
+      continue;
+    }
+    averagePrice += array[i];
+  }
+
+  averagePrice = averagePrice / OrderNumbers;
+
+  Print("averagePrice: ", averagePrice);
+
+  // Define order parameters
+  double lotSize = 0.1; // Lot size
+
+  double price = SymbolInfoDouble(_Symbol, SYMBOL_BID); // Current market price
+
+  // Calculate margin
+  double margin = 0;
+  if (OrderCalcMargin(ORDER_TYPE_BUY, _Symbol, lotSize, price, margin)) {
+    Print("Margin required: ", margin);
+  } else {
+    AlertAndExit("Error calculating margin: " + GetLastError());
+  }
+
+  return 0;
 }
