@@ -7,6 +7,10 @@
 #property link "Link"
 #property version "1.00"
 
+#include <Trade\AccountInfo.mqh>
+
+CAccountInfo AccountInfo;
+
 //+------------------------------------------------------------------+
 //| EA Buy Grid                                                      |
 //+------------------------------------------------------------------+
@@ -42,10 +46,10 @@
 //+------------------------------------------------------------------+
 //| input                                                            |
 //+------------------------------------------------------------------+
-input double MaxPrice = NULL;
+input double MaxPrice = 100;
 input double MinPrice = 0;
 input int MaxOrders = NULL;
-input double PriceRange = NULL;
+input double PriceRange = 5;
 int limitOrders;
 
 double ArrayPrices[];
@@ -73,7 +77,7 @@ int OnInit() {
   // Print("Number of decimal digits for the current chart symbol: ", digits);
 
   //   printf("ACCOUNT_BALANCE =  %G", AccountInfoDouble(ACCOUNT_BALANCE));
-  printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
+  // printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
   //   printf("ACCOUNT_MARGIN =  %G", AccountInfoDouble(ACCOUNT_MARGIN));
   //   printf("ACCOUNT_MARGIN_FREE =  %G",
   //   AccountInfoDouble(ACCOUNT_MARGIN_FREE)); printf("ACCOUNT_MARGIN_LEVEL =
@@ -85,6 +89,8 @@ int OnInit() {
   //   AccountInfoInteger(ACCOUNT_LEVERAGE)); printf("ACCOUNT_LIMIT_ORDERS =
   //   %d",
   //          AccountInfoInteger(ACCOUNT_LIMIT_ORDERS));
+
+  ExpertRemove();
 
   return (INIT_SUCCEEDED);
 }
@@ -177,6 +183,21 @@ double GetLotsSize(double &array[]) {
   averagePrice = averagePrice / OrderNumbers;
 
   Print("averagePrice: ", averagePrice);
+
+  double maxLot = AccountInfo.MaxLotCheck(_Symbol, ORDER_TYPE_BUY, 2400, 100);
+
+  Print("MaxLotCheck ", maxLot);
+
+  // double profit = AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
+  // maxLot,
+  //                                              averagePrice, 0);
+
+  // profit = NormalizeDouble(profit, _Digits);
+
+  // Print("OrderProfitCheck ", profit);
+
+  Print("OrderProfitCheck ",
+        AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, 1, 50, 70));
 
   // Define order parameters
   double lotSize = 0.1; // Lot size

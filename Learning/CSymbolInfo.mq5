@@ -22,4 +22,23 @@ void OnStart() {
 
   Print("SessionOpen(): ", SymbolInfo.SessionOpen());
   Print("SessionClose(): ", SymbolInfo.SessionClose());
+  Print("Digits(): ", SymbolInfo.Digits());
+  Print("Digits(): ", Digits());
+  Print("Point(): ", SymbolInfo.Point());
+  Print("Point(): ", Point());
+  Print("TickValue(): ", SymbolInfo.TickValue());
+  Print("TickValueProfit(): ", SymbolInfo.TickValueProfit());
+  Print("TickValueLoss(): ", SymbolInfo.TickValueLoss());
+  Print("TickSize(): ", SymbolInfo.TickSize());
+  Print("Spread(): ", SymbolInfo.Spread());
+  Print("SpreadFloat(): ", SymbolInfo.SpreadFloat());
+  Print("Bid(): ", SymbolInfo.Bid());
+  Print("Ask(): ", SymbolInfo.Ask());
+  Print("MarginInitial(): ", SymbolInfo.MarginInitial());
+  Print("MarginMaintenance(): ", SymbolInfo.MarginMaintenance());
+  Print("MarginLong(): ", SymbolInfo.MarginLong());
+  Print("MarginShort(): ", SymbolInfo.MarginShort());
+  Print("MarginLimit(): ", SymbolInfo.MarginLimit());
+  Print("MarginStop(): ", SymbolInfo.MarginStop());
+  Print("MarginStopLimit(): ", SymbolInfo.MarginStopLimit());
 }
