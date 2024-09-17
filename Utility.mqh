@@ -11,7 +11,7 @@ class MyUtility {
 public:
   MyUtility();
   ~MyUtility();
-  double CalculateLots(const string symbol,
+  double CalculateLot(const string symbol,
                        const ENUM_ORDER_TYPE trade_operation,
                        const double profit, const double open_price,
                        const double close_price);
@@ -31,14 +31,14 @@ MyUtility::~MyUtility() {}
 //+------------------------------------------------------------------+
 
 //+------------------------------------------------------------------+
-//| Access functions CalculateLots(...).                             |
+//| Access functions CalculateLot(...).                             |
 //| INPUT:  name            - symbol name,                           |
 //|         trade_operation - trade operation,                       |
 //|         profit          - expect profit,                         |
 //|         price_open      - price of the opening position,         |
 //|         price_close     - price of the closing position.         |
 //+------------------------------------------------------------------+
-double MyUtility::CalculateLots(const string symbol,
+double MyUtility::CalculateLot(const string symbol,
                                 const ENUM_ORDER_TYPE trade_operation,
                                 const double profit, const double open_price,
                                 const double close_price) {
@@ -57,8 +57,8 @@ double MyUtility::CalculateLots(const string symbol,
     price_diff = open_price - close_price;
     break;
   default:
-    Alert("MyUtility::CalculateLots: Invalid order type.");
-    ExpertRemove();
+    Print("MyUtility::CalculateLot: Invalid order type");
+    return (0.0);
   }
 
   double lots = profit / (price_diff * contract_size * tick_value);
