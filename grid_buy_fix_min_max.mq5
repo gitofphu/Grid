@@ -7,9 +7,11 @@
 #property link "Link"
 #property version "1.00"
 
-#include <Trade\AccountInfo.mqh>
-
+#include <Trade/AccountInfo.mqh>
 CAccountInfo AccountInfo;
+
+#include <../Experts/Grid/Utility.mqh>
+MyUtility Utility;
 
 //+------------------------------------------------------------------+
 //| EA Buy Grid                                                      |
@@ -59,6 +61,12 @@ double ArrayPrices[];
 //+------------------------------------------------------------------+
 
 int OnInit() {
+
+  if (SymbolInfoString(_Symbol, SYMBOL_CURRENCY_MARGIN) !=
+      SymbolInfoString(_Symbol, SYMBOL_CURRENCY_PROFIT)) {
+    AlertAndExit("EA Cannot be use with this product!");
+    return (INIT_PARAMETERS_INCORRECT);
+  }
 
   ValidateInput();
 
@@ -158,9 +166,12 @@ void GetArrayPrice(double &array[]) {
 
   int index;
   double price;
-
   for (index = 0, price = MinPrice; index < arraySize;
        index++, price += PriceRange) {
+    if (index == 0 && price == 0) {
+      array[0] = _Point;
+      continue;
+    }
     array[index] = price;
   }
 }
@@ -172,21 +183,36 @@ double GetLotsSize(double &array[]) {
   double averagePrice = 0;
 
   for (int i = 0; i < OrderNumbers; i++) {
-
-    if (i == 0 && array[0] == 0) {
-      averagePrice += 1;
-      continue;
-    }
     averagePrice += array[i];
   }
 
   averagePrice = NormalizeDouble(averagePrice / OrderNumbers, _Digits);
-
   Print("averagePrice: ", averagePrice);
+
+  double minPrice = MinPrice > 0 ? MinPrice : _Point;
 
   double maxLot =
       AccountInfo.MaxLotCheck(_Symbol, ORDER_TYPE_BUY, averagePrice, 100);
   Print("MaxLotCheck ", maxLot);
+
+  double marginRequire =
+      AccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY, maxLot, averagePrice);
+  Print("marginRequire: ", marginRequire);
+
+  double profit =
+      AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, maxLot, 50, 49.99);
+  Print("profit: ", profit);
+
+  // double maximunDrawdown =
+
+  // Print("Margin: ", AccountInfo.Margin());
+  // Print("FreeMargin: ", AccountInfo.FreeMargin());
+  // Print("MarginLevel: ", AccountInfo.MarginLevel());
+  // Print("MarginCall: ", AccountInfo.MarginCall());
+  // Print("MarginStopOut: ", AccountInfo.MarginStopOut());
+
+  // double maxLot = Utility.CalculateLot(_Symbol, ORDER_TYPE_BUY_LIMIT, profit,
+  //                                      averagePrice, minPrice);
 
   // double profit = AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
   // maxLot,
@@ -196,9 +222,10 @@ double GetLotsSize(double &array[]) {
 
   // Print("OrderProfitCheck ", profit);
 
-  Print("OrderProfitCheck ",
-        AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
-                                     OrderNumbers * 0.01, averagePrice, 0.01));
+  // Print("OrderProfitCheck ",
+  //       AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
+  //                                    OrderNumbers * 0.01, averagePrice,
+  //                                    0.01));
 
   // Define order parameters
   double lotSize = 0.1; // Lot size
@@ -215,3 +242,15 @@ double GetLotsSize(double &array[]) {
 
   return 0;
 }
+
+// double profit = 100;
+// double openPrice = 50;
+// double closePrice = 60;
+
+// double lots = Utility.CalculateLot(_Symbol, ORDER_TYPE_BUY_LIMIT, profit,
+//                                     openPrice, closePrice);
+// Print("lots: ", lots);
+
+// Print("OrderProfitCheck ",
+//       AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, lots, openPrice,
+//                                    closePrice));

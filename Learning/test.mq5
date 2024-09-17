@@ -1,7 +1,11 @@
 
 void OnStart() {
-  int isOpen = IsOpen();
-  Print("isOpen: ", isOpen);
+
+  // int isOpen = IsOpen();
+  // Print("isOpen: ", isOpen);
+
+  Print("_Digits: ", _Digits);
+  Print("_Point: ", _Point);
 }
 
 int IsOpen() {

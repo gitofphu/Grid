@@ -89,7 +89,7 @@ void OnStart() {
 
   double profit = 100;    // Example profit value
   double openPrice = 50;  // Example open price
-  double closePrice = 70; // Example close price
+  double closePrice = 60; // Example close price
   // int direction = 1;      // 1 for buy, -1 for sell
 
   // Print("profit: ", profit);
@@ -113,7 +113,7 @@ void OnStart() {
   // Print("Contract Size: ",
   //       SymbolInfoDouble(_Symbol, SYMBOL_TRADE_CONTRACT_SIZE));
 
-  double profit4 = CalculateProfit(openPrice, closePrice, 1);
+  double profit4 = CalculateProfit(openPrice, closePrice, 0.01);
   Print("profit4: ", profit4);
 
   double lots = CalculateLots4(profit4, openPrice, closePrice);
