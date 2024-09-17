@@ -39,9 +39,9 @@ MyUtility::~MyUtility() {}
 //|         price_close     - price of the closing position.         |
 //+------------------------------------------------------------------+
 double MyUtility::CalculateLots(const string symbol,
-                              const ENUM_ORDER_TYPE trade_operation,
-                              const double profit, const double open_price,
-                              const double close_price) {
+                                const ENUM_ORDER_TYPE trade_operation,
+                                const double profit, const double open_price,
+                                const double close_price) {
   Print("trade_operation: ", trade_operation);
   double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
   double tick_value = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_VALUE);
@@ -56,6 +56,9 @@ double MyUtility::CalculateLots(const string symbol,
   case ORDER_TYPE_SELL:
     price_diff = open_price - close_price;
     break;
+  default:
+    Alert("MyUtility::CalculateLots: Invalid order type.");
+    ExpertRemove();
   }
 
   double lots = profit / (price_diff * contract_size * tick_value);
