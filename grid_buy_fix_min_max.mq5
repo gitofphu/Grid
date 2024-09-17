@@ -180,12 +180,12 @@ double GetLotsSize(double &array[]) {
     averagePrice += array[i];
   }
 
-  averagePrice = averagePrice / OrderNumbers;
+  averagePrice = NormalizeDouble(averagePrice / OrderNumbers, _Digits);
 
   Print("averagePrice: ", averagePrice);
 
-  double maxLot = AccountInfo.MaxLotCheck(_Symbol, ORDER_TYPE_BUY, 2400, 100);
-
+  double maxLot =
+      AccountInfo.MaxLotCheck(_Symbol, ORDER_TYPE_BUY, averagePrice, 100);
   Print("MaxLotCheck ", maxLot);
 
   // double profit = AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
@@ -197,7 +197,8 @@ double GetLotsSize(double &array[]) {
   // Print("OrderProfitCheck ", profit);
 
   Print("OrderProfitCheck ",
-        AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, 1, 50, 70));
+        AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
+                                     OrderNumbers * 0.01, averagePrice, 0.01));
 
   // Define order parameters
   double lotSize = 0.1; // Lot size
