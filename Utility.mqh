@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                      Utility.mqh |
+//|                                                      MyUtility.mqh |
 //|                                           Copyright 20XX, MyName |
 //|                                          https://www.mysite.com/ |
 //+------------------------------------------------------------------+
@@ -7,10 +7,10 @@
 #property link "https://www.mysite.com/"
 #property version "1.00"
 
-class Utility {
+class MyUtility {
 public:
-  Utility();
-  ~Utility();
+  MyUtility();
+  ~MyUtility();
   double CalculateLots(const string symbol,
                        const ENUM_ORDER_TYPE trade_operation,
                        const double profit, const double open_price,
@@ -22,12 +22,12 @@ private:
 //+------------------------------------------------------------------+
 //| Constructor(s):                                                  |
 //+------------------------------------------------------------------+
-Utility::Utility() {}
+MyUtility::MyUtility() {}
 
 //+------------------------------------------------------------------+
 //| Destructor:                                                      |
 //+------------------------------------------------------------------+
-Utility::~Utility() {}
+MyUtility::~MyUtility() {}
 //+------------------------------------------------------------------+
 
 //+------------------------------------------------------------------+
@@ -38,7 +38,7 @@ Utility::~Utility() {}
 //|         price_open      - price of the opening position,         |
 //|         price_close     - price of the closing position.         |
 //+------------------------------------------------------------------+
-double Utility::CalculateLots(const string symbol,
+double MyUtility::CalculateLots(const string symbol,
                               const ENUM_ORDER_TYPE trade_operation,
                               const double profit, const double open_price,
                               const double close_price) {
