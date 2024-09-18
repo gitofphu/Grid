@@ -86,12 +86,14 @@ double MyUtility::GetGirdLotSize(const string symbol, const double &array[],
     averagePrice += array[i];
   }
   averagePrice = NormalizeDouble(averagePrice / NumberOfGrid, _Digits);
+  Print("averagePrice: ", averagePrice);
 
   double minPrice = min_price > 0 ? min_price : _Point;
 
+  // calculate lot size base on balance
   double maxLot = 0.0;
-
-  for (double lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN); lot <= 20;
+  for (double lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+       lot <= SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
        lot += SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP)) {
 
     lot = NormalizeDouble(lot, 2);
@@ -110,10 +112,9 @@ double MyUtility::GetGirdLotSize(const string symbol, const double &array[],
     maxLot = lot;
   }
 
-  double lotPerGrid = maxLot / NumberOfGrid;
+  double lotPerGrid = NormalizeDouble(maxLot / NumberOfGrid, 2);
 
   if (lotPerGrid < SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN)) {
-
     Print("MyUtility::GetGirdLotSize: Balance are be enough for all price "
           "range. Please increase price range or deposit more balance.");
     return (0.0);
