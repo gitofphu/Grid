@@ -96,8 +96,6 @@ int OnInit() {
   //   return (INIT_PARAMETERS_INCORRECT);
   // }
 
-  double currentPrice = 51.55;
-
   double buyLimitPrices[];
   double buyStopPrices[];
 
