@@ -1,14 +1,11 @@
 //+------------------------------------------------------------------+
-//|                                                         grid_buy.mq5 |
+//|                                                     grid_buy.mq5 |
 //|                                                  Watsadonramai.W |
-//|                                       Link inMQLHeadStandard |
+//|                                           Link inMQLHeadStandard |
 //+------------------------------------------------------------------+
 #property copyright "Watsadonramai.W"
 #property link "Link"
 #property version "1.00"
-
-#include <Trade/AccountInfo.mqh>
-CAccountInfo AccountInfo;
 
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
@@ -31,12 +28,12 @@ MyUtility Utility;
 // [x] ACCOUNT_MARGIN_SO_SO
 // [x] ACCOUNT_LEVERAGE
 // [x] ACCOUNT_LIMIT_ORDERS
-// [ ] Calculate maximum drawdown
+// [x] Calculate maximum drawdown
 // [ ] Calcualte Pip value
 // [x] Define Min-Max price range
-// [ ] Define Entry distant
-// [ ] Calcualte maximun lot size
-// [ ] Check if MaxOrder or OrderNumbers exceed limit orders
+// [x] Define Entry distant
+// [x] Calcualte maximun lot size
+// [ ] Check if MaxOrder or NumberOfGrid exceed limit orders
 // [x] Create array list all price in range
 // [x] Check if can trade
 // [ ] Check if possible to place entry on every price in range
@@ -76,27 +73,11 @@ int OnInit() {
     Print("Price ", i, ": ", ArrayPrices[i]);
   }
 
-  double lotSize = GetLotsSize(ArrayPrices);
+  double lotSize = Utility.GetGirdLotSize(_Symbol, ArrayPrices, MinPrice);
 
-  // //--- get the number of decimal places for the current chart symbol
-  // int digits = Digits();
-
-  // //--- send the obtained data to the journal
-  // Print("Number of decimal digits for the current chart symbol: ", digits);
-
-  //   printf("ACCOUNT_BALANCE =  %G", AccountInfoDouble(ACCOUNT_BALANCE));
-  // printf("ACCOUNT_EQUITY =  %G", AccountInfoDouble(ACCOUNT_EQUITY));
-  //   printf("ACCOUNT_MARGIN =  %G", AccountInfoDouble(ACCOUNT_MARGIN));
-  //   printf("ACCOUNT_MARGIN_FREE =  %G",
-  //   AccountInfoDouble(ACCOUNT_MARGIN_FREE)); printf("ACCOUNT_MARGIN_LEVEL =
-  //   %G", AccountInfoDouble(ACCOUNT_MARGIN_LEVEL));
-  //   printf("ACCOUNT_MARGIN_SO_CALL = %G",
-  //          AccountInfoDouble(ACCOUNT_MARGIN_SO_CALL));
-  //   printf("ACCOUNT_MARGIN_SO_SO = %G",
-  //   AccountInfoDouble(ACCOUNT_MARGIN_SO_SO)); printf("ACCOUNT_LEVERAGE = %d",
-  //   AccountInfoInteger(ACCOUNT_LEVERAGE)); printf("ACCOUNT_LIMIT_ORDERS =
-  //   %d",
-  //          AccountInfoInteger(ACCOUNT_LIMIT_ORDERS));
+  if (lotSize == 0) {
+    return (INIT_PARAMETERS_INCORRECT);
+  }
 
   ExpertRemove();
 
@@ -175,82 +156,3 @@ void GetArrayPrice(double &array[]) {
     array[index] = price;
   }
 }
-
-double GetLotsSize(double &array[]) {
-
-  int OrderNumbers = ArraySize(array);
-
-  double averagePrice = 0;
-
-  for (int i = 0; i < OrderNumbers; i++) {
-    averagePrice += array[i];
-  }
-
-  averagePrice = NormalizeDouble(averagePrice / OrderNumbers, _Digits);
-  Print("averagePrice: ", averagePrice);
-
-  double minPrice = MinPrice > 0 ? MinPrice : _Point;
-
-  double maxLot =
-      AccountInfo.MaxLotCheck(_Symbol, ORDER_TYPE_BUY, averagePrice, 100);
-  Print("MaxLotCheck ", maxLot);
-
-  double marginRequire =
-      AccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY, maxLot, averagePrice);
-  Print("marginRequire: ", marginRequire);
-
-  double profit =
-      AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, maxLot, 50, 49.99);
-  Print("profit: ", profit);
-
-  // double maximunDrawdown =
-
-  // Print("Margin: ", AccountInfo.Margin());
-  // Print("FreeMargin: ", AccountInfo.FreeMargin());
-  // Print("MarginLevel: ", AccountInfo.MarginLevel());
-  // Print("MarginCall: ", AccountInfo.MarginCall());
-  // Print("MarginStopOut: ", AccountInfo.MarginStopOut());
-
-  // double maxLot = Utility.CalculateLot(_Symbol, ORDER_TYPE_BUY_LIMIT, profit,
-  //                                      averagePrice, minPrice);
-
-  // double profit = AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
-  // maxLot,
-  //                                              averagePrice, 0);
-
-  // profit = NormalizeDouble(profit, _Digits);
-
-  // Print("OrderProfitCheck ", profit);
-
-  // Print("OrderProfitCheck ",
-  //       AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
-  //                                    OrderNumbers * 0.01, averagePrice,
-  //                                    0.01));
-
-  // Define order parameters
-  double lotSize = 0.1; // Lot size
-
-  double price = SymbolInfoDouble(_Symbol, SYMBOL_BID); // Current market price
-
-  // Calculate margin
-  double margin = 0;
-  if (OrderCalcMargin(ORDER_TYPE_BUY, _Symbol, lotSize, price, margin)) {
-    Print("Margin required: ", margin);
-  } else {
-    AlertAndExit("Error calculating margin: " + GetLastError());
-  }
-
-  return 0;
-}
-
-// double profit = 100;
-// double openPrice = 50;
-// double closePrice = 60;
-
-// double lots = Utility.CalculateLot(_Symbol, ORDER_TYPE_BUY_LIMIT, profit,
-//                                     openPrice, closePrice);
-// Print("lots: ", lots);
-
-// Print("OrderProfitCheck ",
-//       AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, lots, openPrice,
-//                                    closePrice));

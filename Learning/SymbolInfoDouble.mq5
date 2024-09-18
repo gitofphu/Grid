@@ -46,11 +46,11 @@ void OnStart() {
   // Print("SYMBOL_TRADE_LIQUIDITY_RATE: ",
   //       SymbolInfoDouble(_Symbol, SYMBOL_TRADE_LIQUIDITY_RATE));
 
-  // Print("SYMBOL_VOLUME_MIN: ", SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN));
-  // Print("SYMBOL_VOLUME_MAX: ", SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX));
-  // Print("SYMBOL_VOLUME_STEP: ", SymbolInfoDouble(_Symbol,
-  // SYMBOL_VOLUME_STEP)); Print("SYMBOL_VOLUME_LIMIT: ",
-  //       SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT));
+  Print("SYMBOL_VOLUME_MIN: ", SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN));
+  Print("SYMBOL_VOLUME_MAX: ", SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX));
+  Print("SYMBOL_VOLUME_STEP: ", SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP));
+  Print("SYMBOL_VOLUME_LIMIT: ",
+        SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT));
 
   // Print("SYMBOL_SWAP_LONG: ", SymbolInfoDouble(_Symbol, SYMBOL_SWAP_LONG));
   // Print("SYMBOL_SWAP_SHORT: ", SymbolInfoDouble(_Symbol, SYMBOL_SWAP_SHORT));
