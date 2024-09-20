@@ -7,8 +7,8 @@
 #property link "Link"
 #property version "1.00"
 
-#include <Trade\Trade.mqh>
-CTrade trade;
+#include <Trade/Trade.mqh>
+CTrade Ctrade;
 
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
@@ -54,7 +54,7 @@ input int MaxOrders = NULL;
 input double PriceRange = 5;
 
 int limitOrders;
-double ArrayPrices[];
+CArrayDouble ArrayPrices;
 double lotPerGrid;
 
 //+------------------------------------------------------------------+
@@ -67,8 +67,8 @@ int OnInit() {
         TerminalInfoInteger(TERMINAL_TRADE_ALLOWED));
   Print("MQLInfoInteger(MQL_TRADE_ALLOWED): ",
         MQLInfoInteger(MQL_TRADE_ALLOWED));
-  ExpertRemove();
-  return (INIT_SUCCEEDED);
+  // ExpertRemove();
+  // return (INIT_SUCCEEDED);
 
   if (SymbolInfoString(_Symbol, SYMBOL_CURRENCY_MARGIN) !=
       SymbolInfoString(_Symbol, SYMBOL_CURRENCY_PROFIT)) {
@@ -80,11 +80,11 @@ int OnInit() {
 
   GetArrayPrice(ArrayPrices);
 
-  for (int i = 0; i < ArraySize(ArrayPrices); i++) {
+  for (int i = 0; i < ArrayPrices.Total(); i++) {
     Print("Price ", i, ": ", ArrayPrices[i]);
   }
 
-  if (ArraySize(ArrayPrices) > SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT)) {
+  if (ArrayPrices.Total() > SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT)) {
     AlertAndExit("Number of grid exceeded volume limit.");
     return (INIT_PARAMETERS_INCORRECT);
   }
@@ -96,21 +96,36 @@ int OnInit() {
   //   return (INIT_PARAMETERS_INCORRECT);
   // }
 
-  double buyLimitPrices[];
-  double buyStopPrices[];
+  CArrayDouble newDeals;
+  int ordersTotal = OrdersTotal();
+  int positionsTotal = PositionsTotal();
+
+  if (!ordersTotal || !positionsTotal) {
+    FilterOpenOrderAndPosition(newDeals, ordersTotal, positionsTotal);
+  }
+
+  for (int i = 0; i < newDeals.Total(); i++) {
+    Print("newDeals: ", newDeals[i]);
+  }
+
+  ExpertRemove();
+  return (INIT_SUCCEEDED);
+
+  CArrayDouble buyLimitPrices;
+  CArrayDouble buyStopPrices;
 
   FilterPriceType(ArrayPrices, buyLimitPrices, buyStopPrices);
 
-  for (int i = 0; i < ArraySize(buyLimitPrices); i++) {
+  for (int i = 0; i < buyLimitPrices.Total(); i++) {
     Print("buyLimitPrices: ", buyLimitPrices[i]);
 
     double price = buyLimitPrices[i];
 
-    if (trade.BuyLimit(lotPerGrid, price, _Symbol)) {
+    if (Ctrade.BuyLimit(lotPerGrid, price, _Symbol)) {
 
-      uint retcode = trade.ResultRetcode();
+      uint retcode = Ctrade.ResultRetcode();
       Print("retcode: ", retcode);
-      uint retcodeDescription = trade.ResultRetcodeDescription();
+      uint retcodeDescription = Ctrade.ResultRetcodeDescription();
       Print("retcodeDescription: ", retcodeDescription);
 
     } else {
@@ -118,16 +133,16 @@ int OnInit() {
     }
   }
 
-  for (int i = 0; i < ArraySize(buyStopPrices); i++) {
+  for (int i = 0; i < buyStopPrices.Total(); i++) {
     Print("buyStopPrices: ", buyStopPrices[i]);
 
     double price = buyStopPrices[i];
 
-    if (trade.BuyStop(lotPerGrid, price, _Symbol)) {
+    if (Ctrade.BuyStop(lotPerGrid, price, _Symbol)) {
 
-      uint retcode = trade.ResultRetcode();
+      uint retcode = Ctrade.ResultRetcode();
       Print("retcode: ", retcode);
-      uint retcodeDescription = trade.ResultRetcodeDescription();
+      uint retcodeDescription = Ctrade.ResultRetcodeDescription();
       Print("retcodeDescription: ", retcodeDescription);
 
     } else {
@@ -198,48 +213,89 @@ int TradeAllowed() {
           TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) == 1);
 }
 
-void GetArrayPrice(double &array[]) {
+void GetArrayPrice(CArrayDouble &array) {
   double prices[];
   int arraySize = NormalizeDouble((MaxPrice - MinPrice) / PriceRange, _Digits);
-
-  ArrayResize(array, arraySize);
 
   int index;
   double price;
   for (index = 0, price = MinPrice; index < arraySize;
        index++, price += PriceRange) {
     if (index == 0 && price == 0) {
-      array[0] = _Point;
+      array.Add(_Point);
       continue;
     }
-    array[index] = price;
+    array.Add(price);
   }
 }
 
-void FilterPriceType(double &arrayPrices[], double &buyLimitPrices[],
-                     double &buyStopPrices[]) {
+void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
+                     CArrayDouble &buyStopPrices) {
   // Buy Limit order is placed below the current market price.
   // Buy Stop order is placed above the current market price.
-
-  ArrayResize(buyLimitPrices, 0);
-  ArrayResize(buyStopPrices, 0);
 
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
   Print("bid: ", bid);
 
-  for (int i = 0; i < ArraySize(arrayPrices); i++) {
+  for (int i = 0; i < arrayPrices.Total(); i++) {
 
     if (arrayPrices[i] < bid) {
-      int size = ArraySize(buyLimitPrices);
-      ArrayResize(buyLimitPrices, size + 1);
-      buyLimitPrices[size] = arrayPrices[i];
+      buyLimitPrices.Add(arrayPrices[i]);
     }
 
     if (arrayPrices[i] > bid) {
-      int size = ArraySize(buyStopPrices);
-      ArrayResize(buyStopPrices, size + 1);
-      buyStopPrices[size] = arrayPrices[i];
+      buyStopPrices.Add(arrayPrices[i]);
     }
+  }
+}
+
+void FilterOpenOrderAndPosition(CArrayDouble &newDeals, int ordersTotal,
+                                int positionsTotal) {
+  CArrayDouble existDeals;
+
+  Print("ordersTotal: ", ordersTotal);
+  if (ordersTotal > 0) {
+    for (int i = 0; i < ordersTotal; i++) {
+      ulong orderTicket = OrderGetTicket(i);
+      Print("orderTicket: ", orderTicket);
+      if (OrderSelect(orderTicket)) {
+        double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+
+        int arrayPricesSize = ArrayPrices.Total();
+
+        for (int j = 0; j < arrayPricesSize; j++) {
+          if (orderPrice > ArrayPrices[j] &&
+              orderPrice < ArrayPrices[j] + PriceRange - _Point) {
+            existDeals.Add(ArrayPrices[j]);
+          }
+        }
+      }
+    }
+  }
+
+  Print("positionsTotal: ", positionsTotal);
+  if (positionsTotal > 0) {
+    for (int i = 0; i < positionsTotal; i++) {
+      ulong positionTicket = PositionGetTicket(i);
+      Print("positionTicket: ", positionTicket);
+      if (PositionSelectByTicket(positionTicket)) {
+        double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+
+        int arrayPricesSize = ArrayPrices.Total();
+
+        for (int j = 0; j < arrayPricesSize; j++) {
+
+          if (positionPrice > ArrayPrices[j] &&
+              positionPrice < ArrayPrices[j] + PriceRange - _Point) {
+            existDeals.Add(ArrayPrices[j]);
+          }
+        }
+      }
+    }
+  }
+
+  for (int i = 0; i < existDeals.Total(); i++) {
+    Print("existDeals: ", existDeals[i]);
   }
 }

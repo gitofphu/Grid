@@ -10,6 +10,9 @@
 #include <Trade/AccountInfo.mqh>
 CAccountInfo AccountInfo;
 
+#include <Arrays/ArrayDouble.mqh>
+CArrayDouble Carray;
+
 class MyUtility {
 public:
   MyUtility();
@@ -18,7 +21,7 @@ public:
                       const ENUM_ORDER_TYPE trade_operation,
                       const double profit, const double open_price,
                       const double close_price);
-  double GetGirdLotSize(const string symbol, const double &array[],
+  double GetGirdLotSize(const string symbol, const CArrayDouble &array,
                         const double min_price);
 
 private:
@@ -76,9 +79,9 @@ double MyUtility::CalculateLot(const string symbol,
 //|         array           - grid price array,                      |
 //|         min_price       - minimun price,                         |
 //+------------------------------------------------------------------+
-double MyUtility::GetGirdLotSize(const string symbol, const double &array[],
+double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
                                  const double min_price) {
-  int NumberOfGrid = ArraySize(array);
+  int NumberOfGrid = array.Total();
 
   // calculate average price
   double averagePrice = 0;
