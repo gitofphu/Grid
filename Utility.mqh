@@ -50,7 +50,6 @@ double MyUtility::CalculateLot(const string symbol,
                                const ENUM_ORDER_TYPE trade_operation,
                                const double profit, const double open_price,
                                const double close_price) {
-  Print("trade_operation: ", trade_operation);
   double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
   double tick_value = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_VALUE);
   double contract_size = SymbolInfoDouble(symbol, SYMBOL_TRADE_CONTRACT_SIZE);
@@ -89,7 +88,6 @@ double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
     averagePrice += array[i];
   }
   averagePrice = NormalizeDouble(averagePrice / NumberOfGrid, _Digits);
-  Print("averagePrice: ", averagePrice);
 
   double minPrice = min_price > 0 ? min_price : _Point;
 

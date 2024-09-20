@@ -36,14 +36,17 @@ MyUtility Utility;
 // [x] Define Min-Max price range
 // [x] Define Entry distant
 // [x] Calcualte maximun lot size
-// [ ] Check if MaxOrder or NumberOfGrid exceed limit orders
+// [x] Check if MaxOrder or NumberOfGrid exceed limit orders
 // [x] Create array list all price in range
 // [x] Check if can trade
-// [ ] Check if possible to place entry on every price in range
-// [ ] Create function to place order on every price in range
+// [x] Check if possible to place entry on every price in range
+// [x] Create function to place order on every price in range
 // [ ] Create function to re-place order on tp price
 // [ ] Create function to modify in case of cannot place all order in price
 // range
+// [ ] Create function to close order
+// [ ] Create function to modify order in case of slippage 
+
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -52,6 +55,7 @@ input double MaxPrice = 100;
 input double MinPrice = 0;
 input int MaxOrders = NULL;
 input double PriceRange = 5;
+input bool TradeAnywaywithMinimunLog = false;
 
 int limitOrders;
 CArrayDouble ArrayPrices;
@@ -63,13 +67,6 @@ double lotPerGrid;
 
 int OnInit() {
 
-  Print("TerminalInfoInteger(TERMINAL_TRADE_ALLOWED): ",
-        TerminalInfoInteger(TERMINAL_TRADE_ALLOWED));
-  Print("MQLInfoInteger(MQL_TRADE_ALLOWED): ",
-        MQLInfoInteger(MQL_TRADE_ALLOWED));
-  // ExpertRemove();
-  // return (INIT_SUCCEEDED);
-
   if (SymbolInfoString(_Symbol, SYMBOL_CURRENCY_MARGIN) !=
       SymbolInfoString(_Symbol, SYMBOL_CURRENCY_PROFIT)) {
     AlertAndExit("EA Cannot be use with this product!");
@@ -80,56 +77,56 @@ int OnInit() {
 
   GetArrayPrice(ArrayPrices);
 
-  for (int i = 0; i < ArrayPrices.Total(); i++) {
-    Print("Price ", i, ": ", ArrayPrices[i]);
-  }
-
   if (ArrayPrices.Total() > SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT)) {
     AlertAndExit("Number of grid exceeded volume limit.");
     return (INIT_PARAMETERS_INCORRECT);
   }
 
   lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices, MinPrice);
-  Print("lotPerGrid: ", lotPerGrid);
 
-  // if (lotPerGrid == 0) {
-  //   return (INIT_PARAMETERS_INCORRECT);
-  // }
+  if (lotPerGrid == 0) {
 
-  CArrayDouble newDeals;
+    if (TradeAnywaywithMinimunLog) {
+      lotPerGrid = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+    } else {
+      return (INIT_PARAMETERS_INCORRECT);
+    }
+  }
+
+  CArrayDouble missingDeals;
   int ordersTotal = OrdersTotal();
   int positionsTotal = PositionsTotal();
 
   if (!ordersTotal || !positionsTotal) {
-    FilterOpenOrderAndPosition(newDeals, ordersTotal, positionsTotal);
+    FilterOpenOrderAndPosition(missingDeals, ordersTotal, positionsTotal);
   }
 
-  for (int i = 0; i < newDeals.Total(); i++) {
-    Print("newDeals: ", newDeals[i]);
-  }
-
-  ExpertRemove();
-  return (INIT_SUCCEEDED);
+  // ExpertRemove();
+  // return (INIT_SUCCEEDED);
 
   CArrayDouble buyLimitPrices;
   CArrayDouble buyStopPrices;
 
-  FilterPriceType(ArrayPrices, buyLimitPrices, buyStopPrices);
+  FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
+
+  Print("lotPerGrid: ", lotPerGrid);
 
   for (int i = 0; i < buyLimitPrices.Total(); i++) {
     Print("buyLimitPrices: ", buyLimitPrices[i]);
 
     double price = buyLimitPrices[i];
 
-    if (Ctrade.BuyLimit(lotPerGrid, price, _Symbol)) {
+    if (Ctrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
 
       uint retcode = Ctrade.ResultRetcode();
       Print("retcode: ", retcode);
-      uint retcodeDescription = Ctrade.ResultRetcodeDescription();
-      Print("retcodeDescription: ", retcodeDescription);
 
     } else {
+
       Print("Failed to place Buy Limit order. Error: ", GetLastError());
+
+      uint retcode = Ctrade.ResultRetcode();
+      Print("retcode: ", retcode);
     }
   }
 
@@ -138,15 +135,16 @@ int OnInit() {
 
     double price = buyStopPrices[i];
 
-    if (Ctrade.BuyStop(lotPerGrid, price, _Symbol)) {
+    if (Ctrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
 
       uint retcode = Ctrade.ResultRetcode();
       Print("retcode: ", retcode);
-      uint retcodeDescription = Ctrade.ResultRetcodeDescription();
-      Print("retcodeDescription: ", retcodeDescription);
 
     } else {
-      Print("Failed to place Buy Limit order. Error: ", GetLastError());
+      Print("Failed to place Buy Stop order. Error: ", GetLastError());
+
+      uint retcode = Ctrade.ResultRetcode();
+      Print("retcode: ", retcode);
     }
   }
 
@@ -173,10 +171,6 @@ void OnTick() {
 
 void ValidateInput() {
 
-  Print("MaxPrice ", MaxPrice);
-  Print("MinPrice ", MinPrice);
-  Print("MaxOrders ", MaxOrders);
-
   if (MinPrice < 0)
     AlertAndExit("MinPrice cannot be less than 0.");
 
@@ -188,9 +182,6 @@ void ValidateInput() {
 
   const int accoutnLimitOrders = AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
 
-  Print("accoutnLimitOrders ", accoutnLimitOrders);
-  Print("MaxOrders == NULL ", MaxOrders == NULL);
-
   if (MaxOrders == NULL) {
     limitOrders = accoutnLimitOrders;
   } else if (MaxOrders > accoutnLimitOrders) {
@@ -198,8 +189,6 @@ void ValidateInput() {
   } else {
     limitOrders = MaxOrders;
   }
-
-  Print("limitOrders ", limitOrders);
 }
 
 void AlertAndExit(string message) {
@@ -219,7 +208,7 @@ void GetArrayPrice(CArrayDouble &array) {
 
   int index;
   double price;
-  for (index = 0, price = MinPrice; index < arraySize;
+  for (index = 0, price = MinPrice; index <= arraySize;
        index++, price += PriceRange) {
     if (index == 0 && price == 0) {
       array.Add(_Point);
@@ -236,8 +225,6 @@ void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
 
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-  Print("bid: ", bid);
-
   for (int i = 0; i < arrayPrices.Total(); i++) {
 
     if (arrayPrices[i] < bid) {
@@ -250,15 +237,13 @@ void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
   }
 }
 
-void FilterOpenOrderAndPosition(CArrayDouble &newDeals, int ordersTotal,
+void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
                                 int positionsTotal) {
   CArrayDouble existDeals;
 
-  Print("ordersTotal: ", ordersTotal);
   if (ordersTotal > 0) {
     for (int i = 0; i < ordersTotal; i++) {
       ulong orderTicket = OrderGetTicket(i);
-      Print("orderTicket: ", orderTicket);
       if (OrderSelect(orderTicket)) {
         double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
 
@@ -274,11 +259,9 @@ void FilterOpenOrderAndPosition(CArrayDouble &newDeals, int ordersTotal,
     }
   }
 
-  Print("positionsTotal: ", positionsTotal);
   if (positionsTotal > 0) {
     for (int i = 0; i < positionsTotal; i++) {
       ulong positionTicket = PositionGetTicket(i);
-      Print("positionTicket: ", positionTicket);
       if (PositionSelectByTicket(positionTicket)) {
         double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
 
@@ -295,7 +278,11 @@ void FilterOpenOrderAndPosition(CArrayDouble &newDeals, int ordersTotal,
     }
   }
 
-  for (int i = 0; i < existDeals.Total(); i++) {
-    Print("existDeals: ", existDeals[i]);
+  existDeals.Sort();
+
+  for (int i = 0; i < ArrayPrices.Total(); i++) {
+    if (existDeals.Search(ArrayPrices[i]) == -1) {
+      missingDeals.Add(ArrayPrices[i]);
+    }
   }
 }
