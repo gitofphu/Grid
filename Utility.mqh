@@ -11,7 +11,7 @@
 CAccountInfo AccountInfo;
 
 #include <Arrays/ArrayDouble.mqh>
-CArrayDouble Carray;
+CArrayDouble;
 
 class MyUtility {
 public:

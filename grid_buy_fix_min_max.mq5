@@ -8,7 +8,7 @@
 #property version "1.00"
 
 #include <Trade/Trade.mqh>
-CTrade Ctrade;
+CTrade cTrade;
 
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
@@ -55,6 +55,7 @@ input double MinPrice = 0;
 input int MaxOrders = NULL;
 input double PriceRange = 10000;
 input bool TradeAnywaywithMinimunLog = false;
+input bool ClearOrdersOnInit = false;
 
 int limitOrders;
 CArrayDouble ArrayPrices;
@@ -73,6 +74,8 @@ int OnInit() {
   }
 
   ValidateInput();
+
+
 
   GetArrayPrice(ArrayPrices);
 
@@ -124,12 +127,12 @@ int OnInit() {
 
     double price = buyLimitPrices[i];
 
-    if (Ctrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
+    if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
 
-      uint retcode = Ctrade.ResultRetcode();
+      uint retcode = cTrade.ResultRetcode();
       Print("retcode: ", retcode);
 
-      ulong orderTicket = Ctrade.ResultOrder();
+      ulong orderTicket = cTrade.ResultOrder();
       Print("BuyLimit orderTicket: ", orderTicket);
 
       if (OrderSelect(orderTicket)) {
@@ -141,7 +144,7 @@ int OnInit() {
 
       Print("Failed to place Buy Limit order. Error: ", GetLastError());
 
-      uint retcode = Ctrade.ResultRetcode();
+      uint retcode = cTrade.ResultRetcode();
       Print("retcode: ", retcode);
     }
   }
@@ -151,12 +154,12 @@ int OnInit() {
 
     double price = buyStopPrices[i];
 
-    if (Ctrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
+    if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
 
-      uint retcode = Ctrade.ResultRetcode();
+      uint retcode = cTrade.ResultRetcode();
       Print("retcode: ", retcode);
 
-      ulong orderTicket = Ctrade.ResultOrder();
+      ulong orderTicket = cTrade.ResultOrder();
       Print("BuyStop orderTicket: ", orderTicket);
 
       if (OrderSelect(orderTicket)) {
@@ -167,7 +170,7 @@ int OnInit() {
     } else {
       Print("Failed to place Buy Stop order. Error: ", GetLastError());
 
-      uint retcode = Ctrade.ResultRetcode();
+      uint retcode = cTrade.ResultRetcode();
       Print("retcode: ", retcode);
     }
   }

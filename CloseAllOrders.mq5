@@ -1,8 +1,8 @@
 #include <Trade/Trade.mqh>
-CTrade Ctrade;
+CTrade cTrade;
 
 #include <Arrays/ArrayLong.mqh>
-CArrayLong Carray;
+CArrayLong;
 
 void OnStart() { CloseAllOrders2(); }
 
@@ -11,7 +11,7 @@ void CloseAllOrders1() {
 
   int ordersTotal = OrdersTotal();
 
-  Ctrade.SetAsyncMode(true);
+  cTrade.SetAsyncMode(true);
   /*
   true:Async, false:Sync
   if false ordersTotal will be refesh cause orderTicket to be 0
@@ -32,7 +32,7 @@ void CloseAllOrders1() {
 void CloseAllOrders2() {
   Print("CloseAllOrders2");
 
-  Ctrade.SetAsyncMode(false);
+  cTrade.SetAsyncMode(false);
   int ordersTotal = OrdersTotal();
   CArrayLong tickets;
 
@@ -51,18 +51,18 @@ void CloseAllOrders2() {
 }
 
 void deleteOrder(ulong ticket) {
-  if (Ctrade.OrderDelete(ticket)) {
+  if (cTrade.OrderDelete(ticket)) {
 
     Print("Order ", ticket, " deleted.");
 
-    uint retcode = Ctrade.ResultRetcode();
+    uint retcode = cTrade.ResultRetcode();
     Print("retcode: ", retcode);
 
   } else {
 
     Print("Failed to delete order ", ticket, ". Error: ", GetLastError());
 
-    uint retcode = Ctrade.ResultRetcode();
+    uint retcode = cTrade.ResultRetcode();
     Print("retcode: ", retcode);
   }
 }
