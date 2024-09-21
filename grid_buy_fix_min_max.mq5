@@ -108,27 +108,30 @@ int OnInit() {
     }
   }
 
-  CArrayDouble missingDeals;
-  int ordersTotal = OrdersTotal();
-  int positionsTotal = PositionsTotal();
-
-  Print("Basic info: ordersTotal = ", ordersTotal);
-  Print("Basic info: positionsTotal = ", positionsTotal);
-
-  CArrayDouble buyLimitPrices;
-  CArrayDouble buyStopPrices;
-
   bool OrderPriceInvalid = false;
 
-  if (!ordersTotal || !positionsTotal) {
-    FilterOpenOrderAndPosition(missingDeals, ordersTotal, positionsTotal);
-  }
+  do {
 
-  Print("Basic info: missingDeals = ", missingDeals.Total());
+    CArrayDouble missingDeals;
+    int ordersTotal = OrdersTotal();
+    int positionsTotal = PositionsTotal();
 
-  FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
+    Print("Basic info: ordersTotal = ", ordersTotal);
+    Print("Basic info: positionsTotal = ", positionsTotal);
 
-  PlaceOrder(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
+    CArrayDouble buyLimitPrices;
+    CArrayDouble buyStopPrices;
+
+    if (!ordersTotal || !positionsTotal) {
+      FilterOpenOrderAndPosition(missingDeals, ordersTotal, positionsTotal);
+    }
+
+    Print("Basic info: missingDeals = ", missingDeals.Total());
+
+    FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
+
+    PlaceOrder(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
+  } while (OrderPriceInvalid);
 
   return (INIT_SUCCEEDED);
 }
