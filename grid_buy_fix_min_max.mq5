@@ -149,6 +149,9 @@ void OnTick() {
 
 //+------------------------------------------------------------------+
 
+/**
+ * Validate input
+ */
 void ValidateInput() {
 
   if (MinPrice < 0)
@@ -171,6 +174,10 @@ void ValidateInput() {
   }
 }
 
+/**
+ * Alert and Exit
+ * @param  message: Argument 1
+ */
 void AlertAndExit(string message) {
   Alert(message);
   ExpertRemove();
@@ -182,6 +189,10 @@ int TradeAllowed() {
           TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) == 1);
 }
 
+/**
+ * Make Grid price from MinPrice and MaxPrice
+ * @param  ArrayPrices: Argument 1
+ */
 void GetArrayPrice(CArrayDouble &ArrayPrices) {
   double prices[];
   int arraySize = NormalizeDouble((MaxPrice - MinPrice) / PriceRange, _Digits);
@@ -198,6 +209,12 @@ void GetArrayPrice(CArrayDouble &ArrayPrices) {
   }
 }
 
+/**
+ * Check what price are missing from orders and positions
+ * @param  missingDeals: Argument 1
+ * @param  ordersTotal: Argument 2
+ * @param  positionsTotal: Argument 3
+ */
 void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
                                 int positionsTotal) {
 
@@ -249,6 +266,12 @@ void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
   }
 }
 
+/**
+ * Check if missing price should be limit or stop
+ * @param  arrayPrices: Argument 1
+ * @param  buyLimitPrices: Argument 2
+ * @param  buyStopPrices: Argument 3
+ */
 void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
                      CArrayDouble &buyStopPrices) {
   // Buy Limit order is placed below the current market price.
@@ -268,6 +291,12 @@ void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
   }
 }
 
+/**
+ * Place pending order
+ * @param  buyLimitPrices: Argument 1
+ * @param  buyStopPrices: Argument 2
+ * @param  OrderPriceInvalid: Argument 3
+ */
 void PlaceOrder(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
                 bool &OrderPriceInvalid) {
   OrderPriceInvalid = false;
