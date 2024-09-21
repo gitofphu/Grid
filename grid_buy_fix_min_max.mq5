@@ -242,25 +242,6 @@ void GetArrayPrice(CArrayDouble &array) {
   }
 }
 
-void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
-                     CArrayDouble &buyStopPrices) {
-  // Buy Limit order is placed below the current market price.
-  // Buy Stop order is placed above the current market price.
-
-  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-
-  for (int i = 0; i < arrayPrices.Total(); i++) {
-
-    if (arrayPrices[i] < bid) {
-      buyLimitPrices.Add(arrayPrices[i]);
-    }
-
-    if (arrayPrices[i] > bid) {
-      buyStopPrices.Add(arrayPrices[i]);
-    }
-  }
-}
-
 void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
                                 int positionsTotal) {
 
@@ -308,6 +289,25 @@ void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
   for (int i = 0; i < ArrayPrices.Total(); i++) {
     if (existDeals.Search(ArrayPrices[i]) == -1) {
       missingDeals.Add(ArrayPrices[i]);
+    }
+  }
+}
+
+void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
+                     CArrayDouble &buyStopPrices) {
+  // Buy Limit order is placed below the current market price.
+  // Buy Stop order is placed above the current market price.
+
+  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+  for (int i = 0; i < arrayPrices.Total(); i++) {
+
+    if (arrayPrices[i] < bid) {
+      buyLimitPrices.Add(arrayPrices[i]);
+    }
+
+    if (arrayPrices[i] > bid) {
+      buyStopPrices.Add(arrayPrices[i]);
     }
   }
 }
