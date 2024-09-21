@@ -8,20 +8,25 @@ void OnStart() {
   // OrderCalcProfit(ORDER_TYPE_BUY, _Symbol, 1, 50, 40, profit);
   // Print("OrderCalcProfit: ", profit);
 
-  Print("PositionsTotal: ", PositionsTotal());
-  Print("PositionSelect: ", PositionSelect(_Symbol));
-  Print("POSITION_VOLUME: ", PositionGetDouble(POSITION_VOLUME));
-  Print("POSITION_PRICE_OPEN: ", PositionGetDouble(POSITION_PRICE_OPEN));
-  Print("POSITION_SL: ", PositionGetDouble(POSITION_SL));
-  Print("POSITION_TP: ", PositionGetDouble(POSITION_TP));
-  Print("POSITION_PRICE_CURRENT: ", PositionGetDouble(POSITION_PRICE_CURRENT));
-  Print("POSITION_SWAP: ", PositionGetDouble(POSITION_SWAP));
-  Print("POSITION_PROFIT: ", PositionGetDouble(POSITION_PROFIT));
+  // Print("PositionsTotal: ", PositionsTotal());
+  // Print("PositionSelect: ", PositionSelect(_Symbol));
+  // Print("POSITION_VOLUME: ", PositionGetDouble(POSITION_VOLUME));
+  // Print("POSITION_PRICE_OPEN: ", PositionGetDouble(POSITION_PRICE_OPEN));
+  // Print("POSITION_SL: ", PositionGetDouble(POSITION_SL));
+  // Print("POSITION_TP: ", PositionGetDouble(POSITION_TP));
+  // Print("POSITION_PRICE_CURRENT: ",
+  // PositionGetDouble(POSITION_PRICE_CURRENT)); Print("POSITION_SWAP: ",
+  // PositionGetDouble(POSITION_SWAP)); Print("POSITION_PROFIT: ",
+  // PositionGetDouble(POSITION_PROFIT));
 
   Print("OrdersTotal: ", OrdersTotal());
   ulong orderTicket = OrderGetTicket(0);
   Print("OrderGetTicket: ", orderTicket);
   Print("OrderSelect: ", OrderSelect(orderTicket));
+  Print("_Symbol: ", _Symbol);
+  Print("Symbol: ", Symbol());
+  Print("ORDER_SYMBOL: ", OrderGetString(ORDER_SYMBOL));
+  Print("SYMBOL_COMPARE: ", OrderGetString(ORDER_SYMBOL) == _Symbol);
   Print("ORDER_VOLUME_INITIAL: ", OrderGetDouble(ORDER_VOLUME_INITIAL));
   Print("ORDER_VOLUME_CURRENT: ", OrderGetDouble(ORDER_VOLUME_CURRENT));
   Print("ORDER_PRICE_OPEN: ", OrderGetDouble(ORDER_PRICE_OPEN));
@@ -31,11 +36,11 @@ void OnStart() {
   Print("ORDER_PRICE_STOPLIMIT: ", OrderGetDouble(ORDER_PRICE_STOPLIMIT));
   Print("OrderGetInteger: ", OrderGetInteger(ORDER_TICKET));
 
-  Print("HistorySelect: ", HistorySelect(0, TimeCurrent()));
-  Print("HistoryOrdersTotal: ", HistoryOrdersTotal());
-  Print("HistoryDealsTotal: ", HistoryDealsTotal());
-  ulong dealTicket = HistoryDealGetTicket(0);
-  Print("HistoryDealGetTicket: ", dealTicket);
-  Print("HistoryDealGetInteger: ",
-        HistoryDealGetInteger(dealTicket, DEAL_TICKET));
+  // Print("HistorySelect: ", HistorySelect(0, TimeCurrent()));
+  // Print("HistoryOrdersTotal: ", HistoryOrdersTotal());
+  // Print("HistoryDealsTotal: ", HistoryDealsTotal());
+  // ulong dealTicket = HistoryDealGetTicket(0);
+  // Print("HistoryDealGetTicket: ", dealTicket);
+  // Print("HistoryDealGetInteger: ",
+  //       HistoryDealGetInteger(dealTicket, DEAL_TICKET));
 }

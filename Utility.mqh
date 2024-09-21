@@ -7,11 +7,17 @@
 #property link "https://www.mysite.com/"
 #property version "1.00"
 
+#include <Trade/Trade.mqh>
+CTrade cTrade;
+
 #include <Trade/AccountInfo.mqh>
-CAccountInfo AccountInfo;
+CAccountInfo cAccountInfo;
 
 #include <Arrays/ArrayDouble.mqh>
 CArrayDouble;
+
+#include <Arrays/ArrayLong.mqh>
+CArrayLong;
 
 class MyUtility {
 public:
@@ -23,6 +29,7 @@ public:
                       const double close_price);
   double GetGirdLotSize(const string symbol, const CArrayDouble &array,
                         const double min_price);
+  void CloseAllOrder();
 
 private:
 };
@@ -99,15 +106,15 @@ double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
 
     lot = NormalizeDouble(lot, 2);
 
-    double profit = AccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, lot,
-                                                 averagePrice, minPrice);
+    double profit = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, lot,
+                                                  averagePrice, minPrice);
 
     double marginRequire =
-        AccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY, lot, averagePrice);
+        cAccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY, lot, averagePrice);
 
     double drawdown = NormalizeDouble(profit - marginRequire, 2);
 
-    if (NormalizeDouble(AccountInfo.Balance() + drawdown, 2) <= 0)
+    if (NormalizeDouble(cAccountInfo.Balance() + drawdown, 2) <= 0)
       break;
 
     maxLot = lot;
@@ -122,4 +129,41 @@ double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
   }
 
   return lotPerGrid;
+}
+
+//+------------------------------------------------------------------+
+//| Access functions CloseAllOrder().                             |
+//+------------------------------------------------------------------+
+void MyUtility::CloseAllOrder() {
+
+  int ordersTotal = OrdersTotal();
+  CArrayLong tickets;
+
+  if (ordersTotal > 0) {
+    for (int i = 0; i < ordersTotal; i++) {
+      ulong orderTicket = OrderGetTicket(i);
+
+      if (OrderSelect(orderTicket))
+        if (OrderGetString(ORDER_SYMBOL) == _Symbol)
+          tickets.Add(orderTicket);
+    }
+
+    for (int i = 0; i < tickets.Total(); i++) {
+      Print("MyUtility::CloseAllOrder ticket: ", tickets[i]);
+
+      if (cTrade.OrderDelete(tickets[i])) {
+
+        Print("MyUtility::CloseAllOrder Order ", tickets[i], " deleted.");
+        uint retcode = cTrade.ResultRetcode();
+        Print("MyUtility::CloseAllOrder retcode: ", retcode);
+
+      } else {
+
+        Print("MyUtility::CloseAllOrder Failed to delete order ", tickets[i],
+              ". Error: ", GetLastError());
+        uint retcode = cTrade.ResultRetcode();
+        Print("MyUtility::CloseAllOrder retcode: ", retcode);
+      }
+    }
+  }
 }
