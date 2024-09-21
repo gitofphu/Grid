@@ -45,16 +45,15 @@ MyUtility Utility;
 // [ ] Create function to modify in case of cannot place all order in price
 // range
 // [ ] Create function to close order
-// [ ] Create function to modify order in case of slippage 
-
+// [ ] Create function to modify order in case of slippage
 
 //+------------------------------------------------------------------+
 //| input                                                            |
 //+------------------------------------------------------------------+
-input double MaxPrice = 100;
+input double MaxPrice = 50000;
 input double MinPrice = 0;
 input int MaxOrders = NULL;
-input double PriceRange = 5;
+input double PriceRange = 10000;
 input bool TradeAnywaywithMinimunLog = false;
 
 int limitOrders;
@@ -77,12 +76,23 @@ int OnInit() {
 
   GetArrayPrice(ArrayPrices);
 
-  if (ArrayPrices.Total() > SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT)) {
+  double volumeLimit = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT);
+
+  Print("Basic info: SYMBOL_VOLUME_LIMIT= ", volumeLimit);
+
+  for (int i = 0; i < ArrayPrices.Total(); i++) {
+    Print("Basic info: ArrayPrices ", i, " = ", ArrayPrices[i]);
+  }
+
+  if (volumeLimit != 0 && ArrayPrices.Total() > volumeLimit) {
+
     AlertAndExit("Number of grid exceeded volume limit.");
     return (INIT_PARAMETERS_INCORRECT);
   }
 
   lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices, MinPrice);
+
+  Print("Basic info: lotPerGrid = ", lotPerGrid);
 
   if (lotPerGrid == 0) {
 
@@ -97,22 +107,20 @@ int OnInit() {
   int ordersTotal = OrdersTotal();
   int positionsTotal = PositionsTotal();
 
+  Print("Basic info: ordersTotal = ", ordersTotal);
+  Print("Basic info: positionsTotal = ", positionsTotal);
+
   if (!ordersTotal || !positionsTotal) {
     FilterOpenOrderAndPosition(missingDeals, ordersTotal, positionsTotal);
   }
-
-  // ExpertRemove();
-  // return (INIT_SUCCEEDED);
 
   CArrayDouble buyLimitPrices;
   CArrayDouble buyStopPrices;
 
   FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
 
-  Print("lotPerGrid: ", lotPerGrid);
-
   for (int i = 0; i < buyLimitPrices.Total(); i++) {
-    Print("buyLimitPrices: ", buyLimitPrices[i]);
+    Print("Basic info: buyLimitPrices ", i, " = ", buyLimitPrices[i]);
 
     double price = buyLimitPrices[i];
 
@@ -120,6 +128,14 @@ int OnInit() {
 
       uint retcode = Ctrade.ResultRetcode();
       Print("retcode: ", retcode);
+
+      ulong orderTicket = Ctrade.ResultOrder();
+      Print("BuyLimit orderTicket: ", orderTicket);
+
+      if (OrderSelect(orderTicket)) {
+        double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+        Print("BuyLimit orderPrice: ", orderPrice);
+      }
 
     } else {
 
@@ -131,7 +147,7 @@ int OnInit() {
   }
 
   for (int i = 0; i < buyStopPrices.Total(); i++) {
-    Print("buyStopPrices: ", buyStopPrices[i]);
+    Print("Basic info: buyStopPrices ", i, " = ", buyStopPrices[i]);
 
     double price = buyStopPrices[i];
 
@@ -140,6 +156,14 @@ int OnInit() {
       uint retcode = Ctrade.ResultRetcode();
       Print("retcode: ", retcode);
 
+      ulong orderTicket = Ctrade.ResultOrder();
+      Print("BuyStop orderTicket: ", orderTicket);
+
+      if (OrderSelect(orderTicket)) {
+        double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+        Print("BuyStop orderPrice: ", orderPrice);
+      }
+
     } else {
       Print("Failed to place Buy Stop order. Error: ", GetLastError());
 
@@ -147,8 +171,6 @@ int OnInit() {
       Print("retcode: ", retcode);
     }
   }
-
-  // ExpertRemove();
 
   return (INIT_SUCCEEDED);
 }
