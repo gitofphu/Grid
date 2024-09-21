@@ -263,6 +263,7 @@ void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
 
 void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
                                 int positionsTotal) {
+
   CArrayDouble existDeals;
 
   if (ordersTotal > 0) {
@@ -274,8 +275,8 @@ void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
         int arrayPricesSize = ArrayPrices.Total();
 
         for (int j = 0; j < arrayPricesSize; j++) {
-          if (orderPrice > ArrayPrices[j] &&
-              orderPrice < ArrayPrices[j] + PriceRange - _Point) {
+          if (orderPrice >= ArrayPrices[j] &&
+              orderPrice <= ArrayPrices[j] + PriceRange - _Point) {
             existDeals.Add(ArrayPrices[j]);
           }
         }
@@ -293,8 +294,8 @@ void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
 
         for (int j = 0; j < arrayPricesSize; j++) {
 
-          if (positionPrice > ArrayPrices[j] &&
-              positionPrice < ArrayPrices[j] + PriceRange - _Point) {
+          if (positionPrice >= ArrayPrices[j] &&
+              positionPrice <= ArrayPrices[j] + PriceRange - _Point) {
             existDeals.Add(ArrayPrices[j]);
           }
         }
