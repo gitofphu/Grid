@@ -24,7 +24,9 @@ void CloseAllOrders1() {
 
       Print("orderTicket: ", orderTicket);
 
-      deleteOrder(orderTicket);
+      if (OrderSelect(orderTicket))
+        if (OrderGetString(ORDER_SYMBOL) == _Symbol)
+          deleteOrder(orderTicket);
     }
   }
 }
@@ -39,7 +41,9 @@ void CloseAllOrders2() {
   if (ordersTotal > 0) {
     for (int i = 0; i < ordersTotal; i++) {
       ulong orderTicket = OrderGetTicket(i);
-      tickets.Add(orderTicket);
+      if (OrderSelect(orderTicket))
+        if (OrderGetString(ORDER_SYMBOL) == _Symbol)
+          tickets.Add(orderTicket);
     }
 
     for (int i = 0; i < tickets.Total(); i++) {
