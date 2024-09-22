@@ -10,6 +10,9 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
+#include <Trade/DealInfo.mqh>
+CDealInfo cDealInfo;
+
 //+------------------------------------------------------------------+
 //| EA Buy Grid                                                      |
 //+------------------------------------------------------------------+
@@ -108,30 +111,7 @@ int OnInit() {
     }
   }
 
-  bool OrderPriceInvalid = false;
-
-  do {
-
-    CArrayDouble missingDeals;
-    int ordersTotal = OrdersTotal();
-    int positionsTotal = PositionsTotal();
-
-    Print("Basic info: ordersTotal = ", ordersTotal);
-    Print("Basic info: positionsTotal = ", positionsTotal);
-
-    CArrayDouble buyLimitPrices;
-    CArrayDouble buyStopPrices;
-
-    if (!ordersTotal || !positionsTotal) {
-      FilterOpenOrderAndPosition(missingDeals, ordersTotal, positionsTotal);
-    }
-
-    Print("Basic info: missingDeals = ", missingDeals.Total());
-
-    FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
-
-    PlaceOrder(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
-  } while (OrderPriceInvalid);
+  CheckAndPlaceOrders();
 
   return (INIT_SUCCEEDED);
 }
@@ -148,6 +128,45 @@ void OnTick() {
 
   if (TradeAllowed() == false)
     return;
+}
+
+//+------------------------------------------------------------------+
+//| TradeTransaction function                                        |
+//+------------------------------------------------------------------+
+void OnTradeTransaction(const MqlTradeTransaction &trans,
+                        const MqlTradeRequest &request,
+                        const MqlTradeResult &result) {
+  Print("OnTradeTransaction");
+
+  //--- get transaction type as enumeration value
+  ENUM_TRADE_TRANSACTION_TYPE type = trans.type;
+  //--- if transaction is result of addition of the transaction in history
+  if (type == TRADE_TRANSACTION_DEAL_ADD) {
+    if (HistoryDealSelect(trans.deal))
+      cDealInfo.Ticket(trans.deal);
+    else {
+      Print(__FILE__, " ", __FUNCTION__, ", ERROR: HistoryDealSelect(",
+            trans.deal, ")");
+      return;
+    }
+    //---
+    long reason = -1;
+    if (!cDealInfo.InfoInteger(DEAL_REASON, reason)) {
+      Print(__FILE__, " ", __FUNCTION__,
+            ", ERROR: InfoInteger(DEAL_REASON,reason)");
+      return;
+    }
+    if ((ENUM_DEAL_REASON)reason == DEAL_REASON_SL)
+      Alert("Stop Loss activation");
+    else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
+      Alert("Take Profit activation");
+
+      double price;
+      cDealInfo.InfoDouble(DEAL_PRICE, price);
+
+      ReplaceTpOrder(price);
+    }
+  }
 }
 
 //+------------------------------------------------------------------+
@@ -223,38 +242,34 @@ void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
 
   CArrayDouble existDeals;
 
-  if (ordersTotal > 0) {
-    for (int i = 0; i < ordersTotal; i++) {
-      ulong orderTicket = OrderGetTicket(i);
-      if (OrderSelect(orderTicket)) {
-        double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+  for (int i = 0; i < ordersTotal; i++) {
+    ulong orderTicket = OrderGetTicket(i);
+    if (OrderSelect(orderTicket)) {
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
 
-        int arrayPricesSize = ArrayPrices.Total();
+      int arrayPricesSize = ArrayPrices.Total();
 
-        for (int j = 0; j < arrayPricesSize; j++) {
-          if (orderPrice >= ArrayPrices[j] &&
-              orderPrice <= ArrayPrices[j] + PriceRange - _Point) {
-            existDeals.Add(ArrayPrices[j]);
-          }
+      for (int j = 0; j < arrayPricesSize; j++) {
+        if (orderPrice >= ArrayPrices[j] &&
+            orderPrice <= ArrayPrices[j] + PriceRange - _Point) {
+          existDeals.Add(ArrayPrices[j]);
         }
       }
     }
   }
 
-  if (positionsTotal > 0) {
-    for (int i = 0; i < positionsTotal; i++) {
-      ulong positionTicket = PositionGetTicket(i);
-      if (PositionSelectByTicket(positionTicket)) {
-        double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+  for (int i = 0; i < positionsTotal; i++) {
+    ulong positionTicket = PositionGetTicket(i);
+    if (PositionSelectByTicket(positionTicket)) {
+      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
 
-        int arrayPricesSize = ArrayPrices.Total();
+      int arrayPricesSize = ArrayPrices.Total();
 
-        for (int j = 0; j < arrayPricesSize; j++) {
+      for (int j = 0; j < arrayPricesSize; j++) {
 
-          if (positionPrice >= ArrayPrices[j] &&
-              positionPrice <= ArrayPrices[j] + PriceRange - _Point) {
-            existDeals.Add(ArrayPrices[j]);
-          }
+        if (positionPrice >= ArrayPrices[j] &&
+            positionPrice <= ArrayPrices[j] + PriceRange - _Point) {
+          existDeals.Add(ArrayPrices[j]);
         }
       }
     }
@@ -300,68 +315,220 @@ void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
  * @param  buyStopPrices: Argument 2
  * @param  OrderPriceInvalid: Argument 3
  */
-void PlaceOrder(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
-                bool &OrderPriceInvalid) {
-  OrderPriceInvalid = false;
+void PlaceOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
+                 bool &OrderPriceInvalid) {
 
   for (int i = 0; i < buyLimitPrices.Total(); i++) {
-    Print("Basic info: buyLimitPrices ", i, " = ", buyLimitPrices[i]);
-
     double price = buyLimitPrices[i];
 
-    if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
+    PlaceBuyLimitOrder(price, OrderPriceInvalid);
 
-      uint retcode = cTrade.ResultRetcode();
-      Print("retcode: ", retcode);
+    // if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
 
-      ulong orderTicket = cTrade.ResultOrder();
-      Print("BuyLimit orderTicket: ", orderTicket);
+    //   uint retcode = cTrade.ResultRetcode();
+    //   Print("retcode: ", retcode);
 
-      if (OrderSelect(orderTicket)) {
-        double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-        Print("BuyLimit orderPrice: ", orderPrice);
+    //   ulong orderTicket = cTrade.ResultOrder();
+    //   Print("BuyLimit orderTicket: ", orderTicket);
 
-        if (orderPrice != price) {
-          OrderPriceInvalid = true;
-        }
-      }
+    //   if (OrderSelect(orderTicket)) {
+    //     double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+    //     Print("BuyLimit orderPrice: ", orderPrice);
 
-    } else {
+    //     if (orderPrice != price) {
+    //       OrderPriceInvalid = true;
+    //     }
+    //   }
 
-      Print("Failed to place Buy Limit order. Error: ", GetLastError());
+    // } else {
 
-      uint retcode = cTrade.ResultRetcode();
-      Print("retcode: ", retcode);
-    }
+    //   Print("Failed to place Buy Limit order. Error: ", GetLastError());
+
+    //   uint retcode = cTrade.ResultRetcode();
+    //   Print("retcode: ", retcode);
+    // }
   }
 
   for (int i = 0; i < buyStopPrices.Total(); i++) {
-    Print("Basic info: buyStopPrices ", i, " = ", buyStopPrices[i]);
-
     double price = buyStopPrices[i];
 
-    if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
+    PlaceBuyStopOrder(price, OrderPriceInvalid);
 
-      uint retcode = cTrade.ResultRetcode();
-      Print("retcode: ", retcode);
+    // if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
 
-      ulong orderTicket = cTrade.ResultOrder();
-      Print("BuyStop orderTicket: ", orderTicket);
+    //   uint retcode = cTrade.ResultRetcode();
+    //   Print("retcode: ", retcode);
 
-      if (OrderSelect(orderTicket)) {
-        double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-        Print("BuyStop orderPrice: ", orderPrice);
+    //   ulong orderTicket = cTrade.ResultOrder();
+    //   Print("BuyStop orderTicket: ", orderTicket);
 
-        if (orderPrice != price) {
-          OrderPriceInvalid = true;
-        }
-      }
+    //   if (OrderSelect(orderTicket)) {
+    //     double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+    //     Print("BuyStop orderPrice: ", orderPrice);
 
-    } else {
-      Print("Failed to place Buy Stop order. Error: ", GetLastError());
+    //     if (orderPrice != price) {
+    //       OrderPriceInvalid = true;
+    //     }
+    //   }
 
-      uint retcode = cTrade.ResultRetcode();
-      Print("retcode: ", retcode);
+    // } else {
+    //   Print("Failed to place Buy Stop order. Error: ", GetLastError());
+
+    //   uint retcode = cTrade.ResultRetcode();
+    //   Print("retcode: ", retcode);
+    // }
+  }
+}
+
+/**
+ * Check orders and positions
+ */
+void CheckAndPlaceOrders() {
+
+  bool OrderPriceInvalid = false;
+
+  do {
+
+    CArrayDouble missingDeals;
+    int ordersTotal = OrdersTotal();
+    int positionsTotal = PositionsTotal();
+
+    Print("Basic info: ordersTotal = ", ordersTotal);
+    Print("Basic info: positionsTotal = ", positionsTotal);
+
+    CArrayDouble buyLimitPrices;
+    CArrayDouble buyStopPrices;
+
+    if (!ordersTotal || !positionsTotal) {
+      FilterOpenOrderAndPosition(missingDeals, ordersTotal, positionsTotal);
     }
+
+    Print("Basic info: missingDeals = ", missingDeals.Total());
+
+    FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
+
+    PlaceOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
+  } while (OrderPriceInvalid);
+}
+
+void ReplaceTpOrder(double price) {
+  int ordersTotal = OrdersTotal();
+  int positionsTotal = PositionsTotal();
+
+  CArrayDouble existDeals;
+
+  for (int i = 0; i < ordersTotal; i++) {
+    ulong orderTicket = OrderGetTicket(i);
+    if (OrderSelect(orderTicket)) {
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+
+      existDeals.Add(orderPrice);
+    }
+  }
+
+  for (int i = 0; i < positionsTotal; i++) {
+    ulong positionTicket = PositionGetTicket(i);
+    if (PositionSelectByTicket(positionTicket)) {
+      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+
+      existDeals.Add(positionPrice);
+    }
+  }
+
+  existDeals.Sort();
+
+  if (existDeals.Search(price) != -1) {
+    return;
+  }
+
+  ENUM_ORDER_TYPE orderType;
+
+  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+  if (price < bid) {
+    orderType = ORDER_TYPE_BUY_LIMIT;
+  }
+
+  if (price > bid) {
+    orderType = ORDER_TYPE_BUY_STOP;
+  }
+
+  bool OrderPriceInvalid = false;
+
+  do {
+
+    switch (orderType) {
+    case ORDER_TYPE_BUY_LIMIT:
+      PlaceBuyLimitOrder(price, OrderPriceInvalid);
+      break;
+
+    case ORDER_TYPE_BUY_STOP:
+      PlaceBuyStopOrder(price, OrderPriceInvalid);
+      break;
+
+    default:
+      OrderPriceInvalid = false;
+      break;
+    }
+
+  } while (OrderPriceInvalid);
+}
+
+void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
+
+  Print("Basic info: PlaceBuyLimitOrder = ", price);
+
+  if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
+
+    uint retcode = cTrade.ResultRetcode();
+    Print("retcode: ", retcode);
+
+    ulong orderTicket = cTrade.ResultOrder();
+    Print("BuyLimit orderTicket: ", orderTicket);
+
+    if (OrderSelect(orderTicket)) {
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      Print("BuyLimit orderPrice: ", orderPrice);
+
+      if (orderPrice != price) {
+        OrderPriceInvalid = true;
+      }
+    }
+
+  } else {
+
+    Print("Failed to place Buy Limit order. Error: ", GetLastError());
+
+    uint retcode = cTrade.ResultRetcode();
+    Print("retcode: ", retcode);
+  }
+}
+
+void PlaceBuyStopOrder(double price, bool &OrderPriceInvalid) {
+
+  Print("Basic info: PlaceBuyStopOrder = ", price);
+
+  if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
+
+    uint retcode = cTrade.ResultRetcode();
+    Print("retcode: ", retcode);
+
+    ulong orderTicket = cTrade.ResultOrder();
+    Print("BuyStop orderTicket: ", orderTicket);
+
+    if (OrderSelect(orderTicket)) {
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      Print("BuyStop orderPrice: ", orderPrice);
+
+      if (orderPrice != price) {
+        OrderPriceInvalid = true;
+      }
+    }
+
+  } else {
+    Print("Failed to place Buy Stop order. Error: ", GetLastError());
+
+    uint retcode = cTrade.ResultRetcode();
+    Print("retcode: ", retcode);
   }
 }
