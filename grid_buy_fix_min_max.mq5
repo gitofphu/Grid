@@ -46,7 +46,7 @@ CDealInfo cDealInfo;
 // range | trailing order
 // [x] Create function to close order
 // [x] Create function to modify order in case of slippage
-//
+// [ ] Create fucntion to check hourly if all price are place
 
 //+------------------------------------------------------------------+
 //| input                                                            |
