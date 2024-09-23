@@ -41,11 +41,11 @@ CDealInfo cDealInfo;
 // [x] Check if can trade
 // [x] Check if possible to place entry on every price in range
 // [x] Create function to place order on every price in range
-// [ ] Create function to re-place order on tp price
+// [x] Create function to re-place order on tp price
 // [ ] Create function to modify in case of cannot place all order in price
-// range
-// [ ] Create function to close order
-// [ ] Create function to modify order in case of slippage
+// range | trailing order
+// [x] Create function to close order
+// [x] Create function to modify order in case of slippage
 //
 
 //+------------------------------------------------------------------+
@@ -322,61 +322,12 @@ void PlaceOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
     double price = buyLimitPrices[i];
 
     PlaceBuyLimitOrder(price, OrderPriceInvalid);
-
-    // if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
-
-    //   uint retcode = cTrade.ResultRetcode();
-    //   Print("retcode: ", retcode);
-
-    //   ulong orderTicket = cTrade.ResultOrder();
-    //   Print("BuyLimit orderTicket: ", orderTicket);
-
-    //   if (OrderSelect(orderTicket)) {
-    //     double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-    //     Print("BuyLimit orderPrice: ", orderPrice);
-
-    //     if (orderPrice != price) {
-    //       OrderPriceInvalid = true;
-    //     }
-    //   }
-
-    // } else {
-
-    //   Print("Failed to place Buy Limit order. Error: ", GetLastError());
-
-    //   uint retcode = cTrade.ResultRetcode();
-    //   Print("retcode: ", retcode);
-    // }
   }
 
   for (int i = 0; i < buyStopPrices.Total(); i++) {
     double price = buyStopPrices[i];
 
     PlaceBuyStopOrder(price, OrderPriceInvalid);
-
-    // if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
-
-    //   uint retcode = cTrade.ResultRetcode();
-    //   Print("retcode: ", retcode);
-
-    //   ulong orderTicket = cTrade.ResultOrder();
-    //   Print("BuyStop orderTicket: ", orderTicket);
-
-    //   if (OrderSelect(orderTicket)) {
-    //     double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-    //     Print("BuyStop orderPrice: ", orderPrice);
-
-    //     if (orderPrice != price) {
-    //       OrderPriceInvalid = true;
-    //     }
-    //   }
-
-    // } else {
-    //   Print("Failed to place Buy Stop order. Error: ", GetLastError());
-
-    //   uint retcode = cTrade.ResultRetcode();
-    //   Print("retcode: ", retcode);
-    // }
   }
 }
 
