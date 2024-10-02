@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Watsadonramai.W"
 #property link "Link"
-#property version "1.01"
+#property version "1.02"
 
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
@@ -51,10 +51,10 @@ CDealInfo cDealInfo;
 // [ ] Check If there are other Symbol trading
 // [x] Fix re-run OnInit
 // [ ] Check If order are open by this EA
-// [ ] Print TP per grid
-// [ ] Fix drawdown calculate to current price and min price instead of mix
-// price and min price [ ] Make Array price with price frequently instead of
-// price range
+// [x] Print TP per grid
+// [x] Fix drawdown calculate to current price and min price instead of mix
+// price and min price
+// [ ] Make Array price with price frequently instead of price range
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -116,7 +116,7 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices, MinPrice);
+  lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices);
 
   Print("Basic info: lotPerGrid = ", lotPerGrid);
 
