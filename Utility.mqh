@@ -27,8 +27,7 @@ public:
                       const ENUM_ORDER_TYPE trade_operation,
                       const double profit, const double open_price,
                       const double close_price);
-  double GetGirdLotSize(const string symbol, const CArrayDouble &array,
-                        const double min_price);
+  double GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices);
   void CloseAllOrder();
 
 private:
@@ -83,34 +82,37 @@ double MyUtility::CalculateLot(const string symbol,
 //| Access functions GetGirdLotSize(...).                            |
 //| INPUT:  name            - symbol name,                           |
 //|         arrayPrices     - grid price array,                      |
-//|         min_price       - minimun price,                         |
 //+------------------------------------------------------------------+
-double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices,
-                                 const double min_price) {
-  int NumberOfGrid = arrayPrices.Total();
+double MyUtility::GetGirdLotSize(const string symbol,
+                                 const CArrayDouble &arrayPrices) {
 
-  // calculate average price
-  double accPrice = 0;
-  for (int i = 0; i < NumberOfGrid; i++) {
-    accPrice += arrayPrices[i];
+  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+  double maxDrawdownPrice = 0;
+  int maxDrowdownNumberOfGrid = 0;
+  for (int i = 0; i < arrayPrices.Total(); i++) {
+    if (arrayPrices[i] > bid)
+      break;
+
+    maxDrawdownPrice = arrayPrices[i];
+    maxDrowdownNumberOfGrid = i;
   }
-  double averagePrice = NormalizeDouble(accPrice / NumberOfGrid, _Digits);
 
-  double minPrice = min_price > 0 ? min_price : _Point;
+  Print("maxDrawdownPrice: ", maxDrawdownPrice);
 
   // calculate lot size base on balance
-  double maxLot = 0.0;
+  double totalLot = 0.0;
   for (double lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
        lot <= SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
        lot += SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP)) {
 
     lot = NormalizeDouble(lot, 2);
 
-    double profit = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, lot,
-                                                  averagePrice, minPrice);
+    double profit = cAccountInfo.OrderProfitCheck(
+        _Symbol, ORDER_TYPE_BUY, lot, maxDrawdownPrice, arrayPrices[0]);
 
-    double marginRequire =
-        cAccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY, lot, averagePrice);
+    double marginRequire = cAccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY,
+                                                    lot, maxDrawdownPrice);
 
     double drawdown = NormalizeDouble(profit - marginRequire, 2);
 
@@ -119,13 +121,18 @@ double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &arrayP
     if (NormalizeDouble(cAccountInfo.Balance() + drawdown, 2) <= 0)
       break;
 
-    maxLot = lot;
+    totalLot = lot;
   }
 
-  double lotPerGrid = maxLot / NumberOfGrid;
+  double lotPerGrid = totalLot / maxDrowdownNumberOfGrid;
 
-  Print("maxLot: ", maxLot, ", NumberOfGrid: ", NumberOfGrid,
-        ", lotPerGrid: ", lotPerGrid);
+  double profitPerLot = cAccountInfo.OrderProfitCheck(
+      _Symbol, ORDER_TYPE_BUY, lotPerGrid, arrayPrices[arrayPrices.Total() - 2],
+      arrayPrices[arrayPrices.Total() - 1]);
+
+  Print("totalLot: ", totalLot,
+        ", maxDrowdownNumberOfGrid: ", maxDrowdownNumberOfGrid,
+        ", lotPerGrid: ", lotPerGrid, ", profitPerLot: ", profitPerLot);
 
   if (lotPerGrid < SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN)) {
     string message =
