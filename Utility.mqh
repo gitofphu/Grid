@@ -114,6 +114,8 @@ double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
 
     double drawdown = NormalizeDouble(profit - marginRequire, 2);
 
+    Print("lot: ", lot, ", maximum drawdown: ", drawdown);
+
     if (NormalizeDouble(cAccountInfo.Balance() + drawdown, 2) <= 0)
       break;
 
@@ -122,9 +124,14 @@ double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
 
   double lotPerGrid = NormalizeDouble(maxLot / NumberOfGrid, 2);
 
+  Print("maxLot: ", maxLot, ", NumberOfGrid: ", NumberOfGrid,
+        ", lotPerGrid: ", lotPerGrid);
+
   if (lotPerGrid < SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN)) {
-    Print("MyUtility::GetGirdLotSize: Balance are be enough for all price "
-          "range. Please increase price range or deposit more balance.");
+    string message =
+        "MyUtility::GetGirdLotSize: Balance are be enough for all price range. "
+        "Please increase price range or deposit more balance.";
+    Alert(message);
     return (0.0);
   }
 

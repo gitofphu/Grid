@@ -47,16 +47,21 @@ CDealInfo cDealInfo;
 // [x] Create function to close order
 // [x] Create function to modify order in case of slippage
 // [ ] Create fucntion to check hourly if all price are place
+// [ ] Get all time hight to set max price
+// [ ] Check If there are other Symbol trading
+// [x] Fix re-run OnInit
 
 //+------------------------------------------------------------------+
 //| input                                                            |
 //+------------------------------------------------------------------+
-input double MaxPrice = 50000;
+input double MaxPrice = 100;
 input double MinPrice = 0;
 input int MaxOrders = NULL;
-input double PriceRange = 10000;
+input double PriceRange = 10;
 input bool TradeAnywaywithMinimunLog = false;
 input bool ClearOrdersOnInit = false;
+
+bool isInit = false;
 
 int limitOrders;
 CArrayDouble ArrayPrices;
@@ -68,6 +73,9 @@ double lotPerGrid;
 
 int OnInit() {
   Print("OnInit");
+
+  if (isInit)
+    return (INIT_SUCCEEDED);
 
   if (SymbolInfoString(_Symbol, SYMBOL_CURRENCY_MARGIN) !=
       SymbolInfoString(_Symbol, SYMBOL_CURRENCY_PROFIT)) {
@@ -113,6 +121,8 @@ int OnInit() {
 
   CheckAndPlaceOrders();
 
+  isInit = true;
+
   return (INIT_SUCCEEDED);
 }
 
@@ -136,7 +146,6 @@ void OnTick() {
 void OnTradeTransaction(const MqlTradeTransaction &trans,
                         const MqlTradeRequest &request,
                         const MqlTradeResult &result) {
-  Print("OnTradeTransaction");
 
   //--- get transaction type as enumeration value
   ENUM_TRADE_TRANSACTION_TYPE type = trans.type;
