@@ -5,7 +5,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Watsadonramai.W"
 #property link "Link"
-#property version "1.01"
+#property version "1.02"
 
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
