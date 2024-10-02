@@ -82,19 +82,19 @@ double MyUtility::CalculateLot(const string symbol,
 //+------------------------------------------------------------------+
 //| Access functions GetGirdLotSize(...).                            |
 //| INPUT:  name            - symbol name,                           |
-//|         array           - grid price array,                      |
+//|         arrayPrices     - grid price array,                      |
 //|         min_price       - minimun price,                         |
 //+------------------------------------------------------------------+
-double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
+double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices,
                                  const double min_price) {
-  int NumberOfGrid = array.Total();
+  int NumberOfGrid = arrayPrices.Total();
 
   // calculate average price
-  double averagePrice = 0;
+  double accPrice = 0;
   for (int i = 0; i < NumberOfGrid; i++) {
-    averagePrice += array[i];
+    accPrice += arrayPrices[i];
   }
-  averagePrice = NormalizeDouble(averagePrice / NumberOfGrid, _Digits);
+  double averagePrice = NormalizeDouble(accPrice / NumberOfGrid, _Digits);
 
   double minPrice = min_price > 0 ? min_price : _Point;
 
