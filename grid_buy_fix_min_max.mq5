@@ -52,6 +52,8 @@ CDealInfo cDealInfo;
 // [x] Fix re-run OnInit
 // [ ] Check If order are open by this EA
 // [ ] Print TP per grid
+// [ ] Fix drawdown calculate to current price and min price instead of mix price and min price
+// [ ] Make Array price with price frequently instead of price range
 
 //+------------------------------------------------------------------+
 //| input                                                            |
