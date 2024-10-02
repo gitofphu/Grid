@@ -122,7 +122,7 @@ double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
     maxLot = lot;
   }
 
-  double lotPerGrid = NormalizeDouble(maxLot / NumberOfGrid, 2);
+  double lotPerGrid = maxLot / NumberOfGrid;
 
   Print("maxLot: ", maxLot, ", NumberOfGrid: ", NumberOfGrid,
         ", lotPerGrid: ", lotPerGrid);
@@ -135,7 +135,7 @@ double MyUtility::GetGirdLotSize(const string symbol, const CArrayDouble &array,
     return (0.0);
   }
 
-  return lotPerGrid;
+  return NormalizeDouble(lotPerGrid, 2);
 }
 
 //+------------------------------------------------------------------+

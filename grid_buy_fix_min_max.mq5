@@ -50,6 +50,7 @@ CDealInfo cDealInfo;
 // [ ] Get all time hight to set max price
 // [ ] Check If there are other Symbol trading
 // [x] Fix re-run OnInit
+// [ ] Check If order are open by this EA
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -58,7 +59,7 @@ input double MaxPrice = 100;
 input double MinPrice = 0;
 input int MaxOrders = NULL;
 input double PriceRange = 10;
-input bool TradeAnywaywithMinimunLog = false;
+input bool TradeAnywaywithMinimunLot = false;
 input bool ClearOrdersOnInit = false;
 
 bool isInit = false;
@@ -112,7 +113,7 @@ int OnInit() {
 
   if (lotPerGrid == 0) {
 
-    if (TradeAnywaywithMinimunLog) {
+    if (TradeAnywaywithMinimunLot) {
       lotPerGrid = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
     } else {
       return (INIT_PARAMETERS_INCORRECT);
