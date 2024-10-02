@@ -51,6 +51,7 @@ CDealInfo cDealInfo;
 // [ ] Check If there are other Symbol trading
 // [x] Fix re-run OnInit
 // [ ] Check If order are open by this EA
+// [ ] Print TP per grid
 
 //+------------------------------------------------------------------+
 //| input                                                            |
