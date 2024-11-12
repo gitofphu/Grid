@@ -55,6 +55,7 @@ CDealInfo cDealInfo;
 // [x] Fix drawdown calculate to current price and min price instead of mix
 // price and min price
 // [ ] Make Array price with price frequently instead of price range
+// [ ] OnTradeTransaction check symbol
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -168,6 +169,14 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
             trans.deal, ")");
       return;
     }
+
+    Print("cDealInfo.Symbol()", cDealInfo.Symbol());
+    Print("_Symbol", _Symbol);
+
+    if (cDealInfo.Symbol() != _Symbol) {
+      return;
+    }
+
     //---
     long reason = -1;
     if (!cDealInfo.InfoInteger(DEAL_REASON, reason)) {
