@@ -56,6 +56,7 @@ CDealInfo cDealInfo;
 // price and min price
 // [ ] Make Array price with price frequently instead of price range
 // [ ] OnTradeTransaction check symbol
+// [x] Close order if not in ArrayPrices
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -91,12 +92,12 @@ int OnInit() {
 
   ValidateInput();
 
-  if (ClearOrdersOnInit) {
-    Utility.CloseAllOrder();
-  }
-
   if (ArrayPrices.Total() == 0)
     GetArrayPrice(ArrayPrices);
+
+  if (ClearOrdersOnInit) {
+    Utility.CloseAllOrder(ArrayPrices);
+  }
 
   if (ArrayPrices.Total() > limitOrders) {
     AlertAndExit("ArrayPrices exceed limitOrders.");

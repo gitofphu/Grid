@@ -28,7 +28,7 @@ public:
                       const double profit, const double open_price,
                       const double close_price);
   double GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices);
-  void CloseAllOrder();
+  void CloseAllOrder(const CArrayDouble &arrayPrices);
 
 private:
 };
@@ -136,7 +136,7 @@ double MyUtility::GetGirdLotSize(const string symbol,
 
   if (lotPerGrid < SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN)) {
     string message =
-        "MyUtility::GetGirdLotSize: Balance are be enough for all price range. "
+        "MyUtility::GetGirdLotSize: Balance may not be enough for all price range. "
         "Please increase price range or deposit more balance.";
     Alert(message);
     return (0.0);
@@ -148,7 +148,7 @@ double MyUtility::GetGirdLotSize(const string symbol,
 //+------------------------------------------------------------------+
 //| Access functions CloseAllOrder().                             |
 //+------------------------------------------------------------------+
-void MyUtility::CloseAllOrder() {
+void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices) {
 
   int ordersTotal = OrdersTotal();
   CArrayLong tickets;
@@ -158,9 +158,21 @@ void MyUtility::CloseAllOrder() {
       ulong orderTicket = OrderGetTicket(i);
 
       if (OrderSelect(orderTicket))
-        if (OrderGetString(ORDER_SYMBOL) == _Symbol)
+        if (OrderGetString(ORDER_SYMBOL) == _Symbol) {
+
+          if (arrayPrices.Total()) {
+            double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+
+            int index = arrayPrices.SearchLinear(orderPrice);
+            if (index != -1)
+              continue;
+          }
+
           tickets.Add(orderTicket);
+        }
     }
+
+    Print("tickets.Total()", tickets.Total());
 
     for (int i = 0; i < tickets.Total(); i++) {
       Print("MyUtility::CloseAllOrder ticket: ", tickets[i]);
