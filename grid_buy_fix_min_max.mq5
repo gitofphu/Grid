@@ -268,7 +268,6 @@ void GetArrayPrice(CArrayDouble &ArrayPrices) {
  */
 void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
                                 int positionsTotal) {
-
   CArrayDouble existDeals;
 
   for (int i = 0; i < ordersTotal; i++) {
@@ -379,7 +378,8 @@ void CheckAndPlaceOrders() {
     CArrayDouble buyLimitPrices;
     CArrayDouble buyStopPrices;
 
-    if (!ordersTotal || !positionsTotal) {
+    if (!ordersTotal || !positionsTotal ||
+        ordersTotal + positionsTotal < ArrayPrices.Total()) {
       FilterOpenOrderAndPosition(missingDeals, ordersTotal, positionsTotal);
     }
 
@@ -456,7 +456,8 @@ void ReplaceTpOrder(double price) {
 
 void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
 
-  Print("Basic info: PlaceBuyLimitOrder = ", price);
+  Print("Basic info: PlaceBuyLimitOrder = ", price,
+        ", TP = ", price + PriceRange);
 
   if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
 
@@ -486,7 +487,8 @@ void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
 
 void PlaceBuyStopOrder(double price, bool &OrderPriceInvalid) {
 
-  Print("Basic info: PlaceBuyStopOrder = ", price);
+  Print("Basic info: PlaceBuyStopOrder = ", price,
+        ", TP = ", price + PriceRange);
 
   if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
 
