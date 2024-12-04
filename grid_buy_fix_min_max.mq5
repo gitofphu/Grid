@@ -57,6 +57,7 @@ CDealInfo cDealInfo;
 // [ ] Make Array price with price frequently instead of price range
 // [ ] OnTradeTransaction check symbol
 // [x] Close order if not in ArrayPrices
+// [ ] Close order if lot size are not match with lot per grid
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -67,6 +68,7 @@ input int MaxOrders = NULL;
 input double PriceRange = 10;
 input bool TradeAnywaywithMinimunLot = false;
 input bool ClearOrdersOnInit = false;
+input double MinLot = NULL;
 
 bool isInit = false;
 
@@ -118,12 +120,15 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices);
+  if (MinLot != NULL) {
+    lotPerGrid = MinLot;
+  } else {
+    lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices);
+  }
 
   Print("Basic info: lotPerGrid = ", lotPerGrid);
 
   if (lotPerGrid == 0) {
-
     if (TradeAnywaywithMinimunLot) {
       lotPerGrid = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
     } else {
