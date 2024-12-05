@@ -58,6 +58,7 @@ CDealInfo cDealInfo;
 // [ ] OnTradeTransaction check symbol
 // [x] Close order if not in ArrayPrices
 // [ ] Make grid by fibonacci
+// [ ] Check comment before close order
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -75,6 +76,7 @@ bool isInit = false;
 int limitOrders;
 CArrayDouble ArrayPrices;
 double lotPerGrid;
+string comment = "grid_buy_fix_min_max";
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -240,7 +242,6 @@ int TradeAllowed() {
  * @param  ArrayPrices: Argument 1
  */
 void GetArrayPrice(CArrayDouble &ArrayPrices) {
-  double prices[];
   int arraySize = NormalizeDouble((MaxPrice - MinPrice) / PriceRange, _Digits);
 
   int index;
@@ -454,7 +455,8 @@ void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
   Print("Basic info: PlaceBuyLimitOrder = ", price,
         ", TP = ", price + PriceRange);
 
-  if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
+  if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange,
+                      ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
     Print("retcode: ", retcode);
@@ -485,7 +487,8 @@ void PlaceBuyStopOrder(double price, bool &OrderPriceInvalid) {
   Print("Basic info: PlaceBuyStopOrder = ", price,
         ", TP = ", price + PriceRange);
 
-  if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange)) {
+  if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange,
+                     ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
     Print("retcode: ", retcode);
