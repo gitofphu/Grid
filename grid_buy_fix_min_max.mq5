@@ -57,7 +57,7 @@ CDealInfo cDealInfo;
 // [ ] Make Array price with price frequently instead of price range
 // [ ] OnTradeTransaction check symbol
 // [x] Close order if not in ArrayPrices
-// [ ] Close order if lot size are not match with lot per grid
+// [ ] Make grid by fibonacci
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -88,7 +88,7 @@ int OnInit() {
 
   if (SymbolInfoString(_Symbol, SYMBOL_CURRENCY_MARGIN) !=
       SymbolInfoString(_Symbol, SYMBOL_CURRENCY_PROFIT)) {
-    AlertAndExit("EA Cannot be use with this product!");
+    Utility.AlertAndExit("EA Cannot be use with this product!");
     return (INIT_PARAMETERS_INCORRECT);
   }
 
@@ -102,7 +102,7 @@ int OnInit() {
   }
 
   if (ArrayPrices.Total() > limitOrders) {
-    AlertAndExit("ArrayPrices exceed limitOrders.");
+    Utility.AlertAndExit("ArrayPrices exceed limitOrders.");
     return (INIT_PARAMETERS_INCORRECT);
   }
 
@@ -116,7 +116,7 @@ int OnInit() {
 
   if (volumeLimit != 0 && ArrayPrices.Total() > volumeLimit) {
 
-    AlertAndExit("Number of grid exceeded volume limit.");
+    Utility.AlertAndExit("Number of grid exceeded volume limit.");
     return (INIT_PARAMETERS_INCORRECT);
   }
 
@@ -211,33 +211,23 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 void ValidateInput() {
 
   if (MinPrice < 0)
-    AlertAndExit("MinPrice cannot be less than 0.");
+    Utility.AlertAndExit("MinPrice cannot be less than 0.");
 
   if (MaxPrice > 0 && MinPrice >= MaxPrice)
-    AlertAndExit("MinPrice must be less than MaxPrice.");
+    Utility.AlertAndExit("MinPrice must be less than MaxPrice.");
 
   if (PriceRange == 0)
-    AlertAndExit("PriceRange cannot be 0.");
+    Utility.AlertAndExit("PriceRange cannot be 0.");
 
   const int accoutnLimitOrders = AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
 
   if (MaxOrders == NULL) {
     limitOrders = accoutnLimitOrders;
   } else if (MaxOrders > accoutnLimitOrders) {
-    AlertAndExit("MaxOrders must be less than ACCOUNT_LIMIT_ORDERS.");
+    Utility.AlertAndExit("MaxOrders must be less than ACCOUNT_LIMIT_ORDERS.");
   } else {
     limitOrders = MaxOrders;
   }
-}
-
-/**
- * Alert and Exit
- * @param  message: Argument 1
- */
-void AlertAndExit(string message) {
-  Alert(message);
-  ExpertRemove();
-  return;
 }
 
 int TradeAllowed() {

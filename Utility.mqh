@@ -23,6 +23,7 @@ class MyUtility {
 public:
   MyUtility();
   ~MyUtility();
+  void AlertAndExit(string message);
   double CalculateLot(const string symbol,
                       const ENUM_ORDER_TYPE trade_operation,
                       const double profit, const double open_price,
@@ -43,6 +44,16 @@ MyUtility::MyUtility() {}
 //+------------------------------------------------------------------+
 MyUtility::~MyUtility() {}
 //+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
+//| Access functions AlertAndExit(...).                              |
+//| INPUT:  message         - message                                |
+//+------------------------------------------------------------------+
+void MyUtility::AlertAndExit(string message) {
+  Alert(message);
+  ExpertRemove();
+  return;
+}
 
 //+------------------------------------------------------------------+
 //| Access functions CalculateLot(...).                              |
@@ -135,9 +146,9 @@ double MyUtility::GetGirdLotSize(const string symbol,
         ", lotPerGrid: ", lotPerGrid, ", profitPerLot: ", profitPerLot);
 
   if (lotPerGrid < SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN)) {
-    string message =
-        "MyUtility::GetGirdLotSize: Balance may not be enough for all price range. "
-        "Please increase price range or deposit more balance.";
+    string message = "MyUtility::GetGirdLotSize: Balance may not be enough for "
+                     "all price range. "
+                     "Please increase price range or deposit more balance.";
     Alert(message);
     return (0.0);
   }
