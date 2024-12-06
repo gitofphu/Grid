@@ -29,7 +29,7 @@ public:
                       const double profit, const double open_price,
                       const double close_price);
   double GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices);
-  void CloseAllOrder(const CArrayDouble &arrayPrices);
+  void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment);
 
 private:
 };
@@ -159,7 +159,9 @@ double MyUtility::GetGirdLotSize(const string symbol,
 //+------------------------------------------------------------------+
 //| Access functions CloseAllOrder().                             |
 //+------------------------------------------------------------------+
-void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices) {
+void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices,
+                              const string comment) {
+  Print("CloseAllOrder comment: ", comment);
 
   int ordersTotal = OrdersTotal();
   CArrayLong tickets;
@@ -168,8 +170,9 @@ void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices) {
     for (int i = 0; i < ordersTotal; i++) {
       ulong orderTicket = OrderGetTicket(i);
 
-      if (OrderSelect(orderTicket))
-        if (OrderGetString(ORDER_SYMBOL) == _Symbol) {
+      if (OrderSelect(orderTicket)) {
+        if (OrderGetString(ORDER_SYMBOL) == _Symbol &&
+            OrderGetString(ORDER_COMMENT) == comment) {
 
           if (arrayPrices.Total()) {
             double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
@@ -181,22 +184,23 @@ void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices) {
 
           tickets.Add(orderTicket);
         }
+      }
     }
 
-    Print("tickets.Total()", tickets.Total());
+    Print("MyUtility::CloseAllOrder tickets.Total(): ", tickets.Total());
 
     for (int i = 0; i < tickets.Total(); i++) {
       Print("MyUtility::CloseAllOrder ticket: ", tickets[i]);
 
       if (cTrade.OrderDelete(tickets[i])) {
 
-        Print("MyUtility::CloseAllOrder Order ", tickets[i], " deleted.");
+        Print("MyUtility::CloseAllOrder Order: ", tickets[i], " deleted.");
         uint retcode = cTrade.ResultRetcode();
         Print("MyUtility::CloseAllOrder retcode: ", retcode);
 
       } else {
 
-        Print("MyUtility::CloseAllOrder Failed to delete order ", tickets[i],
+        Print("MyUtility::CloseAllOrder Failed to delete order: ", tickets[i],
               ". Error: ", GetLastError());
         uint retcode = cTrade.ResultRetcode();
         Print("MyUtility::CloseAllOrder retcode: ", retcode);

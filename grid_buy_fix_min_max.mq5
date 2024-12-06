@@ -58,7 +58,7 @@ CDealInfo cDealInfo;
 // [ ] OnTradeTransaction check symbol
 // [x] Close order if not in ArrayPrices
 // [ ] Make grid by fibonacci
-// [ ] Check comment before close order
+// [x] Check comment before close order
 
 //+------------------------------------------------------------------+
 //| input                                                            |
@@ -100,7 +100,7 @@ int OnInit() {
     GetArrayPrice(ArrayPrices);
 
   if (ClearOrdersOnInit) {
-    Utility.CloseAllOrder(ArrayPrices);
+    Utility.CloseAllOrder(ArrayPrices, comment);
   }
 
   if (ArrayPrices.Total() > limitOrders) {
