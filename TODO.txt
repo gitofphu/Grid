@@ -1,0 +1,42 @@
+//+------------------------------------------------------------------+
+//| TODO List                                                        |
+//+------------------------------------------------------------------+
+
+// [x] Get account info
+// [x] ACCOUNT_BALANCE
+// [x] ACCOUNT_EQUITY
+// [x] ACCOUNT_MARGIN
+// [x] ACCOUNT_MARGIN_FREE
+// [x] ACCOUNT_MARGIN_LEVEL
+// [x] ACCOUNT_MARGIN_SO_CALL
+// [x] ACCOUNT_MARGIN_SO_SO
+// [x] ACCOUNT_LEVERAGE
+// [x] ACCOUNT_LIMIT_ORDERS
+// [x] Calculate maximum drawdown
+// [ ] Calcualte Pip value
+// [x] Define Min-Max price range
+// [x] Define Entry distant
+// [x] Calcualte maximun lot size
+// [x] Check if MaxOrder or NumberOfGrid exceed limit orders
+// [x] Create array list all price in range
+// [x] Check if can trade
+// [x] Check if possible to place entry on every price in range
+// [x] Create function to place order on every price in range
+// [x] Create function to re-place order on tp price
+// [ ] Create function to modify in case of cannot place all order in price
+// range | trailing order
+// [x] Create function to close order
+// [x] Create function to modify order in case of slippage
+// [ ] Create fucntion to check hourly if all price are place
+// [ ] Get all time hight to set max price
+// [ ] Check If there are other Symbol trading
+// [x] Fix re-run OnInit
+// [x] Check If order are open by this EA
+// [x] Print TP per grid
+// [x] Fix drawdown calculate to current price and min price instead of mix
+// price and min price
+// [ ] Make Array price with price frequently instead of price range
+// [x] OnTradeTransaction check symbol
+// [x] Close order if not in ArrayPrices
+// [ ] Make grid by fibonacci
+// [x] Check comment before close order
