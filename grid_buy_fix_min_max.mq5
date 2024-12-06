@@ -181,7 +181,13 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
     Print("cDealInfo.Symbol()", cDealInfo.Symbol());
     Print("_Symbol", _Symbol);
 
+    Print("cDealInfo.Comment()", cDealInfo.Comment());
+    Print("comment", comment);
+
     if (cDealInfo.Symbol() != _Symbol) {
+      return;
+    }
+    if (cDealInfo.Comment() != comment) {
       return;
     }
 
@@ -395,6 +401,7 @@ void ReplaceTpOrder(double price) {
 
   for (int i = 0; i < ordersTotal; i++) {
     ulong orderTicket = OrderGetTicket(i);
+
     if (OrderSelect(orderTicket)) {
       double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
 
