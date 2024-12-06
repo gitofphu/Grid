@@ -283,33 +283,32 @@ void getExistDeals(CArrayDouble &existDeals, double price) {
  * @param  positionsTotal: Argument 3
  */
 void FilterOpenOrderAndPosition(CArrayDouble &missingDeals) {
-  int ordersTotal = OrdersTotal();
-  int positionsTotal = PositionsTotal();
-
   CArrayDouble existDeals;
 
   int arrayPricesSize = ArrayPrices.Total();
 
-  for (int i = 0; i < ordersTotal; i++) {
+  for (int i = 0; i < OrdersTotal(); i++) {
     ulong orderTicket = OrderGetTicket(i);
     if (OrderSelect(orderTicket)) {
       double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      string symbol = OrderGetString(ORDER_SYMBOL);
       string orderComment = OrderGetString(ORDER_COMMENT);
 
-      if (orderComment != comment)
+      if (orderComment != comment || symbol != _Symbol)
         continue;
 
       getExistDeals(existDeals, orderPrice);
     }
   }
 
-  for (int i = 0; i < positionsTotal; i++) {
+  for (int i = 0; i < PositionsTotal(); i++) {
     ulong positionTicket = PositionGetTicket(i);
     if (PositionSelectByTicket(positionTicket)) {
       double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      string symbol = PositionGetString(POSITION_SYMBOL);
       string positionComment = PositionGetString(POSITION_COMMENT);
 
-      if (positionComment != comment)
+      if (positionComment != comment || symbol != _Symbol)
         continue;
 
       getExistDeals(existDeals, positionPrice);
