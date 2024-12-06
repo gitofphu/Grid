@@ -32,6 +32,7 @@ public:
   void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment);
   void FilterOpenOrderAndPosition(CArrayDouble &arrayPrices, double PriceRange,
                                   string comment, CArrayDouble &missingDeals);
+  void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double PriceRange, double price,
@@ -231,8 +232,8 @@ void MyUtility::getExistDeals(CArrayDouble &arrayPrices, double priceRange,
 }
 
 //+------------------------------------------------------------------+
-//| Access functions GetGirdLotSize(...).                            |
-//| INPUT:  arrayPrices     - grid price array,                      |
+//| Access functions FilterOpenOrderAndPosition(...).                |
+//| INPUT : arrayPrices     - grid price array,                      |
 //|         priceRange      - grid gap size,                         |
 //|         comment         - deal identier,                         |
 //|         missingDeals    - missing deal array,                    |
@@ -280,5 +281,34 @@ void MyUtility::FilterOpenOrderAndPosition(CArrayDouble &arrayPrices,
     if (existDeals.Search(arrayPrices[i]) == -1) {
       missingDeals.Add(arrayPrices[i]);
     }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetAllTimeHighLow(...).                         |
+//| INPUT:  all_time_high     - return all time high value,          |
+//|         all_time_low      - return all time low value,           |
+//+------------------------------------------------------------------+
+void MyUtility::GetAllTimeHighLow(double &all_time_high, double &all_time_low) {
+  all_time_high = -DBL_MAX; // Initialize with the lowest possible value
+  all_time_low = DBL_MAX;   // Initialize with the highest possible value
+
+  // Get the total number of bars available
+  long total_bars = SeriesInfoInteger(_Symbol, PERIOD_MN1, SERIES_BARS_COUNT);
+  if (total_bars <= 0) {
+    Print("No data available for the symbol: ", _Symbol,
+          " Error: ", GetLastError());
+    return;
+  }
+
+  // Loop through all bars to find the high and low
+  for (long i = 0; i < total_bars; i++) {
+    double high = iHigh(_Symbol, PERIOD_MN1, i);
+    double low = iLow(_Symbol, PERIOD_MN1, i);
+
+    if (high > all_time_high)
+      all_time_high = high;
+    if (low < all_time_low)
+      all_time_low = low;
   }
 }
