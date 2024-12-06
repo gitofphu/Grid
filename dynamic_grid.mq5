@@ -72,16 +72,12 @@ int OnInit() {
     Print("ArrayPrices: ", ArrayPrices[i]);
   }
 
-  int ordersTotal = OrdersTotal();
-  for (int i = 0; i < ordersTotal; i++) {
-    ulong orderTicket = OrderGetTicket(i);
-    if (OrderSelect(orderTicket)) {
-      string symbol = OrderGetString(ORDER_SYMBOL);
-      Print("symbol: ", symbol);
-      string comment = OrderGetString(ORDER_COMMENT);
-      Print("comment: ", comment);
-    }
-  }
+  CArrayDouble missingDeals;
+
+  Utility.FilterOpenOrderAndPosition(ArrayPrices, PriceRange, comment,
+                                     missingDeals);
+
+  Print("Basic info: missingDeals = ", missingDeals.Total());
 
   Utility.AlertAndExit("Test ended.");
 

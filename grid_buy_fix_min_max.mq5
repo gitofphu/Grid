@@ -263,70 +263,6 @@ void GetArrayPrice(CArrayDouble &ArrayPrices) {
 }
 
 /**
- * Get exist deals
- * @param  existDeals: Argument 1
- * @param  price: Argument 2
- */
-void getExistDeals(CArrayDouble &existDeals, double price) {
-  for (int j = 0; j < ArrayPrices.Total(); j++) {
-    if (price >= ArrayPrices[j] &&
-        price <= ArrayPrices[j] + PriceRange - _Point) {
-      existDeals.Add(ArrayPrices[j]);
-    }
-  }
-}
-
-/**
- * Check what price are missing from orders and positions
- * @param  missingDeals: Argument 1
- * @param  ordersTotal: Argument 2
- * @param  positionsTotal: Argument 3
- */
-void FilterOpenOrderAndPosition(CArrayDouble &missingDeals) {
-  CArrayDouble existDeals;
-
-  int arrayPricesSize = ArrayPrices.Total();
-
-  for (int i = 0; i < OrdersTotal(); i++) {
-    ulong orderTicket = OrderGetTicket(i);
-    if (OrderSelect(orderTicket)) {
-      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-      string symbol = OrderGetString(ORDER_SYMBOL);
-      string orderComment = OrderGetString(ORDER_COMMENT);
-
-      if (orderComment != comment || symbol != _Symbol)
-        continue;
-
-      getExistDeals(existDeals, orderPrice);
-    }
-  }
-
-  for (int i = 0; i < PositionsTotal(); i++) {
-    ulong positionTicket = PositionGetTicket(i);
-    if (PositionSelectByTicket(positionTicket)) {
-      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
-      string symbol = PositionGetString(POSITION_SYMBOL);
-      string positionComment = PositionGetString(POSITION_COMMENT);
-
-      if (positionComment != comment || symbol != _Symbol)
-        continue;
-
-      getExistDeals(existDeals, positionPrice);
-    }
-  }
-
-  Print("existDeals: ", existDeals.Total());
-
-  existDeals.Sort();
-
-  for (int i = 0; i < ArrayPrices.Total(); i++) {
-    if (existDeals.Search(ArrayPrices[i]) == -1) {
-      missingDeals.Add(ArrayPrices[i]);
-    }
-  }
-}
-
-/**
  * Check if missing price should be limit or stop
  * @param  arrayPrices: Argument 1
  * @param  buyLimitPrices: Argument 2
@@ -386,7 +322,8 @@ void CheckAndPlaceOrders() {
     CArrayDouble buyLimitPrices;
     CArrayDouble buyStopPrices;
 
-    FilterOpenOrderAndPosition(missingDeals);
+    Utility.FilterOpenOrderAndPosition(ArrayPrices, PriceRange, comment,
+                                       missingDeals);
 
     Print("Basic info: missingDeals = ", missingDeals.Total());
 
