@@ -50,12 +50,12 @@ CDealInfo cDealInfo;
 // [ ] Get all time hight to set max price
 // [ ] Check If there are other Symbol trading
 // [x] Fix re-run OnInit
-// [ ] Check If order are open by this EA
+// [x] Check If order are open by this EA
 // [x] Print TP per grid
 // [x] Fix drawdown calculate to current price and min price instead of mix
 // price and min price
 // [ ] Make Array price with price frequently instead of price range
-// [ ] OnTradeTransaction check symbol
+// [x] OnTradeTransaction check symbol
 // [x] Close order if not in ArrayPrices
 // [ ] Make grid by fibonacci
 // [x] Check comment before close order
