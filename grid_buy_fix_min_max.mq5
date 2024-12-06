@@ -263,28 +263,43 @@ void GetArrayPrice(CArrayDouble &ArrayPrices) {
 }
 
 /**
+ * Get exist deals
+ * @param  existDeals: Argument 1
+ * @param  price: Argument 2
+ */
+void getExistDeals(CArrayDouble &existDeals, double price) {
+  for (int j = 0; j < ArrayPrices.Total(); j++) {
+    if (price >= ArrayPrices[j] &&
+        price <= ArrayPrices[j] + PriceRange - _Point) {
+      existDeals.Add(ArrayPrices[j]);
+    }
+  }
+}
+
+/**
  * Check what price are missing from orders and positions
  * @param  missingDeals: Argument 1
  * @param  ordersTotal: Argument 2
  * @param  positionsTotal: Argument 3
  */
-void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
-                                int positionsTotal) {
+void FilterOpenOrderAndPosition(CArrayDouble &missingDeals) {
+  int ordersTotal = OrdersTotal();
+  int positionsTotal = PositionsTotal();
+
   CArrayDouble existDeals;
+
+  int arrayPricesSize = ArrayPrices.Total();
 
   for (int i = 0; i < ordersTotal; i++) {
     ulong orderTicket = OrderGetTicket(i);
     if (OrderSelect(orderTicket)) {
       double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      string orderComment = OrderGetString(ORDER_COMMENT);
 
-      int arrayPricesSize = ArrayPrices.Total();
+      if (orderComment != comment)
+        continue;
 
-      for (int j = 0; j < arrayPricesSize; j++) {
-        if (orderPrice >= ArrayPrices[j] &&
-            orderPrice <= ArrayPrices[j] + PriceRange - _Point) {
-          existDeals.Add(ArrayPrices[j]);
-        }
-      }
+      getExistDeals(existDeals, orderPrice);
     }
   }
 
@@ -292,18 +307,16 @@ void FilterOpenOrderAndPosition(CArrayDouble &missingDeals, int ordersTotal,
     ulong positionTicket = PositionGetTicket(i);
     if (PositionSelectByTicket(positionTicket)) {
       double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      string positionComment = PositionGetString(POSITION_COMMENT);
 
-      int arrayPricesSize = ArrayPrices.Total();
+      if (positionComment != comment)
+        continue;
 
-      for (int j = 0; j < arrayPricesSize; j++) {
-
-        if (positionPrice >= ArrayPrices[j] &&
-            positionPrice <= ArrayPrices[j] + PriceRange - _Point) {
-          existDeals.Add(ArrayPrices[j]);
-        }
-      }
+      getExistDeals(existDeals, positionPrice);
     }
   }
+
+  Print("existDeals: ", existDeals.Total());
 
   existDeals.Sort();
 
@@ -371,19 +384,10 @@ void CheckAndPlaceOrders() {
   do {
 
     CArrayDouble missingDeals;
-    int ordersTotal = OrdersTotal();
-    int positionsTotal = PositionsTotal();
-
-    Print("Basic info: ordersTotal = ", ordersTotal);
-    Print("Basic info: positionsTotal = ", positionsTotal);
-
     CArrayDouble buyLimitPrices;
     CArrayDouble buyStopPrices;
 
-    if (!ordersTotal || !positionsTotal ||
-        ordersTotal + positionsTotal < ArrayPrices.Total()) {
-      FilterOpenOrderAndPosition(missingDeals, ordersTotal, positionsTotal);
-    }
+    FilterOpenOrderAndPosition(missingDeals);
 
     Print("Basic info: missingDeals = ", missingDeals.Total());
 
