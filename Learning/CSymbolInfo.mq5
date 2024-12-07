@@ -20,6 +20,7 @@ void OnStart() {
   //   Print("Description(): ", SymbolInfo.Description());
   //   Print("Path(): ", SymbolInfo.Path());
 
+  SymbolInfo.Name(_Symbol);
   Print("SessionOpen(): ", SymbolInfo.SessionOpen());
   Print("SessionClose(): ", SymbolInfo.SessionClose());
   Print("Digits(): ", SymbolInfo.Digits());
