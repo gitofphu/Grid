@@ -38,5 +38,5 @@
 // [ ] Make Array price with price frequently instead of price range
 // [x] OnTradeTransaction check symbol
 // [x] Close order if not in ArrayPrices
-// [ ] Make grid by fibonacci
+// [x] Make grid by fibonacci
 // [x] Check comment before close order

@@ -33,6 +33,7 @@ public:
   void FilterOpenOrderAndPosition(CArrayDouble &arrayPrices, double PriceRange,
                                   string comment, CArrayDouble &missingDeals);
   void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
+  void GetFibonacciArrayPrice(double maxPrice, CArrayDouble &ArrayPrices);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double PriceRange, double price,
@@ -311,4 +312,25 @@ void MyUtility::GetAllTimeHighLow(double &all_time_high, double &all_time_low) {
     if (low < all_time_low)
       all_time_low = low;
   }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetFibonacciArrayPrice(...).                    |
+//| INPUT:  maxPrice          - max price of array,                  |
+//|         arrayPrices       - return array of price,               |
+//+------------------------------------------------------------------+
+void MyUtility::GetFibonacciArrayPrice(double maxPrice,
+                                       CArrayDouble &arrayPrices) {
+  for (double price = _Point; price <= maxPrice;) {
+    arrayPrices.Add(price);
+
+    if (price != _Point) {
+      price = NormalizeDouble(price + (arrayPrices[arrayPrices.Total() - 2]),
+                              _Digits);
+    } else {
+      price = NormalizeDouble(price + _Point, _Digits);
+    }
+  }
+
+  arrayPrices.Add(maxPrice);
 }

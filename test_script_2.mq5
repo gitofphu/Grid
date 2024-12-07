@@ -64,18 +64,9 @@ void OnStart() {
   // }
 
   CArrayDouble ArrayPrices;
-  int max = 130;
+  double max = 130;
 
-  for (double price = _Point; price <= max;) {
-    ArrayPrices.Add(price);
-
-    if (price != _Point) {
-      price = NormalizeDouble(price + ArrayPrices[ArrayPrices.Total() - 2],
-                              _Digits);
-    } else {
-      price = NormalizeDouble(price + _Point, _Digits);
-    }
-  }
+  Utility.GetFibonacciArrayPrice(max, ArrayPrices);
 
   Print("ArrayPrices.Total(): ", ArrayPrices.Total());
 
