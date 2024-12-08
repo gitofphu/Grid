@@ -64,9 +64,68 @@ void OnStart() {
   // }
 
   CArrayDouble ArrayPrices;
-  double max = 130;
+  double max = 30;
 
-  Utility.GetFibonacciArrayPrice(max, ArrayPrices);
+  // Utility.GetFibonacciArrayPrices(max, ArrayPrices);
+
+  // for(double price = _Point; price <= max;){
+
+  // }
+
+  float one = 1;
+  float two = 2;
+
+  // Print(one / 10);
+  // Print(NormalizeDouble(one / 10, _Digits));
+  // Print(one % 10);
+  // Print(NormalizeDouble(one % 10, _Digits));
+  // Print(two / 10);
+  // Print(NormalizeDouble(two / 10, _Digits));
+  // Print(two % 10);
+  // Print(NormalizeDouble(two % 10, _Digits));
+
+  // for (double i = 0; i <= 130; i += 10) {
+  //   double price;
+  //   if (i != 0) {
+  //     price = i / 10;
+  //   } else {
+  //     price = 0.01;
+  //   }
+
+  //   Print(i, ", value:", price, ", MathRound:", MathRound(price),
+  //         ", MathRound+NormalizeDouble:",
+  //         MathRound(NormalizeDouble(price, _Digits)),
+  //         ", MathCeil:", MathCeil(price), ", MathCeil+NormalizeDouble:",
+  //         MathCeil(NormalizeDouble(price, _Digits)));
+
+  //   ArrayPrices.Add(NormalizeDouble(price, _Digits));
+
+  //   double addPrice = MathCeil(NormalizeDouble(price, _Digits)) * 0.1;
+
+  //   Print("addPrice: ", addPrice);
+
+  //   for (double j = price; j < price + 10;) {
+  //     j = NormalizeDouble((j * 10) + addPrice, _Digits);
+  //     Print("j: ", j);
+  //     ArrayPrices.Add(j);
+  //   }
+  // }
+
+  for (double i = 0; i <= 130; i++) {
+    double price;
+    price = i / 10;
+
+    if (price == 0) {
+      price = 0.1;
+    }
+
+    double addPrice = NormalizeDouble(
+        MathCeil(NormalizeDouble(price, _Digits)) * 0.1, _Digits);
+
+    for (double j = i; j < i + 1; j += addPrice) {
+      ArrayPrices.Add(NormalizeDouble(j, _Digits));
+    }
+  }
 
   Print("ArrayPrices.Total(): ", ArrayPrices.Total());
 

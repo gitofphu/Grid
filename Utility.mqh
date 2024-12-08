@@ -33,7 +33,8 @@ public:
   void FilterOpenOrderAndPosition(CArrayDouble &arrayPrices, double PriceRange,
                                   string comment, CArrayDouble &missingDeals);
   void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
-  void GetFibonacciArrayPrice(double maxPrice, CArrayDouble &ArrayPrices);
+  void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &ArrayPrices);
+  void GetExpandArrayPrices(double maxPrice, CArrayDouble &arrayPrices);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double PriceRange, double price,
@@ -315,12 +316,12 @@ void MyUtility::GetAllTimeHighLow(double &all_time_high, double &all_time_low) {
 }
 
 //+------------------------------------------------------------------+
-//| Access functions GetFibonacciArrayPrice(...).                    |
+//| Access functions GetFibonacciArrayPrices(...).                   |
 //| INPUT:  maxPrice          - max price of array,                  |
 //|         arrayPrices       - return array of price,               |
 //+------------------------------------------------------------------+
-void MyUtility::GetFibonacciArrayPrice(double maxPrice,
-                                       CArrayDouble &arrayPrices) {
+void MyUtility::GetFibonacciArrayPrices(double maxPrice,
+                                        CArrayDouble &arrayPrices) {
   for (double price = _Point; price <= maxPrice;) {
     arrayPrices.Add(price);
 
@@ -333,4 +334,28 @@ void MyUtility::GetFibonacciArrayPrice(double maxPrice,
   }
 
   arrayPrices.Add(maxPrice);
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetExpandArrayPrices(...).                      |
+//| INPUT:  maxPrice          - max price of array,                  |
+//|         arrayPrices       - return array of price,               |
+//+------------------------------------------------------------------+
+void MyUtility::GetExpandArrayPrices(double maxPrice,
+                                     CArrayDouble &arrayPrices) {
+  for (double i = 0; i <= 130; i++) {
+    double price;
+    price = i / 10;
+
+    if (price == 0) {
+      price = 0.1;
+    }
+
+    double addPrice = NormalizeDouble(
+        MathCeil(NormalizeDouble(price, _Digits)) * 0.1, _Digits);
+
+    for (double j = i; j < i + 1; j += addPrice) {
+      arrayPrices.Add(NormalizeDouble(j, _Digits));
+    }
+  }
 }
