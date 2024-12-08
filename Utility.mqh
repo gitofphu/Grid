@@ -34,7 +34,8 @@ public:
                                   string comment, CArrayDouble &missingDeals);
   void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
   void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &ArrayPrices);
-  void GetExpandArrayPrices(double maxPrice, CArrayDouble &arrayPrices);
+  void GetExpandArrayPrices(double minPrice, double maxPrice,
+                            CArrayDouble &arrayPrices);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double PriceRange, double price,
@@ -338,12 +339,13 @@ void MyUtility::GetFibonacciArrayPrices(double maxPrice,
 
 //+------------------------------------------------------------------+
 //| Access functions GetExpandArrayPrices(...).                      |
-//| INPUT:  maxPrice          - max price of array,                  |
+//| INPUT:  minPrice          - min price of array,                  |
+//|         maxPrice          - max price of array,                  |
 //|         arrayPrices       - return array of price,               |
 //+------------------------------------------------------------------+
-void MyUtility::GetExpandArrayPrices(double maxPrice,
+void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
                                      CArrayDouble &arrayPrices) {
-  for (double i = 0; i <= 130; i++) {
+  for (double i = minPrice; i <= maxPrice; i++) {
     double price;
     price = i / 10;
 

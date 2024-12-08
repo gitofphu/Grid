@@ -111,7 +111,7 @@ void OnStart() {
   //   }
   // }
 
-  for (double i = 0; i <= 130; i++) {
+  for (double i = 5; i <= 130; i++) {
     double price;
     price = i / 10;
 
