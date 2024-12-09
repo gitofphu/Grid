@@ -135,11 +135,11 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       return;
     }
 
-    Print("cDealInfo.Symbol()", cDealInfo.Symbol());
-    Print("_Symbol", _Symbol);
+    Print("cDealInfo.Symbol(): ", cDealInfo.Symbol());
+    Print("_Symbol: ", _Symbol);
 
-    Print("cDealInfo.Comment()", cDealInfo.Comment());
-    Print("comment", comment);
+    Print("cDealInfo.Comment(): ", cDealInfo.Comment());
+    Print("comment: ", comment);
 
     if (cDealInfo.Symbol() != _Symbol) {
       return;
@@ -291,6 +291,7 @@ void CheckAndPlaceOrders() {
 }
 
 void ReplaceTpOrder(double price) {
+  Print("ReplaceTpOrder: ", price);
   int ordersTotal = OrdersTotal();
   int positionsTotal = PositionsTotal();
 
