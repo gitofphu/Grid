@@ -127,25 +127,36 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
   ENUM_TRADE_TRANSACTION_TYPE type = trans.type;
   //--- if transaction is result of addition of the transaction in history
   if (type == TRADE_TRANSACTION_DEAL_ADD) {
-    if (HistoryDealSelect(trans.deal))
+    Print("Deal: ", trans.deal, ", Order: ", trans.order,
+          ", Symbol: ", trans.symbol, ", Price: ", trans.price,
+          ", TP: ", trans.price_tp);
+
+    if (HistoryDealSelect(trans.deal)) {
       cDealInfo.Ticket(trans.deal);
-    else {
+    } else {
       Print(__FILE__, " ", __FUNCTION__, ", ERROR: HistoryDealSelect(",
             trans.deal, ")");
       return;
     }
 
-    Print("cDealInfo.Symbol(): ", cDealInfo.Symbol());
+    // Print("cDealInfo.Symbol(): ", cDealInfo.Symbol());
     Print("_Symbol: ", _Symbol);
 
-    Print("cDealInfo.Comment(): ", cDealInfo.Comment());
+    // Print("cDealInfo.Comment(): ", cDealInfo.Comment());
     Print("comment: ", comment);
 
-    if (cDealInfo.Symbol() != _Symbol) {
-      return;
-    }
-    if (cDealInfo.Comment() != comment) {
-      return;
+    // if (cDealInfo.Symbol() != _Symbol) {
+    //   return;
+    // }
+    // if (cDealInfo.Comment() != comment) {
+    //   return;
+    // }
+
+    if (HistoryOrderSelect(trans.order)) {
+      if (HistoryOrderGetString(trans.order, ORDER_SYMBOL) != _Symbol)
+        return;
+      if (HistoryOrderGetString(trans.order, ORDER_COMMENT) != comment)
+        return;
     }
 
     //---

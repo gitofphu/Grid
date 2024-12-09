@@ -21,7 +21,10 @@ void OnStart() {
   long position_ID;          // position ID
   string deal_description;   // operation description
   double volume;             // operation volume
+  double price;              // operation price
+  double tp;                 // operation tp
   string symbol;             // symbol of the deal
+  string comment;            // comment of the deal
   //--- set the start and end date to request the history of deals
   datetime from_date = 0;           // from the very beginning
   datetime to_date = TimeCurrent(); // till the current moment
@@ -33,18 +36,24 @@ void OnStart() {
   for (int i = 0; i < deals; i++) {
     deal_ticket = HistoryDealGetTicket(i);
     volume = HistoryDealGetDouble(deal_ticket, DEAL_VOLUME);
+    price = HistoryDealGetDouble(deal_ticket, DEAL_PRICE);
+    tp = HistoryDealGetDouble(deal_ticket, DEAL_TP);
     transaction_time = (datetime)HistoryDealGetInteger(deal_ticket, DEAL_TIME);
     order_ticket = HistoryDealGetInteger(deal_ticket, DEAL_ORDER);
     deal_type = HistoryDealGetInteger(deal_ticket, DEAL_TYPE);
     symbol = HistoryDealGetString(deal_ticket, DEAL_SYMBOL);
+    comment = HistoryDealGetString(deal_ticket, DEAL_COMMENT);
     position_ID = HistoryDealGetInteger(deal_ticket, DEAL_POSITION_ID);
     deal_description = GetDealDescription(deal_type, volume, symbol,
                                           order_ticket, position_ID);
     //--- perform fine formatting for the deal number
     string print_index = StringFormat("% 3d", i);
     //--- show information on the deal
-    Print(print_index + ": deal #", deal_ticket, " at ", transaction_time,
-          deal_description);
+    // Print(print_index + ": deal #", deal_ticket, " at ", transaction_time,
+    //       deal_description);
+    Print("deal_ticket: ", deal_ticket, ", order_ticket: ", order_ticket,
+          ", symbol: ", symbol, ", comment: ", comment, ", price: ", price,
+          ", tp: ", tp);
   }
 }
 
