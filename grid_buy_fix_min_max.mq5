@@ -146,10 +146,10 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       return;
     }
 
-    // Print("cDealInfo.Symbol(): ", cDealInfo.Symbol());
+    Print("cDealInfo.Symbol(): ", cDealInfo.Symbol());
     Print("_Symbol: ", _Symbol);
 
-    // Print("cDealInfo.Comment(): ", cDealInfo.Comment());
+    Print("cDealInfo.Comment(): ", cDealInfo.Comment());
     Print("comment: ", comment);
 
     // if (cDealInfo.Symbol() != _Symbol) {
@@ -178,10 +178,23 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
     else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
       Alert("Take Profit activation");
 
+      CheckAndPlaceOrders();
+
       double price;
       cDealInfo.InfoDouble(DEAL_PRICE, price);
+      Print("price: ", price);
 
-      ReplaceTpOrder(price);
+      long PositionId = cDealInfo.PositionId();
+      Print("PositionId: ", PositionId);
+
+      long deal;
+      cDealInfo.InfoInteger(DEAL_TICKET, deal);
+      Print("deal: ", deal);
+      long order;
+      cDealInfo.InfoInteger(DEAL_ORDER, order);
+      Print("order: ", order);
+
+      // ReplaceTpOrder(price);
     }
   }
 }
