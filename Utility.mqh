@@ -365,7 +365,7 @@ void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
 }
 
 //+------------------------------------------------------------------+
-//| Access functions GetExpandArrayPrices(...).                      |
+//| Access functions GetArrayPrice(...).                             |
 //| INPUT:  minPrice          - min price of array,                  |
 //|         maxPrice          - max price of array,                  |
 //|         priceRange        - grid gap size,                       |
