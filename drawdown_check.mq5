@@ -14,14 +14,14 @@ MyUtility Utility;
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
 void OnStart() {
-  double MaxPrice = 70;
+  double CurrentPrice = 70;
   double MinPrice = 0;
   double PriceRange = 10;
   double lotPerGrid = 0.01;
-  double balance = 1000;
+  double balance = 650;
 
   CArrayDouble ArrayPrices;
-  Utility.GetArrayPrice(MinPrice, MaxPrice, PriceRange, ArrayPrices);
+  Utility.GetArrayPrice(MinPrice, CurrentPrice, PriceRange, ArrayPrices);
 
   for (int i = 0; i < ArrayPrices.Total(); i++) {
     Print("ArrayPrices: ", i, " = ", ArrayPrices[i]);
