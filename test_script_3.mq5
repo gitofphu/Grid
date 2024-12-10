@@ -23,11 +23,11 @@ void OnStart() {
 
   // use this method
   // //  Order ticket
-  if (HistoryOrderSelect(305861114)) {
-    Print("Price: ", HistoryOrderGetDouble(305861114, ORDER_PRICE_OPEN));
-    Print("TP: ", HistoryOrderGetDouble(305861114, ORDER_TP));
-    Print("Symbol: ", HistoryOrderGetString(305861114, ORDER_SYMBOL));
-    Print("Comment: ", HistoryOrderGetString(305861114, ORDER_COMMENT));
+  if (HistoryOrderSelect(306590481)) {
+    Print("Price: ", HistoryOrderGetDouble(306590481, ORDER_PRICE_OPEN));
+    Print("TP: ", HistoryOrderGetDouble(306590481, ORDER_TP));
+    Print("Symbol: ", HistoryOrderGetString(306590481, ORDER_SYMBOL));
+    Print("Comment: ", HistoryOrderGetString(306590481, ORDER_COMMENT));
   }
 
   // Deal ticket
