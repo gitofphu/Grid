@@ -180,10 +180,6 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
       CheckAndPlaceOrders();
 
-      double price;
-      cDealInfo.InfoDouble(DEAL_PRICE, price);
-      Print("price: ", price);
-
       long PositionId = cDealInfo.PositionId();
       Print("PositionId: ", PositionId);
 
@@ -193,6 +189,22 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       long order;
       cDealInfo.InfoInteger(DEAL_ORDER, order);
       Print("order: ", order);
+
+      double price;
+      cDealInfo.InfoDouble(DEAL_PRICE, price);
+      Print("price: ", price);
+      double tp;
+      cDealInfo.InfoDouble(DEAL_TP, tp);
+      Print("tp: ", tp);
+      double profit;
+      cDealInfo.InfoDouble(DEAL_PROFIT, profit);
+      Print("profit: ", profit);
+      string symbol;
+      cDealInfo.InfoString(DEAL_SYMBOL, symbol);
+      Print("symbol: ", symbol);
+      string dealComment;
+      cDealInfo.InfoString(DEAL_COMMENT, dealComment);
+      Print("dealComment: ", dealComment);
 
       // ReplaceTpOrder(price);
     }
