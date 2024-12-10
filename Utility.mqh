@@ -120,6 +120,7 @@ double MyUtility::GetGirdLotSize(const string symbol,
   }
 
   Print("maxDrawdownPrice: ", maxDrawdownPrice);
+  Print("maxDrowdownNumberOfGrid: ", maxDrowdownNumberOfGrid);
 
   // calculate lot size base on balance
   double totalLot = 0.0;
@@ -137,7 +138,8 @@ double MyUtility::GetGirdLotSize(const string symbol,
 
     double drawdown = NormalizeDouble(profit - marginRequire, 2);
 
-    Print("lot: ", lot, ", maximum drawdown: ", drawdown);
+    Print("lot: ", lot, " from ", maxDrawdownPrice, " to ", arrayPrices[0],
+          ", maximum drawdown: ", drawdown);
 
     if (NormalizeDouble(cAccountInfo.Balance() + drawdown, 2) <= 0)
       break;
@@ -153,7 +155,8 @@ double MyUtility::GetGirdLotSize(const string symbol,
 
   Print("totalLot: ", totalLot,
         ", maxDrowdownNumberOfGrid: ", maxDrowdownNumberOfGrid,
-        ", lotPerGrid: ", lotPerGrid, ", profitPerLot: ", profitPerLot);
+        ", lotPerGrid: ", NormalizeDouble(lotPerGrid, 2),
+        ", profitPerLot: ", profitPerLot);
 
   if (lotPerGrid < SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN)) {
     string message = "MyUtility::GetGirdLotSize: Balance may not be enough for "
