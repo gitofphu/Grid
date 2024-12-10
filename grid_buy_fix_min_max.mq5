@@ -54,7 +54,8 @@ int OnInit() {
   ValidateInput();
 
   if (ArrayPrices.Total() == 0)
-    GetArrayPrice(ArrayPrices);
+    // GetArrayPrice(ArrayPrices);
+    Utility.GetArrayPrice(MinPrice, MaxPrice, PriceRange, ArrayPrices);
 
   if (ClearOrdersOnInit) {
     Utility.CloseAllOrder(ArrayPrices, comment);
@@ -241,25 +242,6 @@ void ValidateInput() {
 int TradeAllowed() {
   return (MQLInfoInteger(MQL_TRADE_ALLOWED) == 1 &&
           TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) == 1);
-}
-
-/**
- * Make Grid price from MinPrice and MaxPrice
- * @param  ArrayPrices: Argument 1
- */
-void GetArrayPrice(CArrayDouble &ArrayPrices) {
-  int arraySize = NormalizeDouble((MaxPrice - MinPrice) / PriceRange, _Digits);
-
-  int index;
-  double price;
-  for (index = 0, price = MinPrice; index <= arraySize;
-       index++, price += PriceRange) {
-    if (index == 0 && price == 0) {
-      ArrayPrices.Add(_Point);
-      continue;
-    }
-    ArrayPrices.Add(price);
-  }
 }
 
 /**

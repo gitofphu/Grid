@@ -30,12 +30,14 @@ public:
                       const double close_price);
   double GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices);
   void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment);
-  void FilterOpenOrderAndPosition(CArrayDouble &arrayPrices, double PriceRange,
+  void FilterOpenOrderAndPosition(CArrayDouble &arrayPrices, double priceRange,
                                   string comment, CArrayDouble &missingDeals);
   void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
   void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &ArrayPrices);
   void GetExpandArrayPrices(double minPrice, double maxPrice,
                             CArrayDouble &arrayPrices);
+  void GetArrayPrice(double minPrice, double maxPrice, double priceRange,
+                     CArrayDouble &ArrayPrices);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double PriceRange, double price,
@@ -359,5 +361,28 @@ void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
     for (double j = i; j < i + 1; j += addPrice) {
       arrayPrices.Add(NormalizeDouble(j, _Digits));
     }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetExpandArrayPrices(...).                      |
+//| INPUT:  minPrice          - min price of array,                  |
+//|         maxPrice          - max price of array,                  |
+//|         priceRange        - grid gap size,                       |
+//|         arrayPrices       - return array of price,               |
+//+------------------------------------------------------------------+
+void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
+                              double priceRange, CArrayDouble &ArrayPrices) {
+  int arraySize = NormalizeDouble((maxPrice - minPrice) / priceRange, _Digits);
+
+  int index;
+  double price;
+  for (index = 0, price = minPrice; index <= arraySize;
+       index++, price += priceRange) {
+    if (index == 0 && price == 0) {
+      ArrayPrices.Add(_Point);
+      continue;
+    }
+    ArrayPrices.Add(price);
   }
 }
