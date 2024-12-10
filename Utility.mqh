@@ -383,9 +383,9 @@ void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
   for (index = 0, price = minPrice; index <= arraySize;
        index++, price += priceRange) {
     if (index == 0 && price == 0) {
-      ArrayPrices.Add(_Point);
+      ArrayPrices.Add(NormalizeDouble(_Point, _Digits));
       continue;
     }
-    ArrayPrices.Add(price);
+    ArrayPrices.Add(NormalizeDouble(price, _Digits));
   }
 }
