@@ -18,12 +18,55 @@ CChartObject object;
 //+------------------------------------------------------------------+
 void OnStart() {
   // DrawLine();
-  FindAndDeleteHorizontalLinesWithPrefix();
+  // FindAndDeleteHorizontalLinesWithPrefix();
+
+  double CurrentPrice = 75;
+  double MinPrice = 50;
+  double PriceRange = 1;
+
+  CArrayDouble ArrayPrices;
+  Utility.GetArrayPrice(MinPrice, CurrentPrice, PriceRange, ArrayPrices);
+
+  int totalObjects = ObjectsTotal(0); // Get total objects on the current chart
+  Print("Total objects: ", totalObjects);
+
+  for (int i = totalObjects - 1; i >= 0;
+       i--) // Iterate in reverse to safely delete objects
+  {
+    string objectName = ObjectName(0, i); // Get the name of the object
+
+    // Check if the object name contains "My_Line_"
+    if (StringFind(objectName, "My_Line_") >= 0) {
+      if (ObjectGetInteger(0, objectName, OBJPROP_TYPE) ==
+          OBJ_HLINE) // Check if it's a horizontal line
+      {
+        double hlinePrice = ObjectGetDouble(
+            0, objectName,
+            OBJPROP_PRICE); // Get the price level of the horizontal line
+        Print("Deleting horizontal line: Name=", objectName,
+              ", Price=", hlinePrice);
+
+        int index = ArrayPrices.SearchLinear(hlinePrice);
+
+        if (index == -1) {
+          ObjectDelete(0, objectName); // Delete the object
+        } else {
+          ArrayPrices.Delete(index);
+        }
+      }
+    }
+  }
+
+  for (int i = 0; i < ArrayPrices.Total(); i++) {
+    Print("Missing line: ", ArrayPrices[i]);
+    ObjectCreate(0, "My_Line_" + ArrayPrices[i], OBJ_HLINE, 0, 0,
+                 ArrayPrices[i]);
+  }
 }
 
 void DrawLine() {
-  double CurrentPrice = 80;
-  double MinPrice = 70;
+  double CurrentPrice = 75;
+  double MinPrice = 50;
   double PriceRange = 1;
 
   CArrayDouble ArrayPrices;
