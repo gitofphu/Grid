@@ -1,5 +1,4 @@
-#include <Trade\AccountInfo.mqh>
-
+#include <Trade/AccountInfo.mqh>
 CAccountInfo AccountInfo;
 
 void OnStart() {

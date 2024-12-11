@@ -54,7 +54,6 @@ int OnInit() {
   ValidateInput();
 
   if (ArrayPrices.Total() == 0)
-    // GetArrayPrice(ArrayPrices);
     Utility.GetArrayPrice(MinPrice, MaxPrice, PriceRange, ArrayPrices);
 
   if (ClearOrdersOnInit) {
@@ -147,11 +146,11 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       return;
     }
 
-    Print("cDealInfo.Symbol(): ", cDealInfo.Symbol());
-    Print("_Symbol: ", _Symbol);
+    // Print("cDealInfo.Symbol(): ", cDealInfo.Symbol());
+    // Print("_Symbol: ", _Symbol);
 
-    Print("cDealInfo.Comment(): ", cDealInfo.Comment());
-    Print("comment: ", comment);
+    // Print("cDealInfo.Comment(): ", cDealInfo.Comment());
+    // Print("comment: ", comment);
 
     // if (cDealInfo.Symbol() != _Symbol) {
     //   return;
@@ -181,31 +180,29 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
       CheckAndPlaceOrders();
 
-      long PositionId = cDealInfo.PositionId();
-      Print("PositionId: ", PositionId);
-
-      long deal;
-      cDealInfo.InfoInteger(DEAL_TICKET, deal);
-      Print("deal: ", deal);
-      long order;
-      cDealInfo.InfoInteger(DEAL_ORDER, order);
-      Print("order: ", order);
-
-      double price;
-      cDealInfo.InfoDouble(DEAL_PRICE, price);
-      Print("price: ", price);
-      double tp;
-      cDealInfo.InfoDouble(DEAL_TP, tp);
-      Print("tp: ", tp);
-      double profit;
-      cDealInfo.InfoDouble(DEAL_PROFIT, profit);
-      Print("profit: ", profit);
-      string symbol;
-      cDealInfo.InfoString(DEAL_SYMBOL, symbol);
-      Print("symbol: ", symbol);
-      string dealComment;
-      cDealInfo.InfoString(DEAL_COMMENT, dealComment);
-      Print("dealComment: ", dealComment);
+      // long PositionId = cDealInfo.PositionId();
+      // Print("PositionId: ", PositionId);
+      // long deal;
+      // cDealInfo.InfoInteger(DEAL_TICKET, deal);
+      // Print("deal: ", deal);
+      // long order;
+      // cDealInfo.InfoInteger(DEAL_ORDER, order);
+      // Print("order: ", order);
+      // double price;
+      // cDealInfo.InfoDouble(DEAL_PRICE, price);
+      // Print("price: ", price);
+      // double tp;
+      // cDealInfo.InfoDouble(DEAL_TP, tp);
+      // Print("tp: ", tp);
+      // double profit;
+      // cDealInfo.InfoDouble(DEAL_PROFIT, profit);
+      // Print("profit: ", profit);
+      // string symbol;
+      // cDealInfo.InfoString(DEAL_SYMBOL, symbol);
+      // Print("symbol: ", symbol);
+      // string dealComment;
+      // cDealInfo.InfoString(DEAL_COMMENT, dealComment);
+      // Print("dealComment: ", dealComment);
 
       // ReplaceTpOrder(price);
     }
@@ -280,13 +277,11 @@ void PlaceOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
 
   for (int i = 0; i < buyLimitPrices.Total(); i++) {
     double price = buyLimitPrices[i];
-
     PlaceBuyLimitOrder(price, OrderPriceInvalid);
   }
 
   for (int i = 0; i < buyStopPrices.Total(); i++) {
     double price = buyStopPrices[i];
-
     PlaceBuyStopOrder(price, OrderPriceInvalid);
   }
 }
@@ -307,9 +302,11 @@ void CheckAndPlaceOrders() {
     Utility.FilterOpenOrderAndPosition(ArrayPrices, PriceRange, comment,
                                        missingDeals);
 
-    Print("Basic info: missingDeals = ", missingDeals.Total());
-
     FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
+
+    Print("Basic info: missingDeals = ", missingDeals.Total());
+    Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
+    Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
 
     PlaceOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
   } while (OrderPriceInvalid);

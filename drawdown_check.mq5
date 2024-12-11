@@ -15,10 +15,10 @@ MyUtility Utility;
 //+------------------------------------------------------------------+
 void OnStart() {
   double CurrentPrice = 70;
-  double MinPrice = 0;
-  double PriceRange = 0.1;
-  double lotPerGrid = 0.01;
-  double balance = 650;
+  double MinPrice = 50;
+  double PriceRange = 0.2;
+  double lotPerGrid = 0.02;
+  double balance = 660;
 
   CArrayDouble ArrayPrices;
   Utility.GetArrayPrice(MinPrice, CurrentPrice, PriceRange, ArrayPrices);
@@ -31,35 +31,35 @@ void OnStart() {
 
   Print("------------------------------------");
 
-  // for (int i = ArrayPrices.Total() - 1; i >= 0; i--) {
-  //   Print("Current price", i, " = ", ArrayPrices[i]);
+  for (int i = ArrayPrices.Total() - 1; i >= 0; i--) {
+    Print("Current price", i, " = ", ArrayPrices[i]);
 
-  //   if (i == ArrayPrices.Total() - 1)
-  //     continue;
+    if (i == ArrayPrices.Total() - 1)
+      continue;
 
-  //   double drawdown = 0;
+    double drawdown = 0;
 
-  //   for (int j = ArrayPrices.Total() - 1; j > i; j--) {
-  //     double profit = cAccountInfo.OrderProfitCheck(
-  //         _Symbol, ORDER_TYPE_BUY, lotPerGrid, ArrayPrices[j], ArrayPrices[i]);
+    for (int j = ArrayPrices.Total() - 1; j > i; j--) {
+      double profit = cAccountInfo.OrderProfitCheck(
+          _Symbol, ORDER_TYPE_BUY, lotPerGrid, ArrayPrices[j], ArrayPrices[i]);
 
-  //     double marginRequire = cAccountInfo.MarginCheck(
-  //         _Symbol, ORDER_TYPE_BUY, lotPerGrid, ArrayPrices[j]);
+      double marginRequire = cAccountInfo.MarginCheck(
+          _Symbol, ORDER_TYPE_BUY, lotPerGrid, ArrayPrices[j]);
 
-  //     Print("From ", ArrayPrices[j], " to ", ArrayPrices[i], " profit ",
-  //           NormalizeDouble(profit + marginRequire, 2));
+      // Print("From ", ArrayPrices[j], " to ", ArrayPrices[i], " profit ",
+      //       NormalizeDouble(profit + marginRequire, 2));
 
-  //     drawdown = NormalizeDouble(
-  //         drawdown + NormalizeDouble(profit + marginRequire, 2), 2);
+      drawdown = NormalizeDouble(
+          drawdown + NormalizeDouble(profit + marginRequire, 2), 2);
 
-  //     if (balance + drawdown <= 0)
-  //       break;
-  //   }
+      if (balance + drawdown <= 0)
+        break;
+    }
 
-  //   Print("drawdown: ", drawdown);
-  //   Print("------------------------------------");
+    Print("drawdown: ", drawdown);
+    Print("------------------------------------");
 
-  //   if (balance + drawdown <= 0)
-  //     break;
-  // }
+    if (balance + drawdown <= 0)
+      break;
+  }
 }
