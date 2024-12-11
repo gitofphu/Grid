@@ -40,3 +40,5 @@
 // [x] Close order if not in ArrayPrices
 // [x] Make grid by fibonacci
 // [x] Check comment before close order
+// [ ] Dynamic Grid
+// [ ] Buy, Sell options
