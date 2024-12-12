@@ -23,7 +23,7 @@ CDealInfo cDealInfo;
 input double MaxPrice = 100;
 input double MinPrice = 0;
 input int MaxOrders = NULL;
-input double PriceRange = 10;
+input double GridGapSize = 10;
 input bool TradeAnywaywithMinimunLot = false;
 input bool ClearOrdersOnInit = false;
 input double MinLot = NULL;
@@ -54,7 +54,7 @@ int OnInit() {
   ValidateInput();
 
   if (ArrayPrices.Total() == 0)
-    Utility.GetArrayPrice(MinPrice, MaxPrice, PriceRange, ArrayPrices);
+    Utility.GetArrayPrice(MinPrice, MaxPrice, GridGapSize, ArrayPrices);
 
   if (ClearOrdersOnInit) {
     Utility.CloseAllOrder(ArrayPrices, comment);
@@ -69,12 +69,7 @@ int OnInit() {
 
   Print("Basic info: SYMBOL_VOLUME_LIMIT= ", volumeLimit);
 
-  for (int i = 0; i < ArrayPrices.Total(); i++) {
-    Print("Basic info: ArrayPrices ", i, " = ", ArrayPrices[i]);
-  }
-
   if (volumeLimit != 0 && ArrayPrices.Total() > volumeLimit) {
-
     Utility.AlertAndExit("Number of grid exceeded volume limit.");
     return (INIT_PARAMETERS_INCORRECT);
   }
@@ -85,8 +80,6 @@ int OnInit() {
     lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices);
   }
 
-  Print("Basic info: lotPerGrid = ", lotPerGrid);
-
   if (lotPerGrid == 0) {
     if (TradeAnywaywithMinimunLot) {
       lotPerGrid = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
@@ -94,6 +87,12 @@ int OnInit() {
       return (INIT_PARAMETERS_INCORRECT);
     }
   }
+
+  for (int i = 0; i < ArrayPrices.Total(); i++) {
+    Print("Basic info: ArrayPrices ", i, " = ", ArrayPrices[i]);
+  }
+
+  Print("Basic info: lotPerGrid = ", lotPerGrid);
 
   CheckAndPlaceOrders();
 
@@ -222,8 +221,8 @@ void ValidateInput() {
   if (MaxPrice > 0 && MinPrice >= MaxPrice)
     Utility.AlertAndExit("MinPrice must be less than MaxPrice.");
 
-  if (PriceRange == 0)
-    Utility.AlertAndExit("PriceRange cannot be 0.");
+  if (GridGapSize == 0)
+    Utility.AlertAndExit("GridGapSize cannot be 0.");
 
   const int accoutnLimitOrders = AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
 
@@ -299,7 +298,7 @@ void CheckAndPlaceOrders() {
     CArrayDouble buyLimitPrices;
     CArrayDouble buyStopPrices;
 
-    Utility.FilterOpenOrderAndPosition(ArrayPrices, PriceRange, comment,
+    Utility.FilterOpenOrderAndPosition(ArrayPrices, GridGapSize, comment,
                                        missingDeals);
 
     FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
@@ -380,9 +379,9 @@ void ReplaceTpOrder(double price) {
 void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
 
   Print("Basic info: PlaceBuyLimitOrder = ", price,
-        ", TP = ", price + PriceRange);
+        ", TP = ", price + GridGapSize);
 
-  if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + PriceRange,
+  if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + GridGapSize,
                       ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
@@ -412,9 +411,9 @@ void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
 void PlaceBuyStopOrder(double price, bool &OrderPriceInvalid) {
 
   Print("Basic info: PlaceBuyStopOrder = ", price,
-        ", TP = ", price + PriceRange);
+        ", TP = ", price + GridGapSize);
 
-  if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + PriceRange,
+  if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + GridGapSize,
                      ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();

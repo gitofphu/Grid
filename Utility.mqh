@@ -30,17 +30,17 @@ public:
                       const double close_price);
   double GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices);
   void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment);
-  void FilterOpenOrderAndPosition(CArrayDouble &arrayPrices, double priceRange,
+  void FilterOpenOrderAndPosition(CArrayDouble &arrayPrices, double gridGapSize,
                                   string comment, CArrayDouble &missingDeals);
   void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
   void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &ArrayPrices);
   void GetExpandArrayPrices(double minPrice, double maxPrice,
                             CArrayDouble &arrayPrices);
-  void GetArrayPrice(double minPrice, double maxPrice, double priceRange,
+  void GetArrayPrice(double minPrice, double maxPrice, double gridGapSize,
                      CArrayDouble &ArrayPrices);
 
 private:
-  void getExistDeals(CArrayDouble &arrayPrices, double PriceRange, double price,
+  void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize, double price,
                      CArrayDouble &existDeals);
 };
 
@@ -225,15 +225,15 @@ void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices,
 //+------------------------------------------------------------------+
 //| Access functions getExistDeals(...).                             |
 //| INPUT:  arrayPrices     - grid price array,                      |
-//|         priceRange      - grid gap size,                         |
+//|         gridGapSize     - grid gap size,                         |
 //|         price           - current price,                         |
 //|         existDeals      - existing deal array,                   |
 //+------------------------------------------------------------------+
-void MyUtility::getExistDeals(CArrayDouble &arrayPrices, double priceRange,
+void MyUtility::getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
                               double price, CArrayDouble &existDeals) {
   for (int j = 0; j < arrayPrices.Total(); j++) {
     if (price >= arrayPrices[j] &&
-        price <= arrayPrices[j] + priceRange - _Point) {
+        price <= arrayPrices[j] + gridGapSize - _Point) {
       existDeals.Add(arrayPrices[j]);
     }
   }
@@ -242,12 +242,12 @@ void MyUtility::getExistDeals(CArrayDouble &arrayPrices, double priceRange,
 //+------------------------------------------------------------------+
 //| Access functions FilterOpenOrderAndPosition(...).                |
 //| INPUT : arrayPrices     - grid price array,                      |
-//|         priceRange      - grid gap size,                         |
+//|         gridGapSize      - grid gap size,                         |
 //|         comment         - deal identier,                         |
 //|         missingDeals    - missing deal array,                    |
 //+------------------------------------------------------------------+
 void MyUtility::FilterOpenOrderAndPosition(CArrayDouble &arrayPrices,
-                                           double priceRange, string comment,
+                                           double gridGapSize, string comment,
                                            CArrayDouble &missingDeals) {
   CArrayDouble existDeals;
 
@@ -263,7 +263,7 @@ void MyUtility::FilterOpenOrderAndPosition(CArrayDouble &arrayPrices,
       if (orderComment != comment || symbol != _Symbol)
         continue;
 
-      getExistDeals(arrayPrices, priceRange, orderPrice, existDeals);
+      getExistDeals(arrayPrices, gridGapSize, orderPrice, existDeals);
     }
   }
 
@@ -277,7 +277,7 @@ void MyUtility::FilterOpenOrderAndPosition(CArrayDouble &arrayPrices,
       if (positionComment != comment || symbol != _Symbol)
         continue;
 
-      getExistDeals(arrayPrices, priceRange, positionPrice, existDeals);
+      getExistDeals(arrayPrices, gridGapSize, positionPrice, existDeals);
     }
   }
 
@@ -371,17 +371,17 @@ void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
 //| Access functions GetArrayPrice(...).                             |
 //| INPUT:  minPrice          - min price of array,                  |
 //|         maxPrice          - max price of array,                  |
-//|         priceRange        - grid gap size,                       |
+//|         gridGapSize       - grid gap size,                       |
 //|         arrayPrices       - return array of price,               |
 //+------------------------------------------------------------------+
 void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
-                              double priceRange, CArrayDouble &ArrayPrices) {
-  int arraySize = NormalizeDouble((maxPrice - minPrice) / priceRange, _Digits);
+                              double gridGapSize, CArrayDouble &ArrayPrices) {
+  int arraySize = NormalizeDouble((maxPrice - minPrice) / gridGapSize, _Digits);
 
   int index;
   double price;
   for (index = 0, price = minPrice; index <= arraySize;
-       index++, price += priceRange) {
+       index++, price += gridGapSize) {
     if (index == 0 && price == 0) {
       ArrayPrices.Add(NormalizeDouble(_Point, _Digits));
       continue;
