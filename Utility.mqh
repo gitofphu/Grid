@@ -42,6 +42,9 @@ public:
   void FilterPriceBuyType(CArrayDouble &arrayPrices,
                           CArrayDouble &buyLimitPrices,
                           CArrayDouble &buyStopPrices);
+  void FilterPriceSellType(CArrayDouble &arrayPrices,
+                           CArrayDouble &sellLimitPrices,
+                           CArrayDouble &sellStopPrices);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
@@ -431,8 +434,8 @@ void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
 void MyUtility::FilterPriceBuyType(CArrayDouble &arrayPrices,
                                    CArrayDouble &buyLimitPrices,
                                    CArrayDouble &buyStopPrices) {
-  // Buy Limit order is placed below the current market price.
   // Buy Stop order is placed above the current market price.
+  // Buy Limit order is placed below the current market price.
 
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
 
@@ -444,6 +447,32 @@ void MyUtility::FilterPriceBuyType(CArrayDouble &arrayPrices,
 
     if (arrayPrices[i] > ask) {
       buyStopPrices.Add(arrayPrices[i]);
+    }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions FilterPriceSellType(...).                       |
+//| INPUT:  arrayPrices       - array of price,                      |
+//|         sellLimitPrices    - return array of price,              |
+//|         sellStopPrices     - return array of price,              |
+//+------------------------------------------------------------------+
+void MyUtility::FilterPriceSellType(CArrayDouble &arrayPrices,
+                                    CArrayDouble &sellLimitPrices,
+                                    CArrayDouble &sellStopPrices) {
+  // Sell Limit order is placed above the current market price.
+  // Sell Stop order is placed below the current market price.
+
+  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+  for (int i = 0; i < arrayPrices.Total(); i++) {
+
+    if (arrayPrices[i] > bid) {
+      sellLimitPrices.Add(arrayPrices[i]);
+    }
+
+    if (arrayPrices[i] < bid) {
+      sellStopPrices.Add(arrayPrices[i]);
     }
   }
 }
