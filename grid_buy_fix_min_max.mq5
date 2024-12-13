@@ -249,7 +249,7 @@ int TradeAllowed() {
  * @param  buyLimitPrices: Argument 2
  * @param  buyStopPrices: Argument 3
  */
-void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
+void FilterPriceBuyType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
                      CArrayDouble &buyStopPrices) {
   // Buy Limit order is placed below the current market price.
   // Buy Stop order is placed above the current market price.
@@ -304,7 +304,7 @@ void CheckAndPlaceOrders() {
     Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
                                           missingDeals);
 
-    FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
+    FilterPriceBuyType(missingDeals, buyLimitPrices, buyStopPrices);
 
     Print("Basic info: missingDeals = ", missingDeals.Total());
     Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
