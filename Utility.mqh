@@ -44,9 +44,6 @@ public:
                             CArrayDouble &arrayPrices);
   void GetArrayPrice(double minPrice, double maxPrice, double gridGapSize,
                      CArrayDouble &ArrayPrices);
-  void FilterPriceSellType(CArrayDouble &arrayPrices,
-                           CArrayDouble &sellLimitPrices,
-                           CArrayDouble &sellStopPrices);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
@@ -291,8 +288,8 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
       string orderComment = OrderGetString(ORDER_COMMENT);
       long orderType = OrderGetInteger(ORDER_TYPE);
 
-      Print("FilterOpenBuyOrderAndPosition orderTicket: ", orderTicket,
-            ", orderType: ", orderType, ", orderPrice: ", orderPrice);
+      // Print("FilterOpenBuyOrderAndPosition orderTicket: ", orderTicket,
+      //       ", orderType: ", orderType, ", orderPrice: ", orderPrice);
 
       if (orderComment != comment || symbol != _Symbol ||
           (orderType != ORDER_TYPE_BUY_LIMIT &&
@@ -311,9 +308,9 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
       string positionComment = PositionGetString(POSITION_COMMENT);
       long positionType = PositionGetInteger(POSITION_TYPE);
 
-      Print("FilterOpenBuyOrderAndPosition positionTicket: ", positionTicket,
-            ", positionType: ", positionType,
-            ", positionPrice: ", positionPrice);
+      // Print("FilterOpenBuyOrderAndPosition positionTicket: ", positionTicket,
+      //       ", positionType: ", positionType,
+      //       ", positionPrice: ", positionPrice);
 
       if (positionComment != comment || symbol != _Symbol ||
           positionType != POSITION_TYPE_BUY)
@@ -339,6 +336,8 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
   // Buy Limit order is placed below the current market price.
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   for (int i = 0; i < missingDeals.Total(); i++) {
+    Print("missingDeals: ", missingDeals[i]);
+
     if (missingDeals[i] < ask) {
       buyLimitPrices.Add(missingDeals[i]);
     }
@@ -529,31 +528,5 @@ void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
       continue;
     }
     ArrayPrices.Add(NormalizeDouble(price, _Digits));
-  }
-}
-
-//+------------------------------------------------------------------+
-//| Access functions FilterPriceSellType(...).                       |
-//| INPUT:  arrayPrices       - array of price,                      |
-//|         sellLimitPrices    - return array of price,              |
-//|         sellStopPrices     - return array of price,              |
-//+------------------------------------------------------------------+
-void MyUtility::FilterPriceSellType(CArrayDouble &arrayPrices,
-                                    CArrayDouble &sellLimitPrices,
-                                    CArrayDouble &sellStopPrices) {
-  // Sell Limit order is placed above the current market price.
-  // Sell Stop order is placed below the current market price.
-
-  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-
-  for (int i = 0; i < arrayPrices.Total(); i++) {
-
-    if (arrayPrices[i] > bid) {
-      sellLimitPrices.Add(arrayPrices[i]);
-    }
-
-    if (arrayPrices[i] < bid) {
-      sellStopPrices.Add(arrayPrices[i]);
-    }
   }
 }
