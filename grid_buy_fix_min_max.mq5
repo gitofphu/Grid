@@ -125,15 +125,18 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
   //--- get transaction type as enumeration value
   ENUM_TRADE_TRANSACTION_TYPE type = trans.type;
   //--- if transaction is result of addition of the transaction in history
-  Print("Deal: ", trans.deal, ", Order: ", trans.order,
-        ", Symbol: ", trans.symbol, ", Type: ", trans.type,
-        ", order_type: ", trans.order_type,
-        ", order_state: ", trans.order_state, ", deal_type: ", trans.deal_type,
-        ", time_type: ", trans.time_type,
-        ", time_expiration: ", trans.time_expiration, ", Price: ", trans.price,
-        ", price_trigger: ", trans.price_trigger, ", SL: ", trans.price_sl,
-        ", TP: ", trans.price_tp, ", volume: ", trans.volume,
-        ", position: ", trans.position, ", position_by: ", trans.position_by);
+  // Print("Deal: ", trans.deal, ", Order: ", trans.order,
+  //       ", Symbol: ", trans.symbol, ", Type: ", trans.type,
+  //       ", order_type: ", trans.order_type,
+  //       ", order_state: ", trans.order_state, ", deal_type: ",
+  //       trans.deal_type,
+  //       ", time_type: ", trans.time_type,
+  //       ", time_expiration: ", trans.time_expiration, ", Price: ",
+  //       trans.price,
+  //       ", price_trigger: ", trans.price_trigger, ", SL: ", trans.price_sl,
+  //       ", TP: ", trans.price_tp, ", volume: ", trans.volume,
+  //       ", position: ", trans.position, ", position_by: ",
+  //       trans.position_by);
 
   if (type == TRADE_TRANSACTION_DEAL_ADD) {
 
@@ -271,8 +274,8 @@ void FilterPriceType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
  * @param  buyStopPrices: Argument 2
  * @param  OrderPriceInvalid: Argument 3
  */
-void PlaceOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
-                 bool &OrderPriceInvalid) {
+void PlaceBuyOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
+                    bool &OrderPriceInvalid) {
 
   for (int i = 0; i < buyLimitPrices.Total(); i++) {
     double price = buyLimitPrices[i];
@@ -298,8 +301,8 @@ void CheckAndPlaceOrders() {
     CArrayDouble buyLimitPrices;
     CArrayDouble buyStopPrices;
 
-    Utility.FilterOpenOrderAndPosition(ArrayPrices, GridGapSize, comment,
-                                       missingDeals);
+    Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
+                                          missingDeals);
 
     FilterPriceType(missingDeals, buyLimitPrices, buyStopPrices);
 
@@ -307,7 +310,7 @@ void CheckAndPlaceOrders() {
     Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
     Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
 
-    PlaceOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
+    PlaceBuyOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
   } while (OrderPriceInvalid);
 }
 

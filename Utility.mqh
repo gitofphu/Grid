@@ -30,8 +30,9 @@ public:
                       const double close_price);
   double GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices);
   void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment);
-  void FilterOpenOrderAndPosition(CArrayDouble &arrayPrices, double gridGapSize,
-                                  string comment, CArrayDouble &missingDeals);
+  void FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
+                                     double gridGapSize, string comment,
+                                     CArrayDouble &missingDeals);
   void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
   void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &ArrayPrices);
   void GetExpandArrayPrices(double minPrice, double maxPrice,
@@ -40,8 +41,8 @@ public:
                      CArrayDouble &ArrayPrices);
 
 private:
-  void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize, double price,
-                     CArrayDouble &existDeals);
+  void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
+                     double price, CArrayDouble &existDeals);
 };
 
 //+------------------------------------------------------------------+
@@ -239,16 +240,32 @@ void MyUtility::getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
   }
 }
 
+/**
+ * ORDER_TYPE_BUY
+ * ORDER_TYPE_SELL
+ * ORDER_TYPE_BUY_LIMIT
+ * ORDER_TYPE_SELL_LIMIT
+ * ORDER_TYPE_BUY_STOP
+ * ORDER_TYPE_SELL_STOP
+ * ORDER_TYPE_SELL_STOP_LIMIT
+ */
+
+/**
+ * POSITION_TYPE_BUY
+ * POSITION_TYPE_SELL
+ */
+
 //+------------------------------------------------------------------+
-//| Access functions FilterOpenOrderAndPosition(...).                |
+//| Access functions FilterOpenBuyOrderAndPosition(...).             |
 //| INPUT : arrayPrices     - grid price array,                      |
-//|         gridGapSize      - grid gap size,                         |
+//|         gridGapSize     - grid gap size,                         |
 //|         comment         - deal identier,                         |
 //|         missingDeals    - missing deal array,                    |
 //+------------------------------------------------------------------+
-void MyUtility::FilterOpenOrderAndPosition(CArrayDouble &arrayPrices,
-                                           double gridGapSize, string comment,
-                                           CArrayDouble &missingDeals) {
+void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
+                                              double gridGapSize,
+                                              string comment,
+                                              CArrayDouble &missingDeals) {
   CArrayDouble existDeals;
 
   int arrayPricesSize = arrayPrices.Total();
@@ -259,8 +276,14 @@ void MyUtility::FilterOpenOrderAndPosition(CArrayDouble &arrayPrices,
       double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
       string symbol = OrderGetString(ORDER_SYMBOL);
       string orderComment = OrderGetString(ORDER_COMMENT);
+      long orderType = OrderGetInteger(ORDER_TYPE);
 
-      if (orderComment != comment || symbol != _Symbol)
+      Print("orderTicket: ", orderTicket, ", orderType: ", orderType,
+            ", orderPrice: ", orderPrice);
+
+      if (orderComment != comment || symbol != _Symbol ||
+          (orderType != ORDER_TYPE_BUY_LIMIT &&
+           orderType != ORDER_TYPE_BUY_STOP))
         continue;
 
       getExistDeals(arrayPrices, gridGapSize, orderPrice, existDeals);
@@ -273,8 +296,14 @@ void MyUtility::FilterOpenOrderAndPosition(CArrayDouble &arrayPrices,
       double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
       string symbol = PositionGetString(POSITION_SYMBOL);
       string positionComment = PositionGetString(POSITION_COMMENT);
+      long positionType = PositionGetInteger(POSITION_TYPE);
 
-      if (positionComment != comment || symbol != _Symbol)
+      Print("positionTicket: ", positionTicket,
+            ", positionType: ", positionType,
+            ", positionPrice: ", positionPrice);
+
+      if (positionComment != comment || symbol != _Symbol ||
+          positionType != POSITION_TYPE_BUY)
         continue;
 
       getExistDeals(arrayPrices, gridGapSize, positionPrice, existDeals);
