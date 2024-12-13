@@ -359,14 +359,12 @@ void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
                       ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
-    Print("retcode: ", retcode);
-
     ulong orderTicket = cTrade.ResultOrder();
-    Print("BuyLimit orderTicket: ", orderTicket);
 
     if (OrderSelect(orderTicket)) {
       double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-      Print("BuyLimit orderPrice: ", orderPrice);
+      Print("BuyLimit result, retcode: ", retcode,
+            ", orderTicket: ", orderTicket, ", orderPrice: ", orderPrice);
 
       if (orderPrice != price) {
         OrderPriceInvalid = true;
@@ -391,14 +389,12 @@ void PlaceBuyStopOrder(double price, bool &OrderPriceInvalid) {
                      ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
-    Print("retcode: ", retcode);
-
     ulong orderTicket = cTrade.ResultOrder();
-    Print("BuyStop orderTicket: ", orderTicket);
 
     if (OrderSelect(orderTicket)) {
       double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-      Print("BuyStop orderPrice: ", orderPrice);
+      Print("BuyStop result, retcode: ", retcode,
+            ", orderTicket: ", orderTicket, ", orderPrice: ", orderPrice);
 
       if (orderPrice != price) {
         OrderPriceInvalid = true;
