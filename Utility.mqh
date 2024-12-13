@@ -34,6 +34,10 @@ public:
                                      double gridGapSize, string comment,
                                      CArrayDouble &buyLimitPrices,
                                      CArrayDouble &buyStopPrices);
+  void FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
+                                      double gridGapSize, string comment,
+                                      CArrayDouble &sellLimitPrices,
+                                      CArrayDouble &sellStopPrices);
   void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
   void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &ArrayPrices);
   void GetExpandArrayPrices(double minPrice, double maxPrice,
@@ -251,7 +255,9 @@ void MyUtility::getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
  * ORDER_TYPE_SELL_LIMIT
  * ORDER_TYPE_BUY_STOP
  * ORDER_TYPE_SELL_STOP
+ * ORDER_TYPE_BUY_STOP_LIMIT
  * ORDER_TYPE_SELL_STOP_LIMIT
+ * ORDER_TYPE_CLOSE_BY
  */
 
 /**
@@ -338,6 +344,92 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
     }
     if (missingDeals[i] > ask) {
       buyStopPrices.Add(missingDeals[i]);
+    }
+    if (missingDeals[i] == ask) {
+      Print("missingDeals[i] == ask: ", missingDeals[i]);
+    }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions FilterOpenSellOrderAndPosition(...).            |
+//| INPUT : arrayPrices     - grid price array,                      |
+//|         gridGapSize     - grid gap size,                         |
+//|         comment         - deal identier,                         |
+//|         sellLimitPrices  - return array of price,                |
+//|         sellStopPrices   - return array of price,                |
+//+------------------------------------------------------------------+
+void MyUtility::FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
+                                               double gridGapSize,
+                                               string comment,
+                                               CArrayDouble &sellLimitPrices,
+                                               CArrayDouble &sellStopPrices) {
+  CArrayDouble existDeals;
+  CArrayDouble missingDeals;
+
+  int arrayPricesSize = arrayPrices.Total();
+
+  for (int i = 0; i < OrdersTotal(); i++) {
+    ulong orderTicket = OrderGetTicket(i);
+    if (OrderSelect(orderTicket)) {
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      string symbol = OrderGetString(ORDER_SYMBOL);
+      string orderComment = OrderGetString(ORDER_COMMENT);
+      long orderType = OrderGetInteger(ORDER_TYPE);
+
+      Print("FilterOpenSellOrderAndPosition orderTicket: ", orderTicket,
+            ", orderType: ", orderType, ", orderPrice: ", orderPrice);
+
+      if (orderComment != comment || symbol != _Symbol ||
+          (orderType != ORDER_TYPE_SELL_LIMIT &&
+           orderType != ORDER_TYPE_SELL_STOP))
+        continue;
+
+      getExistDeals(arrayPrices, gridGapSize, orderPrice, existDeals);
+    }
+  }
+
+  for (int i = 0; i < PositionsTotal(); i++) {
+    ulong positionTicket = PositionGetTicket(i);
+    if (PositionSelectByTicket(positionTicket)) {
+      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      string symbol = PositionGetString(POSITION_SYMBOL);
+      string positionComment = PositionGetString(POSITION_COMMENT);
+      long positionType = PositionGetInteger(POSITION_TYPE);
+
+      Print("FilterOpenSellOrderAndPosition positionTicket: ", positionTicket,
+            ", positionType: ", positionType,
+            ", positionPrice: ", positionPrice);
+
+      if (positionComment != comment || symbol != _Symbol ||
+          positionType != POSITION_TYPE_SELL)
+        continue;
+
+      getExistDeals(arrayPrices, gridGapSize, positionPrice, existDeals);
+    }
+  }
+
+  Print("FilterOpenSellOrderAndPosition existDeals: ", existDeals.Total());
+
+  existDeals.Sort();
+
+  for (int i = 0; i < arrayPrices.Total(); i++) {
+    if (existDeals.Search(arrayPrices[i]) == -1) {
+      missingDeals.Add(arrayPrices[i]);
+    }
+  }
+
+  Print("FilterOpenSellOrderAndPosition missingDeals: ", missingDeals.Total());
+
+  // Sell Limit order is placed above the current market price.
+  // Sell Stop order is placed below the current market price.
+  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+  for (int i = 0; i < arrayPrices.Total(); i++) {
+    if (arrayPrices[i] > bid) {
+      sellLimitPrices.Add(arrayPrices[i]);
+    }
+    if (arrayPrices[i] < bid) {
+      sellStopPrices.Add(arrayPrices[i]);
     }
   }
 }
