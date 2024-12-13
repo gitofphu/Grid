@@ -336,16 +336,11 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
   // Buy Limit order is placed below the current market price.
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   for (int i = 0; i < missingDeals.Total(); i++) {
-    Print("missingDeals: ", missingDeals[i]);
-
     if (missingDeals[i] < ask) {
       buyLimitPrices.Add(missingDeals[i]);
     }
     if (missingDeals[i] > ask) {
       buyStopPrices.Add(missingDeals[i]);
-    }
-    if (missingDeals[i] == ask) {
-      Print("missingDeals[i] == ask: ", missingDeals[i]);
     }
   }
 }
