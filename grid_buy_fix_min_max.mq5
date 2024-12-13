@@ -272,16 +272,12 @@ void CheckAndPlaceOrders() {
 
   do {
 
-    CArrayDouble missingDeals;
     CArrayDouble buyLimitPrices;
     CArrayDouble buyStopPrices;
 
     Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
-                                          missingDeals);
+                                          buyLimitPrices, buyStopPrices);
 
-    Utility.FilterPriceBuyType(missingDeals, buyLimitPrices, buyStopPrices);
-
-    Print("Basic info: missingDeals = ", missingDeals.Total());
     Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
     Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
 
