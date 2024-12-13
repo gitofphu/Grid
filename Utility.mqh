@@ -39,6 +39,9 @@ public:
                             CArrayDouble &arrayPrices);
   void GetArrayPrice(double minPrice, double maxPrice, double gridGapSize,
                      CArrayDouble &ArrayPrices);
+  void FilterPriceBuyType(CArrayDouble &arrayPrices,
+                          CArrayDouble &buyLimitPrices,
+                          CArrayDouble &buyStopPrices);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
@@ -416,5 +419,31 @@ void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
       continue;
     }
     ArrayPrices.Add(NormalizeDouble(price, _Digits));
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions FilterPriceBuyType(...).                        |
+//| INPUT:  arrayPrices       - array of price,                      |
+//|         buyLimitPrices    - return array of price,               |
+//|         buyStopPrices     - return array of price,               |
+//+------------------------------------------------------------------+
+void MyUtility::FilterPriceBuyType(CArrayDouble &arrayPrices,
+                                   CArrayDouble &buyLimitPrices,
+                                   CArrayDouble &buyStopPrices) {
+  // Buy Limit order is placed below the current market price.
+  // Buy Stop order is placed above the current market price.
+
+  double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+
+  for (int i = 0; i < arrayPrices.Total(); i++) {
+
+    if (arrayPrices[i] < ask) {
+      buyLimitPrices.Add(arrayPrices[i]);
+    }
+
+    if (arrayPrices[i] > ask) {
+      buyStopPrices.Add(arrayPrices[i]);
+    }
   }
 }

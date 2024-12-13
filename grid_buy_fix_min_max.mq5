@@ -244,31 +244,6 @@ int TradeAllowed() {
 }
 
 /**
- * Check if missing price should be limit or stop
- * @param  arrayPrices: Argument 1
- * @param  buyLimitPrices: Argument 2
- * @param  buyStopPrices: Argument 3
- */
-void FilterPriceBuyType(CArrayDouble &arrayPrices, CArrayDouble &buyLimitPrices,
-                     CArrayDouble &buyStopPrices) {
-  // Buy Limit order is placed below the current market price.
-  // Buy Stop order is placed above the current market price.
-
-  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-
-  for (int i = 0; i < arrayPrices.Total(); i++) {
-
-    if (arrayPrices[i] < bid) {
-      buyLimitPrices.Add(arrayPrices[i]);
-    }
-
-    if (arrayPrices[i] > bid) {
-      buyStopPrices.Add(arrayPrices[i]);
-    }
-  }
-}
-
-/**
  * Place pending order
  * @param  buyLimitPrices: Argument 1
  * @param  buyStopPrices: Argument 2
@@ -304,7 +279,7 @@ void CheckAndPlaceOrders() {
     Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
                                           missingDeals);
 
-    FilterPriceBuyType(missingDeals, buyLimitPrices, buyStopPrices);
+    Utility.FilterPriceBuyType(missingDeals, buyLimitPrices, buyStopPrices);
 
     Print("Basic info: missingDeals = ", missingDeals.Total());
     Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
@@ -348,13 +323,13 @@ void ReplaceTpOrder(double price) {
 
   ENUM_ORDER_TYPE orderType;
 
-  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+  double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
 
-  if (price < bid) {
+  if (price < ask) {
     orderType = ORDER_TYPE_BUY_LIMIT;
   }
 
-  if (price > bid) {
+  if (price > ask) {
     orderType = ORDER_TYPE_BUY_STOP;
   }
 
