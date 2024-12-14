@@ -20,8 +20,8 @@ CDealInfo cDealInfo;
 //+------------------------------------------------------------------+
 //| input                                                            |
 //+------------------------------------------------------------------+
-double MaxPrice = 400;
-double MinPrice = 0;
+double maxPrice;
+double minPrice;
 input int PriceRange = 10;
 input double GridGapSize = 0.1;
 input int MaxOrders = NULL;
@@ -53,8 +53,22 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
+  double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+  double currentPrice = MathRound(NormalizeDouble((ask + bid) / 2, _Digits));
+  Print("currentPrice: ", currentPrice);
+
+  maxPrice = NormalizeDouble(currentPrice + PriceRange, _Digits);
+  minPrice = NormalizeDouble(
+      currentPrice - PriceRange > _Point ? currentPrice - PriceRange : _Point,
+      _Digits);
+
+  Print("maxPrice: ", maxPrice);
+  Print("minPrice: ", minPrice);
+
   if (ArrayPrices.Total() == 0)
-    Utility.GetArrayPrice(MinPrice, MaxPrice, GridGapSize, ArrayPrices);
+    Utility.GetArrayPrice(minPrice, maxPrice, GridGapSize, ArrayPrices);
 
   Print("ArrayPrices.Total(): ", ArrayPrices.Total());
 
@@ -120,10 +134,12 @@ void ValidateInputAndVariables() {
     }
   }
 
-  if (MinLot != NULL) {
+  if (TradeBuy && TradeSell && MinLot == NULL) {
+    Utility.AlertAndExit("Must provide MinLot.");
+  } else if (MinLot != NULL) {
     lotPerGrid = MinLot;
   } else {
-    lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices);
+    lotPerGrid = Utility.GetGirdLotSize(ArrayPrices);
   }
 
   if (lotPerGrid == 0) {
@@ -155,8 +171,8 @@ void CheckAndPlaceOrders() {
 
   CArrayDouble sellLimitPrices;
   CArrayDouble sellStopPrices;
-  Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
-                                        sellLimitPrices, sellStopPrices);
+  Utility.FilterOpenSellOrderAndPosition(ArrayPrices, GridGapSize, comment,
+                                         sellLimitPrices, sellStopPrices);
   Print("Basic info: sellLimitPrices = ", sellLimitPrices.Total());
   Print("Basic info: sellStopPrices = ", sellStopPrices.Total());
 

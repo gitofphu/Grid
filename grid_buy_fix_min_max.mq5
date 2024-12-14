@@ -77,7 +77,7 @@ int OnInit() {
   if (MinLot != NULL) {
     lotPerGrid = MinLot;
   } else {
-    lotPerGrid = Utility.GetGirdLotSize(_Symbol, ArrayPrices);
+    lotPerGrid = Utility.GetGirdLotSize(ArrayPrices);
   }
 
   if (lotPerGrid == 0) {

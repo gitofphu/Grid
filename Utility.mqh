@@ -28,7 +28,7 @@ public:
                       const ENUM_ORDER_TYPE trade_operation,
                       const double profit, const double open_price,
                       const double close_price);
-  double GetGirdLotSize(const string symbol, const CArrayDouble &arrayPrices);
+  double GetGirdLotSize(const CArrayDouble &arrayPrices);
   void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment);
   void FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
                                      double gridGapSize, string comment,
@@ -110,8 +110,7 @@ double MyUtility::CalculateLot(const string symbol,
 //| INPUT:  name            - symbol name,                           |
 //|         arrayPrices     - grid price array,                      |
 //+------------------------------------------------------------------+
-double MyUtility::GetGirdLotSize(const string symbol,
-                                 const CArrayDouble &arrayPrices) {
+double MyUtility::GetGirdLotSize(const CArrayDouble &arrayPrices) {
 
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
@@ -335,7 +334,9 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
   // Buy Stop order is placed above the current market price.
   // Buy Limit order is placed below the current market price.
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
-  for (int i = 0; i < missingDeals.Total(); i++) {
+
+  // skip highest price
+  for (int i = 0; i < arrayPrices.Total() - 1; i++) {
     if (missingDeals[i] < ask) {
       buyLimitPrices.Add(missingDeals[i]);
     }
@@ -371,8 +372,8 @@ void MyUtility::FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
       string orderComment = OrderGetString(ORDER_COMMENT);
       long orderType = OrderGetInteger(ORDER_TYPE);
 
-      Print("FilterOpenSellOrderAndPosition orderTicket: ", orderTicket,
-            ", orderType: ", orderType, ", orderPrice: ", orderPrice);
+      // Print("FilterOpenSellOrderAndPosition orderTicket: ", orderTicket,
+      //       ", orderType: ", orderType, ", orderPrice: ", orderPrice);
 
       if (orderComment != comment || symbol != _Symbol ||
           (orderType != ORDER_TYPE_SELL_LIMIT &&
@@ -391,9 +392,10 @@ void MyUtility::FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
       string positionComment = PositionGetString(POSITION_COMMENT);
       long positionType = PositionGetInteger(POSITION_TYPE);
 
-      Print("FilterOpenSellOrderAndPosition positionTicket: ", positionTicket,
-            ", positionType: ", positionType,
-            ", positionPrice: ", positionPrice);
+      // Print("FilterOpenSellOrderAndPosition positionTicket: ",
+      // positionTicket,
+      //       ", positionType: ", positionType,
+      //       ", positionPrice: ", positionPrice);
 
       if (positionComment != comment || symbol != _Symbol ||
           positionType != POSITION_TYPE_SELL)
@@ -418,7 +420,9 @@ void MyUtility::FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
   // Sell Limit order is placed above the current market price.
   // Sell Stop order is placed below the current market price.
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-  for (int i = 0; i < arrayPrices.Total(); i++) {
+
+  // skip lowest price
+  for (int i = 1; i < arrayPrices.Total(); i++) {
     if (arrayPrices[i] > bid) {
       sellLimitPrices.Add(arrayPrices[i]);
     }
