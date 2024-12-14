@@ -159,6 +159,7 @@ void ValidateInputAndVariables() {
 void CheckAndPlaceOrders() {
 
   bool OrderPriceInvalid = false;
+  int errors = 0;
 
   // do {
 
@@ -177,7 +178,12 @@ void CheckAndPlaceOrders() {
   Print("Basic info: sellStopPrices = ", sellStopPrices.Total());
 
   //   PlaceOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
-  // } while (OrderPriceInvalid);
+  if (OrderPriceInvalid)
+    errors++;
+  // } while (OrderPriceInvalid && errors < 3);
+  if (errors >= 3) {
+    Utility.AlertAndExit("Place order error.");
+  }
 }
 
 //+------------------------------------------------------------------+

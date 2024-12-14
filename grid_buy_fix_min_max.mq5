@@ -269,6 +269,7 @@ void PlaceBuyOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
 void CheckAndPlaceOrders() {
 
   bool OrderPriceInvalid = false;
+  int errors = 0;
 
   do {
 
@@ -282,7 +283,13 @@ void CheckAndPlaceOrders() {
     Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
 
     PlaceBuyOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
-  } while (OrderPriceInvalid);
+
+    if (OrderPriceInvalid)
+      errors++;
+  } while (OrderPriceInvalid && errors < 3);
+  if (errors >= 3) {
+    Utility.AlertAndExit("Place order error.");
+  }
 }
 
 void ReplaceTpOrder(double price) {
@@ -330,6 +337,7 @@ void ReplaceTpOrder(double price) {
   }
 
   bool OrderPriceInvalid = false;
+  int errors = 0;
 
   do {
 
@@ -347,7 +355,12 @@ void ReplaceTpOrder(double price) {
       break;
     }
 
-  } while (OrderPriceInvalid);
+    if (OrderPriceInvalid)
+      errors++;
+  } while (OrderPriceInvalid && errors < 3);
+  if (errors >= 3) {
+    Utility.AlertAndExit("Place order error.");
+  }
 }
 
 void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
