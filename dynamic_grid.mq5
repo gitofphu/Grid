@@ -177,7 +177,7 @@ void CheckAndPlaceOrders() {
   Print("Basic info: sellLimitPrices = ", sellLimitPrices.Total());
   Print("Basic info: sellStopPrices = ", sellStopPrices.Total());
 
-  //   PlaceOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
+  //   PlaceBuyOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
   if (OrderPriceInvalid)
     errors++;
   // } while (OrderPriceInvalid && errors < 3);

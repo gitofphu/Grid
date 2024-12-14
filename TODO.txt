@@ -41,4 +41,5 @@
 // [x] Make grid by fibonacci
 // [x] Check comment before close order
 // [ ] Dynamic Grid
-// [ ] Buy, Sell options
+// [x] Buy, Sell options
+// [ ] Calculate maximum two way drawdown
