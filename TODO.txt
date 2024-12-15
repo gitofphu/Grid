@@ -43,3 +43,4 @@
 // [ ] Dynamic Grid
 // [x] Buy, Sell options
 // [ ] Calculate maximum two way drawdown
+// [ ] Accumulate buy
