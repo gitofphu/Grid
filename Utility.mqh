@@ -334,8 +334,7 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
   // Buy Limit order is placed below the current market price.
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
 
-  // skip highest price
-  for (int i = 0; i < missingDeals.Total() - 1; i++) {
+  for (int i = 0; i < missingDeals.Total(); i++) {
     if (missingDeals[i] < ask) {
       buyLimitPrices.Add(missingDeals[i]);
     }
@@ -420,8 +419,7 @@ void MyUtility::FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
   // Sell Stop order is placed below the current market price.
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-  // skip lowest price
-  for (int i = 1; i < arrayPrices.Total(); i++) {
+  for (int i = 0; i < arrayPrices.Total(); i++) {
     if (arrayPrices[i] > bid) {
       sellLimitPrices.Add(arrayPrices[i]);
     }
@@ -515,16 +513,15 @@ void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
 //+------------------------------------------------------------------+
 void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
                               double gridGapSize, CArrayDouble &ArrayPrices) {
-  int arraySize = NormalizeDouble((maxPrice - minPrice) / gridGapSize, _Digits);
+  Print("minPrice: ", minPrice, ", maxPrice: ", maxPrice,
+        ", gridGapSize: ", gridGapSize);
 
-  int index;
-  double price;
-  for (index = 0, price = minPrice; index <= arraySize;
-       index++, price += gridGapSize) {
-    if (index == 0 && price == 0) {
+  for (double price = maxPrice; price >= minPrice;
+       price = NormalizeDouble(price - gridGapSize, _Digits)) {
+    if (price != 0) {
+      ArrayPrices.Add(NormalizeDouble(price, _Digits));
+    } else {
       ArrayPrices.Add(NormalizeDouble(_Point, _Digits));
-      continue;
     }
-    ArrayPrices.Add(NormalizeDouble(price, _Digits));
   }
 }

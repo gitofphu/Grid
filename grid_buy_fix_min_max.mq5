@@ -56,9 +56,17 @@ int OnInit() {
   if (ArrayPrices.Total() == 0)
     Utility.GetArrayPrice(MinPrice, MaxPrice, GridGapSize, ArrayPrices);
 
+  Print("ArrayPrices.Total(): ", ArrayPrices.Total());
+
+  for (int i = 0; i < ArrayPrices.Total(); i++) {
+    Print("Basic info: ArrayPrices ", i, " = ", ArrayPrices[i]);
+  }
+
   if (ClearOrdersOnInit) {
     Utility.CloseAllOrder(ArrayPrices, comment);
   }
+
+  Print("limitOrders: ", limitOrders);
 
   if (ArrayPrices.Total() > limitOrders) {
     Utility.AlertAndExit("ArrayPrices exceed limitOrders.");
@@ -86,10 +94,6 @@ int OnInit() {
     } else {
       return (INIT_PARAMETERS_INCORRECT);
     }
-  }
-
-  for (int i = 0; i < ArrayPrices.Total(); i++) {
-    Print("Basic info: ArrayPrices ", i, " = ", ArrayPrices[i]);
   }
 
   Print("Basic info: lotPerGrid = ", lotPerGrid);
