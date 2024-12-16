@@ -22,20 +22,20 @@ CDealInfo cDealInfo;
 //+------------------------------------------------------------------+
 double maxPrice;
 double minPrice;
-input int PriceRange = 10;
 input double GridGapSize = 0.1;
 input int MaxOrders = NULL;
 input bool TradeAnywaywithMinimunLot = false;
 input bool ClearOrdersOnInit = false;
-input double MinLot = NULL;
-input bool TradeBuy = true;
-input bool TradeSell = true;
+input double LotSize = 0.1;
+// input double MinLot = NULL;
+// input bool TradeBuy = true;
+// input bool TradeSell = true;
 
 bool isInit = false;
 
 int limitOrders;
 CArrayDouble ArrayPrices;
-double lotPerGrid;
+// double lotPerGrid;
 string comment = "dynamic_grid";
 
 //+------------------------------------------------------------------+
@@ -59,32 +59,34 @@ int OnInit() {
   double currentPrice = MathRound(NormalizeDouble((ask + bid) / 2, _Digits));
   Print("currentPrice: ", currentPrice);
 
-  maxPrice = NormalizeDouble(currentPrice + PriceRange, _Digits);
+  maxPrice = NormalizeDouble(currentPrice + GridGapSize, _Digits);
   minPrice = NormalizeDouble(
-      currentPrice - PriceRange > _Point ? currentPrice - PriceRange : _Point,
+      currentPrice - GridGapSize > _Point ? currentPrice - GridGapSize : _Point,
       _Digits);
 
   Print("maxPrice: ", maxPrice);
   Print("minPrice: ", minPrice);
 
   if (ArrayPrices.Total() == 0)
-    Utility.GetArrayPrice(minPrice, maxPrice, GridGapSize, ArrayPrices);
+    Utility.GetArrayPrice(0.01, 70, 0.2, ArrayPrices);
 
   Print("ArrayPrices.Total(): ", ArrayPrices.Total());
 
-  // for (int i = 0; i < ArrayPrices.Total(); i++) {
-  //   Print("ArrayPrices: ", ArrayPrices[i]);
-  // }
+  for (int i = 0; i < ArrayPrices.Total(); i++) {
+    Print("ArrayPrices: ", i, " = ", ArrayPrices[i]);
+  }
 
   ValidateInputAndVariables();
 
-  if (ClearOrdersOnInit) {
-    Utility.CloseAllOrder(ArrayPrices, comment);
-  }
+  TwoWayDrawdownCheck(currentPrice);
 
-  CheckAndPlaceOrders();
+  // if (ClearOrdersOnInit) {
+  //   Utility.CloseAllOrder(ArrayPrices, comment);
+  // }
 
-  isInit = true;
+  // CheckAndPlaceOrders();
+
+  // isInit = true;
 
   Utility.AlertAndExit("Test ended.");
 
@@ -96,17 +98,11 @@ int OnInit() {
  */
 void ValidateInputAndVariables() {
 
-  if (!TradeBuy && !TradeSell)
-    Utility.AlertAndExit("At lease TradeBuy or TradeSell must be true.");
+  // if (!TradeBuy && !TradeSell)
+  //   Utility.AlertAndExit("At lease TradeBuy or TradeSell must be true.");
 
   if (GridGapSize == 0)
     Utility.AlertAndExit("GridGapSize cannot be 0.");
-
-  if (PriceRange == 0)
-    Utility.AlertAndExit("PriceRange cannot be 0.");
-
-  if (GridGapSize >= PriceRange)
-    Utility.AlertAndExit("GridGapSize must be less than PriceRange.");
 
   const int accoutnLimitOrders = AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
 
@@ -120,8 +116,11 @@ void ValidateInputAndVariables() {
 
   Print("limitOrders: ", limitOrders);
 
-  if (ArrayPrices.Total() > limitOrders ||
-      (TradeBuy && TradeSell && ((ArrayPrices.Total() * 2) > limitOrders)))
+  // if (ArrayPrices.Total() > limitOrders ||
+  //     (TradeBuy && TradeSell && ((ArrayPrices.Total() * 2) > limitOrders)))
+  //   Utility.AlertAndExit("Array Prices exceed ACCOUNT_LIMIT_ORDERS.");
+
+  if ((ArrayPrices.Total() * 2) > limitOrders)
     Utility.AlertAndExit("Array Prices exceed ACCOUNT_LIMIT_ORDERS.");
 
   double volumeLimit = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT);
@@ -134,23 +133,104 @@ void ValidateInputAndVariables() {
     }
   }
 
-  if (TradeBuy && TradeSell && MinLot == NULL) {
-    Utility.AlertAndExit("Must provide MinLot.");
-  } else if (MinLot != NULL) {
-    lotPerGrid = MinLot;
-  } else {
-    lotPerGrid = Utility.GetGirdLotSize(ArrayPrices);
-  }
+  // if (TradeBuy && TradeSell && MinLot == NULL) {
+  //   Utility.AlertAndExit("Must provide MinLot.");
+  // } else
 
-  if (lotPerGrid == 0) {
-    if (TradeAnywaywithMinimunLot) {
-      lotPerGrid = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
-    } else {
-      Utility.AlertAndExit("Invalid lotPerGrid.");
+  //     if (MinLot != NULL) {
+  //   lotPerGrid = MinLot;
+  // } else {
+  //   lotPerGrid = Utility.GetGirdLotSize(ArrayPrices);
+  // }
+  // if (lotPerGrid == 0) {
+  //   if (TradeAnywaywithMinimunLot) {
+  //     lotPerGrid = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+  //   } else {
+  //     Utility.AlertAndExit("Invalid lotPerGrid.");
+  //   }
+  // }
+  // Print("Basic info: lotPerGrid = ", lotPerGrid);
+
+  if (LotSize <= 0) {
+    Utility.AlertAndExit("Invalid lotPerGrid.");
+  }
+}
+
+void TwoWayDrawdownCheck(double currentPrice) {
+  Print("TwoWayDrawdownCheck: ", currentPrice);
+
+  return;
+
+  // double balance = cAccountInfo.Balance();
+
+  double balance = 660;
+  currentPrice = 70;
+  double GridGapSize = 0.2;
+  double LotSize = 0.02;
+
+  CArrayDouble arrayPrices;
+  for (double price = currentPrice; price > 0;
+       price = NormalizeDouble(price - GridGapSize, _Digits)) {
+    Print("price: ", price);
+    arrayPrices.Add(price);
+  }
+  arrayPrices.Add(_Point);
+
+  return;
+
+  for (int i = 0; i < arrayPrices.Total(); i++) {
+
+    double drawdown = 0;
+
+    for (int j = 0; j < arrayPrices.Total(); j++) {
+
+      if (arrayPrices[i] <= arrayPrices[j])
+        continue;
+
+      Print("arrayPrices i: ", i, " = ", arrayPrices[i], ", arrayPrices j: ", j,
+            " = ", arrayPrices[j]);
+
+      if (j != 0) {
+        double profit =
+            cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_SELL, LotSize,
+                                          arrayPrices[j - 1], arrayPrices[j]);
+
+        Print("From ", arrayPrices[j - 1], " to ", arrayPrices[j], " profit ",
+              NormalizeDouble(profit, 2));
+
+        balance = NormalizeDouble(balance + profit, 2);
+      }
+
+      double loss = cAccountInfo.OrderProfitCheck(
+          _Symbol, ORDER_TYPE_BUY, LotSize, arrayPrices[i], arrayPrices[j]);
+
+      double marginRequire = cAccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY,
+                                                      LotSize, arrayPrices[i]);
+
+      Print("From ", arrayPrices[i], " to ", arrayPrices[j], " loss ",
+            NormalizeDouble(loss - marginRequire, 2));
+
+      drawdown = NormalizeDouble(
+          drawdown + NormalizeDouble(loss - marginRequire, 2), 2);
+
+      double equity = NormalizeDouble(balance + drawdown, 2);
+
+      Print("balance: ", balance);
+      Print("equity: ", equity);
+      Print("drawdown: ", drawdown);
+
+      Print("------------------------------------");
+
+      if (equity <= 0)
+        break;
     }
-  }
 
-  Print("Basic info: lotPerGrid = ", lotPerGrid);
+    Print("total drawdown: ", drawdown);
+    Print("++++++++++++++++++++++++++++++++++++++");
+
+    if (balance + drawdown <= 0)
+      break;
+  }
 }
 
 /**
