@@ -107,8 +107,7 @@ double MyUtility::CalculateLot(const string symbol,
 
 //+------------------------------------------------------------------+
 //| Access functions GetGirdLotSize(...).                            |
-//| INPUT:  name            - symbol name,                           |
-//|         arrayPrices     - grid price array,                      |
+//| INPUT:  arrayPrices     - grid price array,                      |
 //+------------------------------------------------------------------+
 double MyUtility::GetGirdLotSize(const CArrayDouble &arrayPrices) {
 
@@ -336,7 +335,7 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
 
   // skip highest price
-  for (int i = 0; i < arrayPrices.Total() - 1; i++) {
+  for (int i = 0; i < missingDeals.Total() - 1; i++) {
     if (missingDeals[i] < ask) {
       buyLimitPrices.Add(missingDeals[i]);
     }

@@ -279,8 +279,8 @@ void CheckAndPlaceOrders() {
     Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
                                           buyLimitPrices, buyStopPrices);
 
-    Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
-    Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
+    Print("Basic info: buyLimitPrices.Total(): ", buyLimitPrices.Total());
+    Print("Basic info: buyStopPrices.Total(): ", buyStopPrices.Total());
 
     PlaceBuyOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
 
