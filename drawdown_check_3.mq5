@@ -13,74 +13,89 @@ MyUtility Utility;
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
+
+double balance = 680;
+double basePrice = 70;
+double priceGap = 0.2;
+double lotPerGrid = 0.02;
+double drawdown = 0;
+double lastPrice = basePrice;
+
 void OnStart() {
   Print("OnStart");
-  double balance = 100;
-  double basePrice = 100;
-  double priceGap = 10;
-  double lotPerGrid = 0.01;
-  double drawdown = 0;
-  double lastPrice = basePrice;
 
-  // // down trend
-  // for (double price = basePrice; price >= 0; price -= priceGap) {
+  DownTrendCheck();
 
-  //   if (price >= basePrice)
-  //     continue;
+  UpTrendCheck();
+}
 
-  //   if (price == 0) {
-  //     price = _Point;
-  //   }
+void DownTrendCheck() {
+  // down trend
 
-  //   Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
-  //         " price: ", price);
+  for (double price = basePrice; price >= 0;
+       price = Utility.NormalizeDoubleTwoDigits(price - priceGap)) {
 
-  //   double profit = 0;
+    if (price >= basePrice)
+      continue;
 
-  //   if (lastPrice > price) {
-  //     // balance += 10;
-  //     profit = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_SELL,
-  //                                            lotPerGrid, lastPrice, price);
-  //   }
-  //   lastPrice = price;
+    if (price == 0) {
+      price = _Point;
+    }
 
-  //   double loss = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
-  //                                               lotPerGrid, basePrice,
-  //                                               price);
+    // Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
+    //       " price: ", price);
 
-  //   double marginRequire = cAccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY,
-  //                                                   lotPerGrid, basePrice);
+    double profit = 0;
 
-  //   Print("profit: ", profit, ", loss: ", loss,
-  //         ", marginRequire: ", marginRequire);
+    if (lastPrice > price) {
+      profit = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_SELL,
+                                             lotPerGrid, lastPrice, price);
+    }
+    lastPrice = price;
 
-  //   // Print("From ", price, " to ", lastPrice, " drawdown ",
-  //   //       Utility.NormalizeDoubleTwoDigits(loss - marginRequire, 2));
+    double loss = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY,
+                                                lotPerGrid, basePrice, price);
 
-  //   balance = Utility.NormalizeDoubleTwoDigits(balance + profit);
-  //   drawdown =
-  //       Utility.NormalizeDoubleTwoDigits(drawdown + loss - marginRequire);
+    double marginRequire = cAccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY,
+                                                    lotPerGrid, basePrice);
 
-  //   // drawdown -= basePrice - price;
+    // Print("profit: ", profit, ", loss: ", loss,
+    //       ", marginRequire: ", marginRequire);
 
-  //   double equity = Utility.NormalizeDoubleTwoDigits(balance + drawdown);
-  //   Print("balance: ", balance);
-  //   Print("equity: ", equity);
-  //   Print("drawdown: ", drawdown);
-  //   Print("-----------------------------------");
+    // Print("From ", price, " to ", lastPrice, " drawdown ",
+    //       Utility.NormalizeDoubleTwoDigits(loss - marginRequire, 2));
 
-  //   if (balance + drawdown <= 0)
-  //     break;
-  // }
+    balance = Utility.NormalizeDoubleTwoDigits(balance + profit);
+    drawdown =
+        Utility.NormalizeDoubleTwoDigits(drawdown + loss - marginRequire);
 
+    double equity = Utility.NormalizeDoubleTwoDigits(balance + drawdown);
+    // Print("balance: ", balance);
+    // Print("equity: ", equity);
+    // Print("drawdown: ", drawdown);
+    // Print("-----------------------------------");
+
+    if (balance + drawdown <= 0) {
+      Print("Down Trand last price: " + price + ", balance: " + balance +
+            ", equity: " + equity + ", drawdown: " + drawdown);
+      break;
+    }
+  }
+}
+
+void UpTrendCheck() {
   // up trend
-  for (double price = basePrice; balance > 0; price += priceGap) {
+
+  string str = "";
+
+  for (double price = basePrice; balance > 0;
+       price = Utility.NormalizeDoubleTwoDigits(price + priceGap)) {
 
     if (price <= basePrice)
       continue;
 
-    Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
-          " price: ", price);
+    // Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
+    //       " price: ", price);
 
     double profit = 0;
 
@@ -96,8 +111,8 @@ void OnStart() {
     double marginRequire = cAccountInfo.MarginCheck(_Symbol, ORDER_TYPE_SELL,
                                                     lotPerGrid, basePrice);
 
-    Print("profit: ", profit, ", loss: ", loss,
-          ", marginRequire: ", marginRequire);
+    // Print("profit: ", profit, ", loss: ", loss,
+    //       ", marginRequire: ", marginRequire);
 
     balance = Utility.NormalizeDoubleTwoDigits(balance + profit);
     drawdown =
@@ -105,12 +120,15 @@ void OnStart() {
 
     double equity = Utility.NormalizeDoubleTwoDigits(balance + drawdown);
 
-    Print("balance: ", balance);
-    Print("equity: ", equity);
-    Print("drawdown: ", drawdown);
-    Print("-----------------------------------");
+    // Print("balance: ", balance);
+    // Print("equity: ", equity);
+    // Print("drawdown: ", drawdown);
+    // Print("-----------------------------------");
 
-    if (balance + drawdown <= 0)
+    if (balance + drawdown <= 0) {
+      Print("Up Trand last price: " + price + ", balance: " + balance +
+            ", equity: " + equity + ", drawdown: " + drawdown);
       break;
+    }
   }
 }
