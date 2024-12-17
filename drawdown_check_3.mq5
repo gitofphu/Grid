@@ -18,11 +18,12 @@ double balance = 680;
 double basePrice = 70;
 double priceGap = 0.2;
 double lotPerGrid = 0.02;
-double drawdown = 0;
-double lastPrice = basePrice;
 
 void OnStart() {
   Print("OnStart");
+
+  Print("balance: ", balance, ", basePrice: ", basePrice,
+        ", priceGap: ", priceGap, ", lotPerGrid: ", lotPerGrid);
 
   DownTrendCheck();
 
@@ -31,6 +32,8 @@ void OnStart() {
 
 void DownTrendCheck() {
   // down trend
+  double drawdown = 0;
+  double lastPrice = basePrice;
 
   for (double price = basePrice; price >= 0;
        price = Utility.NormalizeDoubleTwoDigits(price - priceGap)) {
@@ -85,8 +88,8 @@ void DownTrendCheck() {
 
 void UpTrendCheck() {
   // up trend
-
-  string str = "";
+  double drawdown = 0;
+  double lastPrice = basePrice;
 
   for (double price = basePrice; balance > 0;
        price = Utility.NormalizeDoubleTwoDigits(price + priceGap)) {
