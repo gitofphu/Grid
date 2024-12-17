@@ -248,26 +248,6 @@ int TradeAllowed() {
 }
 
 /**
- * Place pending order
- * @param  buyLimitPrices: Argument 1
- * @param  buyStopPrices: Argument 2
- * @param  OrderPriceInvalid: Argument 3
- */
-void PlaceBuyOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
-                    bool &OrderPriceInvalid) {
-
-  for (int i = 0; i < buyLimitPrices.Total(); i++) {
-    double price = buyLimitPrices[i];
-    PlaceBuyLimitOrder(price, OrderPriceInvalid);
-  }
-
-  for (int i = 0; i < buyStopPrices.Total(); i++) {
-    double price = buyStopPrices[i];
-    PlaceBuyStopOrder(price, OrderPriceInvalid);
-  }
-}
-
-/**
  * Check orders and positions
  */
 void CheckAndPlaceOrders() {
@@ -286,7 +266,8 @@ void CheckAndPlaceOrders() {
     Print("Basic info: buyLimitPrices.Total(): ", buyLimitPrices.Total());
     Print("Basic info: buyStopPrices.Total(): ", buyStopPrices.Total());
 
-    PlaceBuyOrders(buyLimitPrices, buyStopPrices, OrderPriceInvalid);
+    Utility.PlaceBuyOrders(buyLimitPrices, buyStopPrices, lotPerGrid,
+                           GridGapSize, comment, OrderPriceInvalid);
 
     if (OrderPriceInvalid)
       errors++;

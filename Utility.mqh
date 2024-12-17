@@ -40,16 +40,23 @@ public:
                                       CArrayDouble &sellLimitPrices,
                                       CArrayDouble &sellStopPrices);
   void GetAllTimeHighLow(double &all_time_high, double &all_time_low);
-  void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &ArrayPrices);
+  void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &arrayPrices);
   void GetExpandArrayPrices(double minPrice, double maxPrice,
                             CArrayDouble &arrayPrices);
   void GetArrayPrice(double minPrice, double maxPrice, double gridGapSize,
-                     CArrayDouble &ArrayPrices);
+                     CArrayDouble &arrayPrices);
   double NormalizeDoubleTwoDigits(double num);
+  void PlaceBuyOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
+                      double lot, double gridGapSize, string comment,
+                      bool &orderPriceInvalid);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
                      double price, CArrayDouble &existDeals);
+  void PlaceBuyLimitOrder(double price, double lot, double gridGapSize,
+                          string comment, bool &orderPriceInvalid);
+  void PlaceBuyStopOrder(double price, double lot, double gridGapSize,
+                         string comment, bool &orderPriceInvalid);
 };
 
 //+------------------------------------------------------------------+
@@ -518,16 +525,16 @@ void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
 //|         arrayPrices       - return array of price,               |
 //+------------------------------------------------------------------+
 void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
-                              double gridGapSize, CArrayDouble &ArrayPrices) {
+                              double gridGapSize, CArrayDouble &arrayPrices) {
   Print("minPrice: ", minPrice, ", maxPrice: ", maxPrice,
         ", gridGapSize: ", gridGapSize);
 
   for (double price = maxPrice; price >= minPrice;
        price = NormalizeDoubleTwoDigits(price - gridGapSize)) {
     if (price != 0) {
-      ArrayPrices.Add(NormalizeDoubleTwoDigits(price));
+      arrayPrices.Add(NormalizeDoubleTwoDigits(price));
     } else {
-      ArrayPrices.Add(NormalizeDoubleTwoDigits(_Point));
+      arrayPrices.Add(NormalizeDoubleTwoDigits(_Point));
     }
   }
 }
@@ -538,4 +545,106 @@ void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
 //+------------------------------------------------------------------+
 double MyUtility::NormalizeDoubleTwoDigits(double number) {
   return NormalizeDouble(number, 2);
+}
+
+//+------------------------------------------------------------------+
+//| Access functions PlaceBuyOrders(...).                            |
+//| INPUT:  buyLimitPrices    - array of buy limit price,            |
+//|         buyStopPrices     - array of buy stop price,             |
+//|         lot               - lot size,                            |
+//|         gridGapSize       - grid gap size,                       |
+//|         comment           - order identification,                |
+//|         orderPriceInvalid - check if order place at wrong price, |
+//+------------------------------------------------------------------+
+void MyUtility::PlaceBuyOrders(CArrayDouble &buyLimitPrices,
+                               CArrayDouble &buyStopPrices, double lot,
+                               double gridGapSize, string comment,
+                               bool &orderPriceInvalid) {
+
+  for (int i = 0; i < buyLimitPrices.Total(); i++) {
+    double price = buyLimitPrices[i];
+    PlaceBuyLimitOrder(price, lot, gridGapSize, comment, orderPriceInvalid);
+  }
+
+  for (int i = 0; i < buyStopPrices.Total(); i++) {
+    double price = buyStopPrices[i];
+    PlaceBuyStopOrder(price, lot, gridGapSize, comment, orderPriceInvalid);
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions PlaceBuyLimitOrder(...).                        |
+//| INPUT:  price             - price,                               |
+//|         lot               - lot size,                            |
+//|         gridGapSize       - grid gap size,                       |
+//|         comment           - order identification,                |
+//|         orderPriceInvalid - check if order place at wrong price, |
+//+------------------------------------------------------------------+
+void MyUtility::PlaceBuyLimitOrder(double price, double lot, double gridGapSize,
+                                   string comment, bool &orderPriceInvalid) {
+
+  Print("Basic info: PlaceBuyLimitOrder = ", price,
+        ", TP = ", NormalizeDoubleTwoDigits(price + gridGapSize));
+
+  if (cTrade.BuyLimit(lot, price, _Symbol, 0, price + gridGapSize,
+                      ORDER_TIME_GTC, 0, comment)) {
+
+    uint retcode = cTrade.ResultRetcode();
+    ulong orderTicket = cTrade.ResultOrder();
+
+    if (OrderSelect(orderTicket)) {
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      Print("BuyLimit result, retcode: ", retcode,
+            ", orderTicket: ", orderTicket, ", orderPrice: ", orderPrice);
+
+      if (orderPrice != price) {
+        orderPriceInvalid = true;
+      }
+    }
+
+  } else {
+
+    Print("Failed to place Buy Limit order. Error: ", GetLastError());
+
+    uint retcode = cTrade.ResultRetcode();
+    Print("retcode: ", retcode);
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions PlaceBuyStopOrder(...).                         |
+//| INPUT:  price             - price,                               |
+//|         lot               - lot size,                            |
+//|         gridGapSize       - grid gap size,                       |
+//|         comment           - order identification,                |
+//|         orderPriceInvalid - check if order place at wrong price, |
+//+------------------------------------------------------------------+
+void MyUtility::PlaceBuyStopOrder(double price, double lot, double gridGapSize,
+                                  string comment, bool &orderPriceInvalid) {
+
+  Print("Basic info: PlaceBuyStopOrder = ", price,
+        ", TP = ", NormalizeDoubleTwoDigits(price + gridGapSize));
+
+  if (cTrade.BuyStop(lot, price, _Symbol, 0, price + gridGapSize,
+                     ORDER_TIME_GTC, 0, comment)) {
+
+    uint retcode = cTrade.ResultRetcode();
+    ulong orderTicket = cTrade.ResultOrder();
+
+    if (OrderSelect(orderTicket)) {
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      Print("BuyStop result, retcode: ", retcode,
+            ", orderTicket: ", orderTicket, ", orderPrice: ", orderPrice);
+
+      if (orderPrice != price) {
+        orderPriceInvalid = true;
+      }
+    }
+
+  } else {
+    Print("Failed to place Buy Stop order. Error: ", GetLastError());
+
+    uint retcode = cTrade.ResultRetcode();
+    Print("retcode: ", retcode);
+  }
 }
