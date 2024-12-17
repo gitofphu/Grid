@@ -134,7 +134,7 @@ double MyUtility::GetGirdLotSize(const CArrayDouble &arrayPrices) {
        lot <= SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
        lot += SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP)) {
 
-    lot = NormalizeDouble(lot, 2);
+    lot = NormalizeDoubleTwoDigits(lot);
 
     double profit = cAccountInfo.OrderProfitCheck(
         _Symbol, ORDER_TYPE_BUY, lot, maxDrawdownPrice, arrayPrices[0]);
@@ -142,12 +142,12 @@ double MyUtility::GetGirdLotSize(const CArrayDouble &arrayPrices) {
     double marginRequire = cAccountInfo.MarginCheck(_Symbol, ORDER_TYPE_BUY,
                                                     lot, maxDrawdownPrice);
 
-    double drawdown = NormalizeDouble(profit - marginRequire, 2);
+    double drawdown = NormalizeDoubleTwoDigits(profit - marginRequire);
 
     Print("lot: ", lot, " from ", maxDrawdownPrice, " to ", arrayPrices[0],
           ", maximum drawdown: ", drawdown);
 
-    if (NormalizeDouble(cAccountInfo.Balance() + drawdown, 2) <= 0)
+    if (NormalizeDoubleTwoDigits(cAccountInfo.Balance() + drawdown) <= 0)
       break;
 
     totalLot = lot;
@@ -161,7 +161,7 @@ double MyUtility::GetGirdLotSize(const CArrayDouble &arrayPrices) {
 
   Print("totalLot: ", totalLot,
         ", maxDrowdownNumberOfGrid: ", maxDrowdownNumberOfGrid,
-        ", lotPerGrid: ", NormalizeDouble(lotPerGrid, 2),
+        ", lotPerGrid: ", NormalizeDoubleTwoDigits(lotPerGrid),
         ", profitPerLot: ", profitPerLot);
 
   if (lotPerGrid < SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN)) {
@@ -172,7 +172,7 @@ double MyUtility::GetGirdLotSize(const CArrayDouble &arrayPrices) {
     return (0.0);
   }
 
-  return NormalizeDouble(lotPerGrid, 2);
+  return NormalizeDoubleTwoDigits(lotPerGrid);
 }
 
 //+------------------------------------------------------------------+
@@ -196,12 +196,9 @@ void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices,
         if (OrderGetString(ORDER_SYMBOL) == _Symbol &&
             OrderGetString(ORDER_COMMENT) == comment) {
 
-          double intVolume = OrderGetDouble(ORDER_VOLUME_INITIAL);
-          double currVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
-          Print("intVolume: ", intVolume, ", currVolume: ", currVolume);
-
           if (arrayPrices.Total()) {
             double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+            double currVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
 
             int index = arrayPrices.SearchLinear(orderPrice);
             if (index != -1 && lot == currVolume)
@@ -478,10 +475,10 @@ void MyUtility::GetFibonacciArrayPrices(double maxPrice,
     arrayPrices.Add(price);
 
     if (price != _Point) {
-      price = NormalizeDouble(price + (arrayPrices[arrayPrices.Total() - 2]),
-                              _Digits);
+      price = NormalizeDoubleTwoDigits(price +
+                                       (arrayPrices[arrayPrices.Total() - 2]));
     } else {
-      price = NormalizeDouble(price + _Point, _Digits);
+      price = NormalizeDoubleTwoDigits(price + _Point);
     }
   }
 
@@ -504,11 +501,11 @@ void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
       price = 0.1;
     }
 
-    double addPrice = NormalizeDouble(
-        MathCeil(NormalizeDouble(price, _Digits)) * 0.1, _Digits);
+    double addPrice = NormalizeDoubleTwoDigits(
+        MathCeil(NormalizeDoubleTwoDigits(price)) * 0.1);
 
     for (double j = i; j < i + 1; j += addPrice) {
-      arrayPrices.Add(NormalizeDouble(j, _Digits));
+      arrayPrices.Add(NormalizeDoubleTwoDigits(j));
     }
   }
 }
@@ -526,11 +523,11 @@ void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
         ", gridGapSize: ", gridGapSize);
 
   for (double price = maxPrice; price >= minPrice;
-       price = NormalizeDouble(price - gridGapSize, _Digits)) {
+       price = NormalizeDoubleTwoDigits(price - gridGapSize)) {
     if (price != 0) {
-      ArrayPrices.Add(NormalizeDouble(price, _Digits));
+      ArrayPrices.Add(NormalizeDoubleTwoDigits(price));
     } else {
-      ArrayPrices.Add(NormalizeDouble(_Point, _Digits));
+      ArrayPrices.Add(NormalizeDoubleTwoDigits(_Point));
     }
   }
 }
