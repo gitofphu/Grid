@@ -44,6 +44,7 @@ public:
                             CArrayDouble &arrayPrices);
   void GetArrayPrice(double minPrice, double maxPrice, double gridGapSize,
                      CArrayDouble &ArrayPrices);
+  double NormalizeDoubleTwoDigits(double num);
 
 private:
   void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
@@ -524,4 +525,12 @@ void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
       ArrayPrices.Add(NormalizeDouble(_Point, _Digits));
     }
   }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions NormalizeDoubleTwoDigits(...).                  |
+//| INPUT:  number          - double number,                         |
+//+------------------------------------------------------------------+
+double MyUtility::NormalizeDoubleTwoDigits(double number) {
+  return NormalizeDouble(number, 2);
 }

@@ -24,6 +24,7 @@ void OnStart() {
 
   double lastPrice = balance;
 
+  // down trend
   for (double j = currentPrice; j >= 0; j -= priceGap) {
 
     if (j >= currentPrice)
@@ -55,21 +56,22 @@ void OnStart() {
           ", marginRequire: ", marginRequire);
 
     // Print("From ", j, " to ", lastPrice, " drawdown ",
-    //       NormalizeDouble(loss - marginRequire, 2));
+    //       Utility.NormalizeDoubleTwoDigits(loss - marginRequire, 2));
 
-    balance = NormalizeDouble(balance + profit, 2);
-    drawdown = NormalizeDouble(drawdown + loss - marginRequire, 2);
+    balance = Utility.NormalizeDoubleTwoDigits(balance + profit);
+    drawdown =
+        Utility.NormalizeDoubleTwoDigits(drawdown + loss - marginRequire);
 
     // drawdown -= currentPrice - j;
 
-    double equity = balance + drawdown;
+    double equity = Utility.NormalizeDoubleTwoDigits(balance + drawdown);
     Print("balance: ", balance);
     Print("equity: ", equity);
     Print("drawdown: ", drawdown);
     Print("-----------------------------------");
 
-    // if (balance + drawdown <= 0)
-    //   break;
+    if (balance + drawdown <= 0)
+      break;
   }
 
   // for (double price = currentPrice; balance > 0;
