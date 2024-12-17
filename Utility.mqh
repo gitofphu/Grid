@@ -29,7 +29,8 @@ public:
                       const double profit, const double open_price,
                       const double close_price);
   double GetGirdLotSize(const CArrayDouble &arrayPrices);
-  void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment);
+  void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment,
+                     const double lot);
   void FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
                                      double gridGapSize, string comment,
                                      CArrayDouble &buyLimitPrices,
@@ -176,10 +177,13 @@ double MyUtility::GetGirdLotSize(const CArrayDouble &arrayPrices) {
 
 //+------------------------------------------------------------------+
 //| Access functions CloseAllOrder().                                |
+//| INPUT:  arrayPrices     - grid price array,                      |
+//|         comment         - comment,                               |
+//|         lot             - lot size,                              |
 //+------------------------------------------------------------------+
 void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices,
-                              const string comment) {
-  Print("CloseAllOrder comment: ", comment);
+                              const string comment, const double lot) {
+  Print("CloseAllOrder comment: ", comment, ", lot: ", lot);
 
   int ordersTotal = OrdersTotal();
   CArrayLong tickets;
@@ -192,11 +196,15 @@ void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices,
         if (OrderGetString(ORDER_SYMBOL) == _Symbol &&
             OrderGetString(ORDER_COMMENT) == comment) {
 
+          double intVolume = OrderGetDouble(ORDER_VOLUME_INITIAL);
+          double currVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
+          Print("intVolume: ", intVolume, ", currVolume: ", currVolume);
+
           if (arrayPrices.Total()) {
             double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
 
             int index = arrayPrices.SearchLinear(orderPrice);
-            if (index != -1)
+            if (index != -1 && lot == currVolume)
               continue;
           }
 

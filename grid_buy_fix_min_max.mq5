@@ -62,10 +62,6 @@ int OnInit() {
     Print("Basic info: ArrayPrices ", i, " = ", ArrayPrices[i]);
   }
 
-  if (ClearOrdersOnInit) {
-    Utility.CloseAllOrder(ArrayPrices, comment);
-  }
-
   Print("limitOrders: ", limitOrders);
 
   if (ArrayPrices.Total() > limitOrders) {
@@ -97,6 +93,10 @@ int OnInit() {
   }
 
   Print("Basic info: lotPerGrid = ", lotPerGrid);
+
+  if (ClearOrdersOnInit) {
+    Utility.CloseAllOrder(ArrayPrices, comment, lotPerGrid);
+  }
 
   CheckAndPlaceOrders();
 
@@ -370,7 +370,7 @@ void ReplaceTpOrder(double price) {
 void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
 
   Print("Basic info: PlaceBuyLimitOrder = ", price,
-        ", TP = ", price + GridGapSize);
+        ", TP = ", Utility.NormalizeDoubleTwoDigits(price + GridGapSize));
 
   if (cTrade.BuyLimit(lotPerGrid, price, _Symbol, 0, price + GridGapSize,
                       ORDER_TIME_GTC, 0, comment)) {
@@ -400,7 +400,7 @@ void PlaceBuyLimitOrder(double price, bool &OrderPriceInvalid) {
 void PlaceBuyStopOrder(double price, bool &OrderPriceInvalid) {
 
   Print("Basic info: PlaceBuyStopOrder = ", price,
-        ", TP = ", price + GridGapSize);
+        ", TP = ", Utility.NormalizeDoubleTwoDigits(price + GridGapSize));
 
   if (cTrade.BuyStop(lotPerGrid, price, _Symbol, 0, price + GridGapSize,
                      ORDER_TIME_GTC, 0, comment)) {
