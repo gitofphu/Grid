@@ -18,7 +18,6 @@ void OnStart() {
   double MinPrice = 0.01;
   double GridGapSize = 10;
   double lotPerGrid = 0.01;
-  double balance = 100;
 
   CArrayDouble ArrayPrices;
   Utility.GetArrayPrice(MinPrice, CurrentPrice, GridGapSize, ArrayPrices);
@@ -28,6 +27,7 @@ void OnStart() {
   for (int i = 0; i < ArrayPrices.Total(); i++) {
     // Print("i: ", ArrayPrices[i]);
 
+    double balance = 100;
     double drawdown = 0;
 
     for (int j = 0; j <= i; j++) {
@@ -63,7 +63,7 @@ void OnStart() {
       // Print("balance: ", balance);
       // Print("equity: ", equity);
       // Print("drawdown: ", drawdown);
-      // Print("------------------------------------");
+      Print("------------------------------------");
 
       // if (balance + drawdown <= 0)
       //   break;
