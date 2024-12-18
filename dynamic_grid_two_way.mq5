@@ -20,10 +20,9 @@ CDealInfo cDealInfo;
 //+------------------------------------------------------------------+
 //| input                                                            |
 //+------------------------------------------------------------------+
-input double GridGapSize = 0.1;
+input double GridGapSize = 0.5;
 input double GridRange = 10;
 input int MaxOrders = NULL;
-input bool ClearOrdersOnInit = false;
 input double LotSize = 0.01;
 
 bool isInit = false;
@@ -75,15 +74,11 @@ int OnInit() {
 
   ValidateInputAndVariables();
 
-  if (ClearOrdersOnInit) {
-    Utility.CloseOrderOutsideArrayPrices(ArrayPrices, comment, LotSize);
-  }
+  Utility.CloseOrderOutsideArrayPrices(ArrayPrices, comment, LotSize);
 
   CheckAndPlaceOrders();
 
   isInit = true;
-
-  Utility.AlertAndExit("Test ended.");
 
   return (INIT_SUCCEEDED);
 }
@@ -167,18 +162,56 @@ void CheckAndPlaceOrders() {
       Print("sellStopPrices: ", sellStopPrices[i]);
     }
 
-    // Utility.PlaceBuyOrders(buyLimitPrices, buyStopPrices, LotSize,
-    // GridGapSize,
-    //                        comment, OrderPriceInvalid);
+    Utility.PlaceBuyOrders(buyLimitPrices, buyStopPrices, LotSize,
+    GridGapSize,
+                           comment, OrderPriceInvalid);
 
-    // Utility.PlaceSellOrders(sellLimitPrices, sellStopPrices, LotSize,
-    //                         GridGapSize, comment, OrderPriceInvalid);
+    Utility.PlaceSellOrders(sellLimitPrices, sellStopPrices, LotSize,
+                            GridGapSize, comment, OrderPriceInvalid);
 
     if (OrderPriceInvalid)
       errors++;
   } while (OrderPriceInvalid && errors < 3);
   if (errors >= 3) {
     Utility.AlertAndExit("Place order error.");
+  }
+}
+
+//+------------------------------------------------------------------+
+//| TradeTransaction function                                        |
+//+------------------------------------------------------------------+
+void OnTradeTransaction(const MqlTradeTransaction &trans,
+                        const MqlTradeRequest &request,
+                        const MqlTradeResult &result) {
+
+  //--- get transaction type as enumeration value
+  ENUM_TRADE_TRANSACTION_TYPE type = trans.type;
+
+  if (type == TRADE_TRANSACTION_DEAL_ADD) {
+
+    if (HistoryDealSelect(trans.deal)) {
+      cDealInfo.Ticket(trans.deal);
+    } else {
+      Print(__FILE__, " ", __FUNCTION__, ", ERROR: HistoryDealSelect(",
+            trans.deal, ")");
+      return;
+    }
+
+    long reason = -1;
+    if (!cDealInfo.InfoInteger(DEAL_REASON, reason)) {
+      Print(__FILE__, " ", __FUNCTION__,
+            ", ERROR: InfoInteger(DEAL_REASON,reason)");
+      return;
+    }
+    if ((ENUM_DEAL_REASON)reason == DEAL_REASON_SL)
+      Alert("Stop Loss activation");
+    else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
+      Alert("Take Profit activation");
+
+      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, comment, LotSize);
+
+      CheckAndPlaceOrders();
+    }
   }
 }
 

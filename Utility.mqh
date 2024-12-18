@@ -349,6 +349,10 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
 
   existDeals.Sort();
 
+  // for (int i = 0; i < existDeals.Total(); i++) {
+  //   Print("buy existDeals:", existDeals[i]);
+  // }
+
   for (int i = 0; i < arrayPrices.Total(); i++) {
     if (existDeals.Search(arrayPrices[i]) == -1) {
       missingDeals.Add(arrayPrices[i]);
@@ -356,6 +360,10 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
   }
 
   Print("FilterOpenBuyOrderAndPosition missingDeals: ", missingDeals.Total());
+
+  // for (int i = 0; i < missingDeals.Total(); i++) {
+  //   Print("buy missingDeals:", missingDeals[i]);
+  // }
 
   // Buy Stop order is placed above the current market price.
   // Buy Limit order is placed below the current market price.
@@ -434,6 +442,10 @@ void MyUtility::FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
 
   existDeals.Sort();
 
+  // for (int i = 0; i < existDeals.Total(); i++) {
+  //   Print("sell existDeals:", existDeals[i]);
+  // }
+
   for (int i = 0; i < arrayPrices.Total(); i++) {
     if (existDeals.Search(arrayPrices[i]) == -1) {
       missingDeals.Add(arrayPrices[i]);
@@ -442,16 +454,20 @@ void MyUtility::FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
 
   Print("FilterOpenSellOrderAndPosition missingDeals: ", missingDeals.Total());
 
+  // for (int i = 0; i < missingDeals.Total(); i++) {
+  //   Print("sell missingDeals:", missingDeals[i]);
+  // }
+
   // Sell Limit order is placed above the current market price.
   // Sell Stop order is placed below the current market price.
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-  for (int i = 0; i < arrayPrices.Total(); i++) {
-    if (arrayPrices[i] > bid) {
-      sellLimitPrices.Add(arrayPrices[i]);
+  for (int i = 0; i < missingDeals.Total(); i++) {
+    if (missingDeals[i] > bid) {
+      sellLimitPrices.Add(missingDeals[i]);
     }
-    if (arrayPrices[i] < bid) {
-      sellStopPrices.Add(arrayPrices[i]);
+    if (missingDeals[i] < bid) {
+      sellStopPrices.Add(missingDeals[i]);
     }
   }
 }
@@ -701,9 +717,9 @@ void MyUtility::PlaceSellLimitOrder(double price, double lot,
                                     bool &orderPriceInvalid) {
 
   Print("Basic info: PlaceSellLimitOrder = ", price,
-        ", TP = ", NormalizeDoubleTwoDigits(price + gridGapSize));
+        ", TP = ", NormalizeDoubleTwoDigits(price - gridGapSize));
 
-  if (cTrade.SellLimit(lot, price, _Symbol, 0, price + gridGapSize,
+  if (cTrade.SellLimit(lot, price, _Symbol, 0, price - gridGapSize,
                        ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
@@ -740,9 +756,9 @@ void MyUtility::PlaceSellStopOrder(double price, double lot, double gridGapSize,
                                    string comment, bool &orderPriceInvalid) {
 
   Print("Basic info: PlaceSellStopOrder = ", price,
-        ", TP = ", NormalizeDoubleTwoDigits(price + gridGapSize));
+        ", TP = ", NormalizeDoubleTwoDigits(price - gridGapSize));
 
-  if (cTrade.SellStop(lot, price, _Symbol, 0, price + gridGapSize,
+  if (cTrade.SellStop(lot, price, _Symbol, 0, price - gridGapSize,
                       ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();

@@ -26,9 +26,51 @@ void OnStart() {
     if (OrderSelect(orderTicket)) {
       double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
       double orderTP = OrderGetDouble(ORDER_TP);
+      long orderType = OrderGetInteger(ORDER_TYPE);
+      string symbol = OrderGetString(ORDER_SYMBOL);
+
+      if (symbol != _Symbol)
+        continue;
 
       Print("orderTicket: ", orderTicket, ", orderPrice: ", orderPrice,
-            ", orderTP: ", orderTP);
+            ", orderTP: ", orderTP, ", type: ", GetOrderTypeString(orderType));
     }
   }
+}
+
+string GetOrderTypeString(long orderType) {
+  string str = "";
+  switch (orderType) {
+  case ORDER_TYPE_BUY:
+    str = ("ORDER_TYPE_BUY");
+    break;
+  case ORDER_TYPE_SELL:
+    str = ("ORDER_TYPE_SELL");
+    break;
+  case ORDER_TYPE_BUY_LIMIT:
+    str = ("ORDER_TYPE_BUY_LIMIT");
+    break;
+  case ORDER_TYPE_SELL_LIMIT:
+    str = ("ORDER_TYPE_SELL_LIMIT");
+    break;
+  case ORDER_TYPE_BUY_STOP:
+    str = ("ORDER_TYPE_BUY_STOP");
+    break;
+  case ORDER_TYPE_SELL_STOP:
+    str = ("ORDER_TYPE_SELL_STOP");
+    break;
+  case ORDER_TYPE_BUY_STOP_LIMIT:
+    str = ("ORDER_TYPE_BUY_STOP_LIMIT");
+    break;
+  case ORDER_TYPE_SELL_STOP_LIMIT:
+    str = ("ORDER_TYPE_SELL_STOP_LIMIT");
+    break;
+  case ORDER_TYPE_CLOSE_BY:
+    str = ("ORDER_TYPE_CLOSE_BY");
+    break;
+  default:
+    str = ("Unknow Type");
+    break;
+  }
+  return str;
 }
