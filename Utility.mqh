@@ -29,8 +29,8 @@ public:
                       const double profit, const double open_price,
                       const double close_price);
   double GetGirdLotSize(const CArrayDouble &arrayPrices);
-  void CloseAllOrder(const CArrayDouble &arrayPrices, const string comment,
-                     const double lot);
+  void CloseOrderOutsideArrayPrices(const CArrayDouble &arrayPrices,
+                                    const string comment, const double lot);
   void FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
                                      double gridGapSize, string comment,
                                      CArrayDouble &buyLimitPrices,
@@ -191,14 +191,15 @@ double MyUtility::GetGirdLotSize(const CArrayDouble &arrayPrices) {
 }
 
 //+------------------------------------------------------------------+
-//| Access functions CloseAllOrder().                                |
+//| Access functions CloseOrderOutsideArrayPrices().                 |
 //| INPUT:  arrayPrices     - grid price array,                      |
 //|         comment         - comment,                               |
 //|         lot             - lot size,                              |
 //+------------------------------------------------------------------+
-void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices,
-                              const string comment, const double lot) {
-  Print("CloseAllOrder comment: ", comment, ", lot: ", lot);
+void MyUtility::CloseOrderOutsideArrayPrices(const CArrayDouble &arrayPrices,
+                                             const string comment,
+                                             const double lot) {
+  Print("CloseOrderOutsideArrayPrices comment: ", comment, ", lot: ", lot);
 
   int ordersTotal = OrdersTotal();
   CArrayLong tickets;
@@ -216,6 +217,8 @@ void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices,
             double currVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
 
             int index = arrayPrices.SearchLinear(orderPrice);
+
+            // remove if not found in array price order lot not match
             if (index != -1 && lot == currVolume)
               continue;
           }
@@ -225,23 +228,26 @@ void MyUtility::CloseAllOrder(const CArrayDouble &arrayPrices,
       }
     }
 
-    Print("MyUtility::CloseAllOrder tickets.Total(): ", tickets.Total());
+    Print("MyUtility::CloseOrderOutsideArrayPrices tickets.Total(): ",
+          tickets.Total());
 
     for (int i = 0; i < tickets.Total(); i++) {
-      Print("MyUtility::CloseAllOrder ticket: ", tickets[i]);
+      Print("MyUtility::CloseOrderOutsideArrayPrices ticket: ", tickets[i]);
 
       if (cTrade.OrderDelete(tickets[i])) {
 
-        Print("MyUtility::CloseAllOrder Order: ", tickets[i], " deleted.");
+        Print("MyUtility::CloseOrderOutsideArrayPrices Order: ", tickets[i],
+              " deleted.");
         uint retcode = cTrade.ResultRetcode();
-        Print("MyUtility::CloseAllOrder retcode: ", retcode);
+        Print("MyUtility::CloseOrderOutsideArrayPrices retcode: ", retcode);
 
       } else {
 
-        Print("MyUtility::CloseAllOrder Failed to delete order: ", tickets[i],
-              ". Error: ", GetLastError());
+        Print(
+            "MyUtility::CloseOrderOutsideArrayPrices Failed to delete order: ",
+            tickets[i], ". Error: ", GetLastError());
         uint retcode = cTrade.ResultRetcode();
-        Print("MyUtility::CloseAllOrder retcode: ", retcode);
+        Print("MyUtility::CloseOrderOutsideArrayPrices retcode: ", retcode);
       }
     }
   }

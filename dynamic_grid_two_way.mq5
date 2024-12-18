@@ -76,7 +76,7 @@ int OnInit() {
   ValidateInputAndVariables();
 
   if (ClearOrdersOnInit) {
-    Utility.CloseAllOrder(ArrayPrices, comment, LotSize);
+    Utility.CloseOrderOutsideArrayPrices(ArrayPrices, comment, LotSize);
   }
 
   CheckAndPlaceOrders();

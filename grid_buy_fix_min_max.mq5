@@ -95,7 +95,7 @@ int OnInit() {
   Print("Basic info: lotPerGrid = ", lotPerGrid);
 
   if (ClearOrdersOnInit) {
-    Utility.CloseAllOrder(ArrayPrices, comment, lotPerGrid);
+    Utility.CloseOrderOutsideArrayPrices(ArrayPrices, comment, lotPerGrid);
   }
 
   CheckAndPlaceOrders();

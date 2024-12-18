@@ -42,5 +42,6 @@
 // [x] Check comment before close order
 // [ ] Dynamic Grid
 // [x] Buy, Sell options
-// [ ] Calculate maximum two way drawdown
-// [ ] Accumulate buy
+// [x] Calculate maximum two way drawdown
+// [x] Accumulate buy
+// [x] Remove order outside array prices 
