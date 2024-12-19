@@ -10,7 +10,7 @@
 #include <Trade/DealInfo.mqh>
 CDealInfo cDealInfo;
 
-#include <Trade\HistoryOrderInfo.mqh>
+#include <Trade/HistoryOrderInfo.mqh>
 CHistoryOrderInfo cHistoryOrderInfo;
 
 //+------------------------------------------------------------------+

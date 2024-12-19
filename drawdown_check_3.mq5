@@ -10,11 +10,15 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
+#include <Trade/AccountInfo.mqh>
+CAccountInfo AccountInfo;
+
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
 
-double balance = 680;
+double balance = cAccountInfo.Balance();
+// double balance = 20000;
 double basePrice = 70;
 double priceGap = 0.2;
 double lotPerGrid = 0.02;
@@ -25,9 +29,9 @@ void OnStart() {
   Print("balance: ", balance, ", basePrice: ", basePrice,
         ", priceGap: ", priceGap, ", lotPerGrid: ", lotPerGrid);
 
-  DownTrendCheck();
-
   UpTrendCheck();
+
+  DownTrendCheck();
 }
 
 void DownTrendCheck() {
@@ -45,8 +49,8 @@ void DownTrendCheck() {
       price = _Point;
     }
 
-    // Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
-    //       " price: ", price);
+    Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
+          " price: ", price);
 
     double profit = 0;
 
@@ -66,17 +70,17 @@ void DownTrendCheck() {
     //       ", marginRequire: ", marginRequire);
 
     // Print("From ", price, " to ", lastPrice, " drawdown ",
-    //       Utility.NormalizeDoubleTwoDigits(loss - marginRequire, 2));
+    //       Utility.NormalizeDoubleTwoDigits(loss - marginRequire));
 
     balance = Utility.NormalizeDoubleTwoDigits(balance + profit);
     drawdown =
         Utility.NormalizeDoubleTwoDigits(drawdown + loss - marginRequire);
 
     double equity = Utility.NormalizeDoubleTwoDigits(balance + drawdown);
-    // Print("balance: ", balance);
-    // Print("equity: ", equity);
-    // Print("drawdown: ", drawdown);
-    // Print("-----------------------------------");
+    Print("balance: ", balance);
+    Print("equity: ", equity);
+    Print("drawdown: ", drawdown);
+    Print("-----------------------------------");
 
     if (balance + drawdown <= 0) {
       Print("Down Trand last price: " + price + ", balance: " + balance +
@@ -97,8 +101,8 @@ void UpTrendCheck() {
     if (price <= basePrice)
       continue;
 
-    // Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
-    //       " price: ", price);
+    Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
+          " price: ", price);
 
     double profit = 0;
 
@@ -123,10 +127,10 @@ void UpTrendCheck() {
 
     double equity = Utility.NormalizeDoubleTwoDigits(balance + drawdown);
 
-    // Print("balance: ", balance);
-    // Print("equity: ", equity);
-    // Print("drawdown: ", drawdown);
-    // Print("-----------------------------------");
+    Print("balance: ", balance);
+    Print("equity: ", equity);
+    Print("drawdown: ", drawdown);
+    Print("-----------------------------------");
 
     if (balance + drawdown <= 0) {
       Print("Up Trand last price: " + price + ", balance: " + balance +

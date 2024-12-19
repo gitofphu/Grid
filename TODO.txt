@@ -44,4 +44,6 @@
 // [x] Buy, Sell options
 // [x] Calculate maximum two way drawdown
 // [x] Accumulate buy
-// [x] Remove order outside array prices 
+// [x] Remove order outside array prices
+// [ ] Calculte margin level
+// [x] Pyramid
