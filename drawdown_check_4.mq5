@@ -12,16 +12,16 @@ MyUtility Utility;
 
 double currentPrice = 71.2;
 double maxPrice = 75;
-double minPrice = 69;
+double minPrice = 58;
 double gridGap = 0.2;
-double lot = 0.02;
+double lot = 0.01;
 
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
 void OnStart() {
-  UpTrendCheck();
-  // DownTrendCheck();
+  // UpTrendCheck();
+  DownTrendCheck();
 }
 //+------------------------------------------------------------------+
 

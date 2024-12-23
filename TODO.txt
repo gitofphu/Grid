@@ -47,3 +47,4 @@
 // [x] Remove order outside array prices
 // [ ] Calculte margin level
 // [x] Pyramid
+// [ ] Close order if TP not match array price grid gap

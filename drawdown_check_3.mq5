@@ -20,7 +20,7 @@ CAccountInfo AccountInfo;
 double balance = cAccountInfo.Balance();
 // double balance = 20000;
 double basePrice = 70;
-double priceGap = 0.2;
+double priceGap = 0.1;
 double lotPerGrid = 0.02;
 
 void OnStart() {
@@ -49,8 +49,8 @@ void DownTrendCheck() {
       price = _Point;
     }
 
-    Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
-          " price: ", price);
+    // Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
+    //       " price: ", price);
 
     double profit = 0;
 
@@ -77,10 +77,10 @@ void DownTrendCheck() {
         Utility.NormalizeDoubleTwoDigits(drawdown + loss - marginRequire);
 
     double equity = Utility.NormalizeDoubleTwoDigits(balance + drawdown);
-    Print("balance: ", balance);
-    Print("equity: ", equity);
-    Print("drawdown: ", drawdown);
-    Print("-----------------------------------");
+    // Print("balance: ", balance);
+    // Print("equity: ", equity);
+    // Print("drawdown: ", drawdown);
+    // Print("-----------------------------------");
 
     if (balance + drawdown <= 0) {
       Print("Down Trand last price: " + price + ", balance: " + balance +
@@ -101,8 +101,8 @@ void UpTrendCheck() {
     if (price <= basePrice)
       continue;
 
-    Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
-          " price: ", price);
+    // Print("basePrice: ", basePrice, ", lastPrice: ", lastPrice,
+    //       " price: ", price);
 
     double profit = 0;
 
@@ -127,10 +127,10 @@ void UpTrendCheck() {
 
     double equity = Utility.NormalizeDoubleTwoDigits(balance + drawdown);
 
-    Print("balance: ", balance);
-    Print("equity: ", equity);
-    Print("drawdown: ", drawdown);
-    Print("-----------------------------------");
+    // Print("balance: ", balance);
+    // Print("equity: ", equity);
+    // Print("drawdown: ", drawdown);
+    // Print("-----------------------------------");
 
     if (balance + drawdown <= 0) {
       Print("Up Trand last price: " + price + ", balance: " + balance +
