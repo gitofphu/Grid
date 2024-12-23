@@ -24,6 +24,8 @@ input double GridGapSize = 0.5;
 input double GridRange = 10;
 input int MaxOrders = NULL;
 input double LotSize = 0.01;
+input bool TradeBuy = true;
+input bool TradeSell = true;
 
 bool isInit = false;
 
@@ -88,6 +90,10 @@ int OnInit() {
  */
 void ValidateInputAndVariables() {
 
+  if (TradeBuy == false && TradeSell == false)
+    Utility.AlertAndExit(
+        "TradeBuy and TradeSell cannot be false at the same time.");
+
   if (GridGapSize == 0)
     Utility.AlertAndExit("GridGapSize cannot be 0.");
 
@@ -103,13 +109,18 @@ void ValidateInputAndVariables() {
 
   Print("limitOrders: ", limitOrders);
 
-  if ((ArrayPrices.Total() * 2) > limitOrders)
+  if (TradeBuy == true && TradeSell == true &&
+      (ArrayPrices.Total() * 2) > limitOrders) {
     Utility.AlertAndExit("Array Prices exceed ACCOUNT_LIMIT_ORDERS.");
+  } else if ((TradeBuy == true || TradeSell == true) &&
+             (ArrayPrices.Total()) > limitOrders) {
+    Utility.AlertAndExit("Array Prices exceed ACCOUNT_LIMIT_ORDERS.");
+  }
 
   double volumeLimit = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT);
 
-  Print("Basic info SYMBOL_VOLUME_LIMIT: ", volumeLimit,
-        ", Total Orders: ", ArrayPrices.Total() * 2);
+  Print("Basic info SYMBOL_VOLUME_LIMIT: ", volumeLimit, ", Total Orders: ",
+        ArrayPrices.Total() * (TradeBuy == true && TradeSell == true ? 2 : 1));
 
   if (volumeLimit != 0) {
     if (ArrayPrices.Total() > volumeLimit) {
@@ -134,40 +145,43 @@ void CheckAndPlaceOrders() {
 
   do {
 
-    CArrayDouble buyLimitPrices;
-    CArrayDouble buyStopPrices;
-    Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
-                                          buyLimitPrices, buyStopPrices);
-    Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
-    Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
+    if (TradeBuy) {
+      CArrayDouble buyLimitPrices;
+      CArrayDouble buyStopPrices;
+      Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
+                                            buyLimitPrices, buyStopPrices);
+      Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
+      Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
 
-    for (int i = 0; i < buyLimitPrices.Total(); i++) {
-      Print("buyLimitPrices: ", buyLimitPrices[i]);
-    }
-    for (int i = 0; i < buyStopPrices.Total(); i++) {
-      Print("buyStopPrices: ", buyStopPrices[i]);
-    }
+      for (int i = 0; i < buyLimitPrices.Total(); i++) {
+        Print("buyLimitPrices: ", buyLimitPrices[i]);
+      }
+      for (int i = 0; i < buyStopPrices.Total(); i++) {
+        Print("buyStopPrices: ", buyStopPrices[i]);
+      }
 
-    CArrayDouble sellLimitPrices;
-    CArrayDouble sellStopPrices;
-    Utility.FilterOpenSellOrderAndPosition(ArrayPrices, GridGapSize, comment,
-                                           sellLimitPrices, sellStopPrices);
-    Print("Basic info: sellLimitPrices = ", sellLimitPrices.Total());
-    Print("Basic info: sellStopPrices = ", sellStopPrices.Total());
-
-    for (int i = 0; i < sellLimitPrices.Total(); i++) {
-      Print("sellLimitPrices: ", sellLimitPrices[i]);
-    }
-    for (int i = 0; i < sellStopPrices.Total(); i++) {
-      Print("sellStopPrices: ", sellStopPrices[i]);
+      Utility.PlaceBuyOrders(buyLimitPrices, buyStopPrices, LotSize,
+                             GridGapSize, comment, OrderPriceInvalid);
     }
 
-    Utility.PlaceBuyOrders(buyLimitPrices, buyStopPrices, LotSize,
-    GridGapSize,
-                           comment, OrderPriceInvalid);
+    if (TradeSell) {
+      CArrayDouble sellLimitPrices;
+      CArrayDouble sellStopPrices;
+      Utility.FilterOpenSellOrderAndPosition(ArrayPrices, GridGapSize, comment,
+                                             sellLimitPrices, sellStopPrices);
+      Print("Basic info: sellLimitPrices = ", sellLimitPrices.Total());
+      Print("Basic info: sellStopPrices = ", sellStopPrices.Total());
 
-    Utility.PlaceSellOrders(sellLimitPrices, sellStopPrices, LotSize,
-                            GridGapSize, comment, OrderPriceInvalid);
+      for (int i = 0; i < sellLimitPrices.Total(); i++) {
+        Print("sellLimitPrices: ", sellLimitPrices[i]);
+      }
+      for (int i = 0; i < sellStopPrices.Total(); i++) {
+        Print("sellStopPrices: ", sellStopPrices[i]);
+      }
+
+      Utility.PlaceSellOrders(sellLimitPrices, sellStopPrices, LotSize,
+                              GridGapSize, comment, OrderPriceInvalid);
+    }
 
     if (OrderPriceInvalid)
       errors++;
