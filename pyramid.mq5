@@ -12,7 +12,7 @@ MyUtility Utility;
 
 double currentPrice = 70;
 double maxPrice = 130;
-double minPrice = 60;
+double minPrice = 55;
 double gridGap = 0.5;
 double lot = 0.01;
 
@@ -32,13 +32,14 @@ void OnStart() {
       double loss = cAccountInfo.OrderProfitCheck(
           _Symbol, ORDER_TYPE_BUY, lot * (i + 1), arrayPrices[i], price);
 
-      Print("From: ", Utility.NormalizeDoubleTwoDigits(arrayPrices[i]),
-            ", To: ", Utility.NormalizeDoubleTwoDigits(price),
-            ", lot: ", lot * (i + 1),
-            ", loss: ", Utility.NormalizeDoubleTwoDigits(loss));
+      // Print("From: ", Utility.NormalizeDoubleTwoDigits(arrayPrices[i]),
+      //       ", To: ", Utility.NormalizeDoubleTwoDigits(price),
+      //       ", lot: ", lot * (i + 1),
+      //       ", loss: ", Utility.NormalizeDoubleTwoDigits(loss));
 
       drawdown = Utility.NormalizeDoubleTwoDigits(drawdown + loss);
     }
+    Print("price: ", price);
     Print("drawdown: ", drawdown);
     Print("-------------------");
   }

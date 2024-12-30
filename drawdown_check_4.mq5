@@ -10,16 +10,19 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
-double currentPrice = 71.2;
-double maxPrice = 75;
-double minPrice = 58;
-double gridGap = 0.2;
-double lot = 0.01;
+double currentPrice = 75;
+double maxPrice = 80;
+double minPrice = 65;
+double gridGap = 0.1;
+double lot = 0.02;
 
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
 void OnStart() {
+  Print("currentPrice: ", currentPrice, ", maxPrice: ", maxPrice,
+        ", minPrice: ", minPrice, ", gridGap: ", gridGap, ", lot: ", lot);
+
   // UpTrendCheck();
   DownTrendCheck();
 }
@@ -38,13 +41,14 @@ void UpTrendCheck() {
       double loss = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_SELL, lot,
                                                   arrayPrices[i], price);
 
-      Print("From: ", Utility.NormalizeDoubleTwoDigits(arrayPrices[i]),
-            ", To: ", Utility.NormalizeDoubleTwoDigits(price),
-            ", loss: ", Utility.NormalizeDoubleTwoDigits(loss));
+      // Print("From: ", Utility.NormalizeDoubleTwoDigits(arrayPrices[i]),
+      //       ", To: ", Utility.NormalizeDoubleTwoDigits(price),
+      //       ", loss: ", Utility.NormalizeDoubleTwoDigits(loss));
 
       drawdown = Utility.NormalizeDoubleTwoDigits(drawdown + loss);
     }
 
+    Print("price: ", price);
     Print("drawdown: ", drawdown);
     Print("-------------------");
   }
@@ -64,12 +68,14 @@ void DownTrendCheck() {
       double loss = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, lot,
                                                   arrayPrices[i], price);
 
-      Print("From: ", Utility.NormalizeDoubleTwoDigits(arrayPrices[i]),
-            ", To: ", Utility.NormalizeDoubleTwoDigits(price),
-            ", loss: ", Utility.NormalizeDoubleTwoDigits(loss));
+      // Print("From: ", Utility.NormalizeDoubleTwoDigits(arrayPrices[i]),
+      //       ", To: ", Utility.NormalizeDoubleTwoDigits(price),
+      //       ", loss: ", Utility.NormalizeDoubleTwoDigits(loss));
 
       drawdown = Utility.NormalizeDoubleTwoDigits(drawdown + loss);
     }
+
+    Print("price: ", price);
     Print("drawdown: ", drawdown);
     Print("-------------------");
   }

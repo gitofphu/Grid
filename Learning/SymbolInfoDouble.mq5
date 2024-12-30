@@ -2,13 +2,13 @@
 //+------------------------------------------------------------------+
 void OnStart() {
   // Variables for symbol volume conditions
-  // double dbLotsMinimum = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN),
-  //        dbLotsMaximum = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX),
-  //        dbLotsStep = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+  double dbLotsMinimum = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN),
+         dbLotsMaximum = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX),
+         dbLotsStep = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
 
-  // Print("dbLotsMinimum: ", dbLotsMinimum);
-  // Print("dbLotsMaximum: ", dbLotsMaximum);
-  // Print("dbLotsStep: ", dbLotsStep);
+  Print("dbLotsMinimum: ", dbLotsMinimum);
+  Print("dbLotsMaximum: ", dbLotsMaximum);
+  Print("dbLotsStep: ", dbLotsStep);
 
   // Print("SYMBOL_BID: ", SymbolInfoDouble(_Symbol, SYMBOL_BID));
   // Print("SYMBOL_BIDHIGH: ", SymbolInfoDouble(_Symbol, SYMBOL_BIDHIGH));
