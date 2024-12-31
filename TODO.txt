@@ -49,3 +49,4 @@
 // [x] Pyramid
 // [ ] Close order if TP not match array price grid gap
 // [ ] Fill lot if open position less than lotPerGrid
+// [x] CheckAndPlaceOrders on pending order exceute
