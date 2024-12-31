@@ -209,6 +209,8 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       // string dealComment;
       // cDealInfo.InfoString(DEAL_COMMENT, dealComment);
       // Print("dealComment: ", dealComment);
+    } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
+      CheckAndPlaceOrders();
     }
   }
 }
