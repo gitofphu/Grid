@@ -10,11 +10,11 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
-double currentPrice = 75;
+double currentPrice = 74;
 double maxPrice = 80;
-double minPrice = 65;
+double minPrice = 60;
 double gridGap = 0.1;
-double lot = 0.02;
+double lot = 0.01;
 
 //+------------------------------------------------------------------+
 //| Script program start function                                    |

@@ -31,7 +31,7 @@ bool isInit = false;
 
 int limitOrders;
 CArrayDouble ArrayPrices;
-string comment = "dynamic_grid";
+string Comment = "dynamic_grid";
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -76,7 +76,7 @@ int OnInit() {
 
   ValidateInputAndVariables();
 
-  Utility.CloseOrderOutsideArrayPrices(ArrayPrices, comment, LotSize);
+  Utility.CloseOrderOutsideArrayPrices(ArrayPrices, Comment, LotSize);
 
   CheckAndPlaceOrders();
 
@@ -97,7 +97,7 @@ void ValidateInputAndVariables() {
   if (GridGapSize == 0)
     Utility.AlertAndExit("GridGapSize cannot be 0.");
 
-  const int accoutnLimitOrders = AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
+  const int accoutnLimitOrders = (int)AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
 
   if (MaxOrders == NULL) {
     limitOrders = accoutnLimitOrders;
@@ -147,7 +147,7 @@ void CheckAndPlaceOrders() {
     if (TradeBuy) {
       CArrayDouble buyLimitPrices;
       CArrayDouble buyStopPrices;
-      Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, comment,
+      Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, Comment,
                                             buyLimitPrices, buyStopPrices);
       Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
       Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
@@ -160,13 +160,13 @@ void CheckAndPlaceOrders() {
       }
 
       Utility.PlaceBuyOrders(buyLimitPrices, buyStopPrices, LotSize,
-                             GridGapSize, comment, OrderPriceInvalid);
+                             GridGapSize, Comment, OrderPriceInvalid);
     }
 
     if (TradeSell) {
       CArrayDouble sellLimitPrices;
       CArrayDouble sellStopPrices;
-      Utility.FilterOpenSellOrderAndPosition(ArrayPrices, GridGapSize, comment,
+      Utility.FilterOpenSellOrderAndPosition(ArrayPrices, GridGapSize, Comment,
                                              sellLimitPrices, sellStopPrices);
       Print("Basic info: sellLimitPrices = ", sellLimitPrices.Total());
       Print("Basic info: sellStopPrices = ", sellStopPrices.Total());
@@ -179,7 +179,7 @@ void CheckAndPlaceOrders() {
       }
 
       Utility.PlaceSellOrders(sellLimitPrices, sellStopPrices, LotSize,
-                              GridGapSize, comment, OrderPriceInvalid);
+                              GridGapSize, Comment, OrderPriceInvalid);
     }
 
     if (OrderPriceInvalid)
@@ -286,11 +286,11 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       Alert("Stop Loss activation");
     else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
       Alert("Take Profit activation");
-      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, comment, LotSize);
+      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, Comment, LotSize);
 
       CheckAndPlaceOrders();
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
-      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, comment, LotSize);
+      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, Comment, LotSize);
 
       CheckAndPlaceOrders();
     }

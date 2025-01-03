@@ -31,6 +31,10 @@ public:
   double GetGirdLotSize(const CArrayDouble &arrayPrices);
   void CloseOrderOutsideArrayPrices(const CArrayDouble &arrayPrices,
                                     const string comment, const double lot);
+  void CloseOrderOutsideArrayPricesByType(const CArrayDouble &arrayPrices,
+                                          const string comment,
+                                          const double lot,
+                                          const ENUM_ORDER_TYPE type);
   void FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
                                      double gridGapSize, string comment,
                                      CArrayDouble &buyLimitPrices,
@@ -53,10 +57,10 @@ public:
                        CArrayDouble &sellStopPrices, double lot,
                        double gridGapSize, string comment,
                        bool &orderPriceInvalid);
-
-private:
   void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
                      double price, CArrayDouble &existDeals);
+
+private:
   void PlaceBuyLimitOrder(double price, double lot, double gridGapSize,
                           string comment, bool &orderPriceInvalid);
   void PlaceBuyStopOrder(double price, double lot, double gridGapSize,
@@ -204,51 +208,121 @@ void MyUtility::CloseOrderOutsideArrayPrices(const CArrayDouble &arrayPrices,
   int ordersTotal = OrdersTotal();
   CArrayLong tickets;
 
-  if (ordersTotal > 0) {
-    for (int i = 0; i < ordersTotal; i++) {
-      ulong orderTicket = OrderGetTicket(i);
+  if (ordersTotal == 0)
+    return;
 
-      if (OrderSelect(orderTicket)) {
-        if (OrderGetString(ORDER_SYMBOL) == _Symbol &&
-            OrderGetString(ORDER_COMMENT) == comment) {
+  for (int i = 0; i < ordersTotal; i++) {
+    ulong orderTicket = OrderGetTicket(i);
 
-          if (arrayPrices.Total()) {
-            double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-            double currVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
+    if (OrderSelect(orderTicket)) {
+      if (OrderGetString(ORDER_SYMBOL) == _Symbol &&
+          OrderGetString(ORDER_COMMENT) == comment) {
 
-            int index = arrayPrices.SearchLinear(orderPrice);
+        if (arrayPrices.Total()) {
+          double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+          double currVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
 
-            // remove if not found in array price order lot not match
-            if (index != -1 && lot == currVolume)
-              continue;
-          }
+          int index = arrayPrices.SearchLinear(orderPrice);
 
-          tickets.Add(orderTicket);
+          // remove if not found in array price order lot not match
+          if (index != -1 && lot == currVolume)
+            continue;
         }
+
+        tickets.Add(orderTicket);
       }
     }
+  }
 
-    Print("MyUtility::CloseOrderOutsideArrayPrices tickets.Total(): ",
-          tickets.Total());
+  Print("MyUtility::CloseOrderOutsideArrayPrices tickets.Total(): ",
+        tickets.Total());
 
-    for (int i = 0; i < tickets.Total(); i++) {
-      Print("MyUtility::CloseOrderOutsideArrayPrices ticket: ", tickets[i]);
+  for (int i = 0; i < tickets.Total(); i++) {
+    Print("MyUtility::CloseOrderOutsideArrayPrices ticket: ", tickets[i]);
 
-      if (cTrade.OrderDelete(tickets[i])) {
+    if (cTrade.OrderDelete(tickets[i])) {
 
-        Print("MyUtility::CloseOrderOutsideArrayPrices Order: ", tickets[i],
-              " deleted.");
-        uint retcode = cTrade.ResultRetcode();
-        Print("MyUtility::CloseOrderOutsideArrayPrices retcode: ", retcode);
+      Print("MyUtility::CloseOrderOutsideArrayPrices Order: ", tickets[i],
+            " deleted.");
+      uint retcode = cTrade.ResultRetcode();
+      Print("MyUtility::CloseOrderOutsideArrayPrices retcode: ", retcode);
 
-      } else {
+    } else {
 
-        Print(
-            "MyUtility::CloseOrderOutsideArrayPrices Failed to delete order: ",
+      Print("MyUtility::CloseOrderOutsideArrayPrices Failed to delete order: ",
             tickets[i], ". Error: ", GetLastError());
-        uint retcode = cTrade.ResultRetcode();
-        Print("MyUtility::CloseOrderOutsideArrayPrices retcode: ", retcode);
-      }
+      uint retcode = cTrade.ResultRetcode();
+      Print("MyUtility::CloseOrderOutsideArrayPrices retcode: ", retcode);
+    }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions CloseOrderOutsideArrayPricesByType().           |
+//| INPUT:  arrayPrices     - grid price array,                      |
+//|         comment         - comment,                               |
+//|         lot             - lot size,                              |
+//|         type            - order type,                            |
+//+------------------------------------------------------------------+
+void MyUtility::CloseOrderOutsideArrayPricesByType(
+    const CArrayDouble &arrayPrices, const string comment, const double lot,
+    const ENUM_ORDER_TYPE type) {
+  Print("CloseOrderOutsideArrayPricesByType arrayPrices.Total():",
+        arrayPrices.Total(), ", comment: ", comment, ", lot: ", lot,
+        ", type: ", type);
+
+  if (arrayPrices.Total() == 0) {
+    return;
+  }
+
+  int ordersTotal = OrdersTotal();
+  CArrayLong tickets;
+
+  if (ordersTotal == 0)
+    return;
+
+  for (int i = 0; i < ordersTotal; i++) {
+    ulong orderTicket = OrderGetTicket(i);
+    if (OrderSelect(orderTicket)) {
+      string symbol = OrderGetString(ORDER_SYMBOL);
+      string orderComment = OrderGetString(ORDER_COMMENT);
+      long orderType = OrderGetInteger(ORDER_TYPE);
+
+      if (orderComment != comment || symbol != _Symbol || orderType != type)
+        continue;
+
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      double orderVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
+
+      int index = arrayPrices.SearchLinear(orderPrice);
+
+      if (index != -1 && lot == orderVolume)
+        continue;
+
+      tickets.Add(orderTicket);
+    }
+  }
+
+  Print("MyUtility::CloseOrderOutsideArrayPricesByType tickets.Total(): ",
+        tickets.Total());
+
+  for (int i = 0; i < tickets.Total(); i++) {
+    Print("MyUtility::CloseOrderOutsideArrayPricesByType ticket: ", tickets[i]);
+
+    if (cTrade.OrderDelete(tickets[i])) {
+
+      Print("MyUtility::CloseOrderOutsideArrayPricesByType Order: ", tickets[i],
+            " deleted.");
+      uint retcode = cTrade.ResultRetcode();
+      Print("MyUtility::CloseOrderOutsideArrayPricesByType retcode: ", retcode);
+
+    } else {
+
+      Print("MyUtility::CloseOrderOutsideArrayPricesByType Failed to delete "
+            "order: ",
+            tickets[i], ". Error: ", GetLastError());
+      uint retcode = cTrade.ResultRetcode();
+      Print("MyUtility::CloseOrderOutsideArrayPricesByType retcode: ", retcode);
     }
   }
 }
