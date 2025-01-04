@@ -60,7 +60,6 @@ public:
   void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
                      double price, CArrayDouble &existDeals);
 
-private:
   void PlaceBuyLimitOrder(double price, double lot, double gridGapSize,
                           string comment, bool &orderPriceInvalid);
   void PlaceBuyStopOrder(double price, double lot, double gridGapSize,
@@ -69,6 +68,8 @@ private:
                            string comment, bool &orderPriceInvalid);
   void PlaceSellStopOrder(double price, double lot, double gridGapSize,
                           string comment, bool &orderPriceInvalid);
+
+private:
 };
 
 //+------------------------------------------------------------------+
@@ -377,8 +378,6 @@ void MyUtility::FilterOpenBuyOrderAndPosition(CArrayDouble &arrayPrices,
   CArrayDouble existDeals;
   CArrayDouble missingDeals;
 
-  int arrayPricesSize = arrayPrices.Total();
-
   for (int i = 0; i < OrdersTotal(); i++) {
     ulong orderTicket = OrderGetTicket(i);
     if (OrderSelect(orderTicket)) {
@@ -468,8 +467,6 @@ void MyUtility::FilterOpenSellOrderAndPosition(CArrayDouble &arrayPrices,
                                                CArrayDouble &sellStopPrices) {
   CArrayDouble existDeals;
   CArrayDouble missingDeals;
-
-  int arrayPricesSize = arrayPrices.Total();
 
   for (int i = 0; i < OrdersTotal(); i++) {
     ulong orderTicket = OrderGetTicket(i);
@@ -666,13 +663,13 @@ void MyUtility::PlaceBuyOrders(CArrayDouble &buyLimitPrices,
                                bool &orderPriceInvalid) {
 
   for (int i = 0; i < buyLimitPrices.Total(); i++) {
-    double price = buyLimitPrices[i];
-    PlaceBuyLimitOrder(price, lot, gridGapSize, comment, orderPriceInvalid);
+    PlaceBuyLimitOrder(buyLimitPrices[i], lot, gridGapSize, comment,
+                       orderPriceInvalid);
   }
 
   for (int i = 0; i < buyStopPrices.Total(); i++) {
-    double price = buyStopPrices[i];
-    PlaceBuyStopOrder(price, lot, gridGapSize, comment, orderPriceInvalid);
+    PlaceBuyStopOrder(buyStopPrices[i], lot, gridGapSize, comment,
+                      orderPriceInvalid);
   }
 }
 
@@ -768,13 +765,13 @@ void MyUtility::PlaceSellOrders(CArrayDouble &sellLimitPrices,
                                 bool &orderPriceInvalid) {
 
   for (int i = 0; i < sellLimitPrices.Total(); i++) {
-    double price = sellLimitPrices[i];
-    PlaceSellLimitOrder(price, lot, gridGapSize, comment, orderPriceInvalid);
+    PlaceSellLimitOrder(sellLimitPrices[i], lot, gridGapSize, comment,
+                        orderPriceInvalid);
   }
 
   for (int i = 0; i < sellStopPrices.Total(); i++) {
-    double price = sellStopPrices[i];
-    PlaceSellStopOrder(price, lot, gridGapSize, comment, orderPriceInvalid);
+    PlaceSellStopOrder(sellStopPrices[i], lot, gridGapSize, comment,
+                       orderPriceInvalid);
   }
 }
 

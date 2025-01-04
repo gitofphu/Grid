@@ -48,27 +48,7 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
-  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-
-  double currentPrice = MathRound(NormalizeDouble((ask + bid) / 2, _Digits));
-  Print("currentPrice: ", currentPrice);
-
-  double maxPrice =
-      NormalizeDouble(currentPrice + (GridGapSize * GridRange), _Digits);
-  double minPrice =
-      NormalizeDouble(currentPrice - (GridGapSize * GridRange) > _Point
-                          ? currentPrice - (GridGapSize * GridRange)
-                          : _Point,
-                      _Digits);
-
-  Print("maxPrice: ", maxPrice);
-  Print("minPrice: ", minPrice);
-
-  if (ArrayPrices.Total() == 0)
-    Utility.GetArrayPrice(minPrice, maxPrice, GridGapSize, ArrayPrices);
-
-  Print("ArrayPrices.Total(): ", ArrayPrices.Total());
+  GetArrayPrices();
 
   for (int i = 0; i < ArrayPrices.Total(); i++) {
     Print("ArrayPrices: ", i, " = ", ArrayPrices[i]);
@@ -133,6 +113,29 @@ void ValidateInputAndVariables() {
   if (LotSize < volumeMin) {
     Utility.AlertAndExit("Invalid lotPerGrid. min lot: " + volumeMin);
   }
+}
+
+void GetArrayPrices() {
+  double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+  double currentPrice = MathRound(NormalizeDouble((ask + bid) / 2, _Digits));
+  Print("currentPrice: ", currentPrice);
+
+  double maxPrice =
+      NormalizeDouble(currentPrice + (GridGapSize * GridRange), _Digits);
+  double minPrice =
+      NormalizeDouble(currentPrice - (GridGapSize * GridRange) > _Point
+                          ? currentPrice - (GridGapSize * GridRange)
+                          : _Point,
+                      _Digits);
+
+  Print("maxPrice: ", maxPrice);
+  Print("minPrice: ", minPrice);
+
+  Utility.GetArrayPrice(minPrice, maxPrice, GridGapSize, ArrayPrices);
+
+  Print("ArrayPrices.Total(): ", ArrayPrices.Total());
 }
 
 /**
@@ -286,10 +289,16 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       Alert("Stop Loss activation");
     else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
       Alert("Take Profit activation");
+
+      GetArrayPrices();
+
       Utility.CloseOrderOutsideArrayPrices(ArrayPrices, Comment, LotSize);
 
       CheckAndPlaceOrders();
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
+
+      GetArrayPrices();
+
       Utility.CloseOrderOutsideArrayPrices(ArrayPrices, Comment, LotSize);
 
       CheckAndPlaceOrders();
