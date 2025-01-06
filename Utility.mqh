@@ -300,10 +300,6 @@ void MyUtility::CloseOrderOutsideArrayPricesByType(
     const CArrayDouble &arrayPrices, const string comment, const double lot,
     const ENUM_ORDER_TYPE type) {
 
-  if (arrayPrices.Total() == 0) {
-    return;
-  }
-
   Print("CloseOrderOutsideArrayPricesByType arrayPrices.Total():",
         arrayPrices.Total(), ", comment: ", comment, ", lot: ", lot,
         ", type: ", GetOrderTypeString(type));
