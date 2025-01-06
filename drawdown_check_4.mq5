@@ -10,7 +10,7 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
-double currentPrice = 74;
+double currentPrice = 74.5;
 double maxPrice = 80;
 double minPrice = 60;
 double gridGap = 0.1;

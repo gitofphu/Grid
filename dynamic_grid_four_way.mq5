@@ -123,13 +123,12 @@ int OnInit() {
 
   CheckAndPlaceOrders();
 
-  Utility.AlertAndExit("Test exit");
-
   isInit = true;
   return (INIT_SUCCEEDED);
 }
 
 void CloseOrderOutSideArray() {
+  Print("CloseOrderOutSideArray");
   Utility.CloseOrderOutsideArrayPricesByType(buyStopArrayPrices, Comment,
                                              buyStopLot, ORDER_TYPE_BUY_STOP);
   Utility.CloseOrderOutsideArrayPricesByType(buyLimitArrayPrices, Comment,
@@ -144,8 +143,8 @@ void GetArrayPrices() {
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-  Print("ask: ", ask);
-  Print("bid: ", bid);
+  Print("GetArrayPrices ask: ", ask);
+  Print("GetArrayPrices bid: ", bid);
 
   if (buyStopGapSize) {
     Utility.GetArrayPrice(NormalizeDouble(ask + buyStopGapSize, 1),
@@ -192,6 +191,7 @@ void GetArrayPrices() {
  * Check orders and positions
  */
 void CheckAndPlaceOrders() {
+  Print("CheckAndPlaceOrders");
   bool orderPriceInvalid = false;
   int errors = 0;
 
@@ -202,6 +202,8 @@ void CheckAndPlaceOrders() {
       FilterOpenOrdersAndPositionsByType(buyStopArrayPrices, buyStopGapSize,
                                          Comment, ORDER_TYPE_BUY_STOP,
                                          buyStopMissingDeals);
+
+      Print("buyStopMissingDeals: ", buyStopMissingDeals.Total());
 
       for (int i = 0; i < buyStopMissingDeals.Total(); i++) {
         Print("PlaceBuyStopOrder: ", buyStopMissingDeals[i]);
@@ -216,6 +218,8 @@ void CheckAndPlaceOrders() {
                                          Comment, ORDER_TYPE_BUY_LIMIT,
                                          buyLimitMissingDeals);
 
+      Print("buyLimitMissingDeals: ", buyLimitMissingDeals.Total());
+
       for (int i = 0; i < buyLimitMissingDeals.Total(); i++) {
         Print("PlaceBuyLimitOrder: ", buyLimitMissingDeals[i]);
         Utility.PlaceBuyLimitOrder(buyLimitMissingDeals[i], buyLimitLot,
@@ -228,6 +232,8 @@ void CheckAndPlaceOrders() {
       FilterOpenOrdersAndPositionsByType(sellLimitArrayPrices, sellLimitGapSize,
                                          Comment, ORDER_TYPE_SELL_LIMIT,
                                          sellLimitMissingDeals);
+
+      Print("sellLimitMissingDeals: ", sellLimitMissingDeals.Total());
 
       for (int i = 0; i < sellLimitMissingDeals.Total(); i++) {
         Print("PlaceSellLimitOrder: ", sellLimitMissingDeals[i]);
@@ -242,6 +248,8 @@ void CheckAndPlaceOrders() {
       FilterOpenOrdersAndPositionsByType(sellStopArrayPrices, sellStopGapSize,
                                          Comment, ORDER_TYPE_SELL_STOP,
                                          sellStopMissingDeals);
+
+      Print("sellStopMissingDeals: ", sellStopMissingDeals.Total());
 
       for (int i = 0; i < sellStopMissingDeals.Total(); i++) {
         Print("PlaceSellStopOrder: ", sellStopMissingDeals[i]);
@@ -275,7 +283,7 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
       string orderComment = OrderGetString(ORDER_COMMENT);
       long orderType = OrderGetInteger(ORDER_TYPE);
 
-      if (orderComment != comment || symbol != _Symbol || (orderType != type))
+      if (orderComment != comment || symbol != _Symbol || orderType != type)
         continue;
 
       Utility.getExistDeals(arrayPrices, gridGapSize, orderPrice, existDeals);
@@ -349,6 +357,56 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
             ", ERROR: InfoInteger(DEAL_REASON,reason)");
       return;
     }
+
+    string strReason = "";
+
+    switch (reason) {
+    case DEAL_REASON_CLIENT:
+      strReason = "The deal was executed as a result of activation of an order "
+                  "placed from a desktop terminal.";
+      break;
+    case DEAL_REASON_MOBILE:
+      strReason = "The deal was executed as a result of activation of an order "
+                  "placed from a mobile application.";
+      break;
+    case DEAL_REASON_WEB:
+      strReason = "The deal was executed as a result of activation of an order "
+                  "placed from the web platform.";
+      break;
+    case DEAL_REASON_EXPERT:
+      strReason =
+          "The deal was executed as a result of activation of an order placed "
+          "from an MQL5 program, i.e. an Expert Advisor or a script.";
+      break;
+    case DEAL_REASON_SL:
+      strReason = "The deal was executed as a result of Stop Loss activation.";
+      break;
+    case DEAL_REASON_TP:
+      strReason =
+          "The deal was executed as a result of Take Profit activation.";
+      break;
+    case DEAL_REASON_SO:
+      strReason = "The deal was executed as a result of the Stop Out event.";
+      break;
+    case DEAL_REASON_ROLLOVER:
+      strReason = "The deal was executed due to a rollover.";
+      break;
+    case DEAL_REASON_VMARGIN:
+      strReason = "The deal was executed after charging the variation margin.";
+      break;
+    case DEAL_REASON_SPLIT:
+      strReason =
+          "The deal was executed after the split (price reduction) of an "
+          "instrument, which had an open position during split announcement.";
+      break;
+    case DEAL_REASON_CORPORATE_ACTION:
+      strReason =
+          "The deal was executed as a result of a corporate action: merging or "
+          "renaming a security, transferring a client to another account, etc.";
+      break;
+    }
+
+    Print("strReason: ", strReason);
 
     if ((ENUM_DEAL_REASON)reason == DEAL_REASON_SL)
       Alert("Stop Loss activation");

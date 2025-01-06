@@ -630,6 +630,10 @@ void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
   Print("minPrice: ", minPrice, ", maxPrice: ", maxPrice,
         ", gridGapSize: ", gridGapSize);
 
+  if (arrayPrices.Total() > 0) {
+    arrayPrices.Shutdown();
+  }
+
   for (double price = maxPrice; price >= minPrice;
        price = NormalizeDoubleTwoDigits(price - gridGapSize)) {
     if (price != 0) {
