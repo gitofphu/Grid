@@ -151,9 +151,9 @@ void GetArrayPrices() {
                           NormalizeDouble(ask + PriceRange, 1), buyStopGapSize,
                           buyStopArrayPrices);
 
-    // for (int i = 0; i < buyStopArrayPrices.Total(); i++) {
-    //   Print("buyStopArrayPrices: ", i, " = ", buyStopArrayPrices[i]);
-    // }
+    for (int i = 0; i < buyStopArrayPrices.Total(); i++) {
+      Print("buyStopArrayPrices: ", i, " = ", buyStopArrayPrices[i]);
+    }
   }
 
   if (buyLimitGapSize) {
@@ -161,9 +161,9 @@ void GetArrayPrices() {
                           NormalizeDouble(bid - buyLimitGapSize, 1),
                           buyLimitGapSize, buyLimitArrayPrices);
 
-    // for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
-    //   Print("buyLimitArrayPrices: ", i, " = ", buyLimitArrayPrices[i]);
-    // }
+    for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
+      Print("buyLimitArrayPrices: ", i, " = ", buyLimitArrayPrices[i]);
+    }
   }
 
   if (sellLimitGapSize) {
@@ -171,9 +171,9 @@ void GetArrayPrices() {
                           NormalizeDouble(ask + PriceRange, 1),
                           sellLimitGapSize, sellLimitArrayPrices);
 
-    // for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
-    //   Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
-    // }
+    for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
+      Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
+    }
   }
 
   if (sellStopGapSize) {
@@ -181,9 +181,9 @@ void GetArrayPrices() {
                           NormalizeDouble(bid - sellStopGapSize, 1),
                           sellStopGapSize, sellStopArrayPrices);
 
-    // for (int i = 0; i < sellStopArrayPrices.Total(); i++) {
-    //   Print("sellStopArrayPrices: ", i, " = ", sellStopArrayPrices[i]);
-    // }
+    for (int i = 0; i < sellStopArrayPrices.Total(); i++) {
+      Print("sellStopArrayPrices: ", i, " = ", sellStopArrayPrices[i]);
+    }
   }
 }
 
@@ -331,7 +331,56 @@ void OnDeinit(const int reason) {}
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
-void OnTick() {}
+void OnTick() {
+  double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+  double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+
+  if (buyStopGapSize && Utility.NormalizeDoubleTwoDigits(
+                            buyStopArrayPrices[buyStopArrayPrices.Total() - 1] -
+                            ask) >= buyStopGapSize) {
+
+    Print("buyStop ask: ", ask,
+          ", last price: ", buyStopArrayPrices[buyStopArrayPrices.Total() - 1],
+          ", diff: ",
+          Utility.NormalizeDoubleTwoDigits(
+              buyStopArrayPrices[buyStopArrayPrices.Total() - 1] - ask),
+          ", gap: ", buyStopGapSize);
+
+    Order66();
+  } else if (buyLimitGapSize &&
+             Utility.NormalizeDoubleTwoDigits(bid - buyLimitArrayPrices[0]) >=
+                 buyLimitGapSize) {
+
+    Print("buyLimit bid: ", bid, ", first price: ", buyLimitArrayPrices[0],
+          ", diff: ",
+          Utility.NormalizeDoubleTwoDigits(bid - buyLimitArrayPrices[0]),
+          ", gap: ", buyLimitGapSize);
+
+    Order66();
+  } else if (sellLimitGapSize &&
+             Utility.NormalizeDoubleTwoDigits(
+                 sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] -
+                 ask) >= sellLimitGapSize) {
+
+    Print("sellLimit ask: ", ask, ", last price: ",
+          sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1], ", diff: ",
+          Utility.NormalizeDoubleTwoDigits(
+              sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask),
+          ", gap: ", sellLimitGapSize);
+
+    Order66();
+  } else if (sellStopGapSize &&
+             Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]) >=
+                 sellStopGapSize) {
+
+    Print("sellStop bid: ", bid, ", first price: ", sellStopArrayPrices[0],
+          ", diff: ",
+          Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]),
+          ", gap: ", sellStopGapSize);
+
+    Order66();
+  }
+}
 
 //+------------------------------------------------------------------+
 //| TradeTransaction function                                        |
@@ -412,15 +461,17 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       Alert("Stop Loss activation");
     else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
       Alert("Take Profit activation");
-      GetArrayPrices();
-      CloseOrderOutSideArray();
-      CheckAndPlaceOrders();
+      Order66();
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
-      GetArrayPrices();
-      CloseOrderOutSideArray();
-      CheckAndPlaceOrders();
+      Order66();
     }
   }
+}
+
+void Order66() {
+  GetArrayPrices();
+  CloseOrderOutSideArray();
+  CheckAndPlaceOrders();
 }
 
 //+------------------------------------------------------------------+
