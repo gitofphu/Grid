@@ -335,11 +335,9 @@ void OnTick() {
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-  Print("OnTick ask: ", ask, ", bid: ", bid);
-
   if (buyStopGapSize && Utility.NormalizeDoubleTwoDigits(
                             buyStopArrayPrices[buyStopArrayPrices.Total() - 1] -
-                            ask) >= buyStopGapSize) {
+                            ask) > buyStopGapSize) {
 
     Print("buyStop ask: ", ask,
           ", last price: ", buyStopArrayPrices[buyStopArrayPrices.Total() - 1],
@@ -362,6 +360,8 @@ void OnTick() {
 
     bool orderPriceInvalid = false;
 
+    Print("buyStopMissingDeals: ", buyStopMissingDeals.Total());
+
     for (int i = 0; i < buyStopMissingDeals.Total(); i++) {
       Utility.PlaceBuyStopOrder(buyStopMissingDeals[i], buyStopLot,
                                 buyStopGapSize, Comment, orderPriceInvalid);
@@ -369,7 +369,7 @@ void OnTick() {
   }
 
   if (buyLimitGapSize && Utility.NormalizeDoubleTwoDigits(
-                             bid - buyLimitArrayPrices[0]) >= buyLimitGapSize) {
+                             bid - buyLimitArrayPrices[0]) > buyLimitGapSize) {
 
     Print("buyLimit bid: ", bid, ", first price: ", buyLimitArrayPrices[0],
           ", diff: ",
@@ -390,6 +390,8 @@ void OnTick() {
 
     bool orderPriceInvalid = false;
 
+    Print("buyLimitMissingDeals: ", buyLimitMissingDeals.Total());
+
     for (int i = 0; i < buyLimitMissingDeals.Total(); i++) {
       Utility.PlaceBuyLimitOrder(buyLimitMissingDeals[i], buyLimitLot,
                                  buyLimitGapSize, Comment, orderPriceInvalid);
@@ -398,7 +400,7 @@ void OnTick() {
 
   if (sellLimitGapSize &&
       Utility.NormalizeDoubleTwoDigits(
-          sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask) >=
+          sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask) >
           sellLimitGapSize) {
 
     Print("sellLimit ask: ", ask, ", last price: ",
@@ -421,6 +423,8 @@ void OnTick() {
 
     bool orderPriceInvalid = false;
 
+    Print("sellLimitMissingDeals: ", sellLimitMissingDeals.Total());
+
     for (int i = 0; i < sellLimitMissingDeals.Total(); i++) {
       Print("PlaceSellLimitOrder: ", sellLimitMissingDeals[i]);
       Utility.PlaceSellLimitOrder(sellLimitMissingDeals[i], sellLimitLot,
@@ -429,7 +433,7 @@ void OnTick() {
   }
 
   if (sellStopGapSize && Utility.NormalizeDoubleTwoDigits(
-                             bid - sellStopArrayPrices[0]) >= sellStopGapSize) {
+                             bid - sellStopArrayPrices[0]) > sellStopGapSize) {
 
     Print("sellStop bid: ", bid, ", first price: ", sellStopArrayPrices[0],
           ", diff: ",
@@ -449,6 +453,8 @@ void OnTick() {
                                        sellStopMissingDeals);
 
     bool orderPriceInvalid = false;
+
+    Print("sellStopMissingDeals: ", sellStopMissingDeals.Total());
 
     for (int i = 0; i < sellStopMissingDeals.Total(); i++) {
       Utility.PlaceSellStopOrder(sellStopMissingDeals[i], sellStopLot,
