@@ -69,6 +69,8 @@ public:
   void PlaceSellStopOrder(double price, double lot, double gridGapSize,
                           string comment, bool &orderPriceInvalid);
 
+  string GetOrderTypeString(ENUM_ORDER_TYPE type);
+
 private:
 };
 
@@ -259,6 +261,35 @@ void MyUtility::CloseOrderOutsideArrayPrices(const CArrayDouble &arrayPrices,
 }
 
 //+------------------------------------------------------------------+
+//| Access functions GetOrderTypeString().                           |
+//| INPUT:  type     - enum order type,                              |
+//+------------------------------------------------------------------+
+string MyUtility::GetOrderTypeString(ENUM_ORDER_TYPE type) {
+  switch (type) {
+  case ORDER_TYPE_BUY:
+    return "ORDER_TYPE_BUY";
+  case ORDER_TYPE_SELL:
+    return "ORDER_TYPE_SELL";
+  case ORDER_TYPE_BUY_LIMIT:
+    return "ORDER_TYPE_BUY_LIMIT";
+  case ORDER_TYPE_SELL_LIMIT:
+    return "ORDER_TYPE_SELL_LIMIT";
+  case ORDER_TYPE_BUY_STOP:
+    return "ORDER_TYPE_BUY_STOP";
+  case ORDER_TYPE_SELL_STOP:
+    return "ORDER_TYPE_SELL_STOP";
+  case ORDER_TYPE_BUY_STOP_LIMIT:
+    return "ORDER_TYPE_BUY_STOP_LIMIT";
+  case ORDER_TYPE_SELL_STOP_LIMIT:
+    return "ORDER_TYPE_SELL_STOP_LIMIT";
+  case ORDER_TYPE_CLOSE_BY:
+    return "ORDER_TYPE_CLOSE_BY";
+  default:
+    return "UNKNOWN";
+  }
+}
+
+//+------------------------------------------------------------------+
 //| Access functions CloseOrderOutsideArrayPricesByType().           |
 //| INPUT:  arrayPrices     - grid price array,                      |
 //|         comment         - comment,                               |
@@ -268,13 +299,14 @@ void MyUtility::CloseOrderOutsideArrayPrices(const CArrayDouble &arrayPrices,
 void MyUtility::CloseOrderOutsideArrayPricesByType(
     const CArrayDouble &arrayPrices, const string comment, const double lot,
     const ENUM_ORDER_TYPE type) {
-  Print("CloseOrderOutsideArrayPricesByType arrayPrices.Total():",
-        arrayPrices.Total(), ", comment: ", comment, ", lot: ", lot,
-        ", type: ", type);
 
   if (arrayPrices.Total() == 0) {
     return;
   }
+
+  Print("CloseOrderOutsideArrayPricesByType arrayPrices.Total():",
+        arrayPrices.Total(), ", comment: ", comment, ", lot: ", lot,
+        ", type: ", GetOrderTypeString(type));
 
   int ordersTotal = OrdersTotal();
   CArrayLong tickets;

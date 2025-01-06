@@ -270,7 +270,7 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
                                         const ENUM_ORDER_TYPE type,
                                         CArrayDouble &missingDeals) {
   Print("FilterOpenOrdersAndPositionsByType comment: ", comment,
-        " type: ", type);
+        ", type: ", Utility.GetOrderTypeString(type));
 
   CArrayDouble existDeals;
 
