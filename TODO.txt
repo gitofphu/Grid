@@ -51,3 +51,4 @@
 // [ ] Fill lot if open position less than lotPerGrid
 // [x] CheckAndPlaceOrders on pending order exceute
 // [x] Trailing pending Order
+// [ ] add min max price to four way

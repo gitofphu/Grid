@@ -25,6 +25,8 @@ input double sellLimitGapSize = NULL;
 input double sellStopLot = NULL;
 input double sellStopGapSize = NULL;
 
+input bool useNotification = false;
+
 bool isInit = false;
 
 int limitOrders;
@@ -43,6 +45,11 @@ int OnInit() {
 
   if (isInit)
     return (INIT_SUCCEEDED);
+
+  if (useNotification && !TerminalInfoInteger(TERMINAL_NOTIFICATIONS_ENABLED)) {
+    Utility.AlertAndExit("Error. The client terminal does not have permission "
+                         "to send notifications");
+  }
 
   if (SymbolInfoString(_Symbol, SYMBOL_CURRENCY_MARGIN) !=
       SymbolInfoString(_Symbol, SYMBOL_CURRENCY_PROFIT)) {
@@ -260,9 +267,9 @@ void CheckAndPlaceOrders() {
 
   } while (orderPriceInvalid && errors < 3);
 
-  if (errors >= 3) {
-    Utility.AlertAndExit("Place order error.");
-  }
+  // if (errors >= 3) {
+  //   Utility.AlertAndExit("Place order error.");
+  // }
 }
 
 void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
@@ -538,11 +545,25 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
     Print("strReason: ", strReason);
 
-    if ((ENUM_DEAL_REASON)reason == DEAL_REASON_SL)
-      Alert("Stop Loss activation");
-    else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
-      Alert("Take Profit activation");
+    if ((ENUM_DEAL_REASON)reason == DEAL_REASON_SL) {
+      string message = "Stop Loss activation";
+
+      Alert(message);
+
+      if (useNotification)
+        SendNotification(message);
+
+    } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
+
+      string message = "Take Profit activation";
+
+      Alert(message);
+
+      if (useNotification)
+        SendNotification(message);
+
       Order66();
+
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
       Order66();
     }

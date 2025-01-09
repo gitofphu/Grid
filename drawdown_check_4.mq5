@@ -10,9 +10,9 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
-double currentPrice = 74.5;
-double maxPrice = 80;
-double minPrice = 60;
+double currentPrice = 73;
+double maxPrice = 90;
+double minPrice = 65;
 double gridGap = 0.1;
 double lot = 0.01;
 
@@ -23,8 +23,8 @@ void OnStart() {
   Print("currentPrice: ", currentPrice, ", maxPrice: ", maxPrice,
         ", minPrice: ", minPrice, ", gridGap: ", gridGap, ", lot: ", lot);
 
-  // UpTrendCheck();
-  DownTrendCheck();
+  UpTrendCheck();
+  // DownTrendCheck();
 }
 //+------------------------------------------------------------------+
 
