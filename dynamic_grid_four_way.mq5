@@ -16,18 +16,25 @@ CDealInfo cDealInfo;
 input double PriceRange = 10;
 input int MaxOrders = NULL;
 
-input double buyStopLot = NULL;
-input double buyStopGapSize = NULL;
-input double buyLimitLot = NULL;
-input double buyLimitGapSize = NULL;
-input double sellLimitLot = NULL;
-input double sellLimitGapSize = NULL;
-input double sellStopLot = NULL;
-input double sellStopGapSize = NULL;
+input double BuyStopLot = NULL;
+input double BuyStopGapSize = NULL;
+input double BuyLimitLot = NULL;
+input double BuyLimitGapSize = NULL;
+input double SellLimitLot = NULL;
+input double SellLimitGapSize = NULL;
+input double SellStopLot = NULL;
+input double SellStopGapSize = NULL;
+
+double buyStopLot = NULL;
+double buyStopGapSize = NULL;
+double buyLimitLot = NULL;
+double buyLimitGapSize = NULL;
+double sellLimitLot = NULL;
+double sellLimitGapSize = NULL;
+double sellStopLot = NULL;
+double sellStopGapSize = NULL;
 
 input bool useNotification = false;
-
-bool isInit = false;
 
 int limitOrders;
 CArrayDouble buyStopArrayPrices;
@@ -41,10 +48,22 @@ string Comment = "dynamic_grid";
 //+------------------------------------------------------------------+
 int OnInit() {
 
-  Print("OnInit");
-
-  if (isInit)
+  if (BuyStopLot == buyStopLot && BuyStopGapSize == buyStopGapSize &&
+      BuyLimitLot == buyLimitLot && BuyLimitGapSize == buyLimitGapSize &&
+      SellLimitLot == sellLimitLot && SellLimitGapSize == sellLimitGapSize &&
+      SellStopLot == sellStopLot && SellStopGapSize == sellStopGapSize) {
+    Print("Parameters are already set.");
     return (INIT_SUCCEEDED);
+  }
+
+  buyStopLot = BuyStopLot;
+  buyStopGapSize = BuyStopGapSize;
+  buyLimitLot = BuyLimitLot;
+  buyLimitGapSize = BuyLimitGapSize;
+  sellLimitLot = SellLimitLot;
+  sellLimitGapSize = SellLimitGapSize;
+  sellStopLot = SellStopLot;
+  sellStopGapSize = SellStopGapSize;
 
   if (useNotification && !TerminalInfoInteger(TERMINAL_NOTIFICATIONS_ENABLED)) {
     Utility.AlertAndExit("Error. The client terminal does not have permission "
@@ -130,7 +149,6 @@ int OnInit() {
 
   CheckAndPlaceOrders();
 
-  isInit = true;
   return (INIT_SUCCEEDED);
 }
 
