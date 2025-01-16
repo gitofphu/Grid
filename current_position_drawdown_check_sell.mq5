@@ -51,6 +51,9 @@ void OnStart() {
   double balance = cAccountInfo.Balance();
   double totalDrawdown = 0;
 
+  double totalProfit = 0;
+  double buyLot = 0.1;
+
   do {
 
     double drawdown = 0;
@@ -62,10 +65,17 @@ void OnStart() {
       drawdown = Utility.NormalizeDoubleTwoDigits(drawdown + loss);
     }
 
-    Print("price: ", price, ", drawdown: ", drawdown);
+    double profit = cAccountInfo.OrderProfitCheck(
+        _Symbol, ORDER_TYPE_BUY, buyLot, price - gridGap, price);
+
+    Print("price: ", price, ", drawdown: ", drawdown, ", profit: ", profit);
 
     totalDrawdown = Utility.NormalizeDoubleTwoDigits(drawdown);
     price = Utility.NormalizeDoubleTwoDigits(price + gridGap);
-  } while (balance + totalDrawdown > 0);
+    totalProfit = Utility.NormalizeDoubleTwoDigits(totalProfit + profit);
+  } while (balance + totalDrawdown + totalProfit > 0);
+
+  Print("balance: ", balance, ", totalDrawdown: ", totalDrawdown,
+        ", totalProfit: ", totalProfit);
 }
 //+------------------------------------------------------------------+

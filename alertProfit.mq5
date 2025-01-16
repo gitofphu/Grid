@@ -46,18 +46,58 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       return;
     }
 
+    int orderType = (int)HistoryOrderGetInteger(trans.deal, ORDER_TYPE);
+
+    string strType = "";
+
+    switch (orderType) {
+    case ORDER_TYPE_BUY:
+      // Print("ORDER_TYPE_BUY");
+      strType = "ORDER_TYPE_BUY";
+      break;
+    case ORDER_TYPE_SELL:
+      // Print("ORDER_TYPE_SELL");
+      strType = "ORDER_TYPE_SELL";
+      break;
+    case ORDER_TYPE_BUY_LIMIT:
+      // Print("ORDER_TYPE_BUY_LIMIT");
+      strType = "ORDER_TYPE_BUY_LIMIT";
+      break;
+    case ORDER_TYPE_SELL_LIMIT:
+      // Print("ORDER_TYPE_SELL_LIMIT");
+      strType = "ORDER_TYPE_SELL_LIMIT";
+      break;
+    case ORDER_TYPE_BUY_STOP:
+      // Print("ORDER_TYPE_BUY_STOP");
+      strType = "ORDER_TYPE_BUY_STOP";
+      break;
+    case ORDER_TYPE_SELL_STOP:
+      // Print("ORDER_TYPE_SELL_STOP");
+      strType = "ORDER_TYPE_SELL_STOP";
+      break;
+    case ORDER_TYPE_BUY_STOP_LIMIT:
+      // Print("ORDER_TYPE_BUY_STOP_LIMIT");
+      strType = "ORDER_TYPE_BUY_STOP_LIMIT";
+      break;
+    case ORDER_TYPE_SELL_STOP_LIMIT:
+      // Print("ORDER_TYPE_SELL_STOP_LIMIT");
+      strType = "ORDER_TYPE_SELL_STOP_LIMIT";
+      break;
+    case ORDER_TYPE_CLOSE_BY:
+      // Print("ORDER_TYPE_CLOSE_BY");
+      strType = "ORDER_TYPE_CLOSE_BY";
+      break;
+    default:
+      // Print("Unknow Type");
+      break;
+    }
+
     long reason = -1;
     if (!cDealInfo.InfoInteger(DEAL_REASON, reason)) {
       Print(__FILE__, " ", __FUNCTION__,
             ", ERROR: InfoInteger(DEAL_REASON,reason)");
       return;
     }
-
-    // long dealType = -1;
-    // cDealInfo.InfoInteger(DEAL_TYPE, dealType);
-    // Print("Deal Type: ", dealType);
-
-    // Print("DealType(): ", cDealInfo.DealType());
 
     string strReason = "";
 
@@ -110,7 +150,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
     Print("strReason: ", strReason);
 
     if ((ENUM_DEAL_REASON)reason == DEAL_REASON_SL) {
-      string message = "Stop Loss activation";
+      string message = "SL " + strType + " " + (string)trans.volume;
 
       Alert(message);
 
@@ -129,12 +169,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       //       ", volume: ", trans.volume, ", position: ", trans.position,
       //       ", position_by: ", trans.position_by);
 
-      string message = "Take Profit activation";
-      if (trans.order_type == ORDER_TYPE_BUY) {
-        message = "Take Profit activation for BUY order";
-      } else if (trans.order_type == ORDER_TYPE_SELL) {
-        message = "Take Profit activation for SELL order";
-      }
+      string message = "TP " + strType + " " + (string)trans.volume;
 
       Alert(message);
     }

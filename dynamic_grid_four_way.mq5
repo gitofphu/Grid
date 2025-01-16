@@ -513,6 +513,40 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       return;
     }
 
+    int orderType = (int)HistoryOrderGetInteger(trans.deal, ORDER_TYPE);
+
+    string strType = "";
+
+    switch (orderType) {
+    case ORDER_TYPE_BUY:
+      strType = "ORDER_TYPE_BUY";
+      break;
+    case ORDER_TYPE_SELL:
+      strType = "ORDER_TYPE_SELL";
+      break;
+    case ORDER_TYPE_BUY_LIMIT:
+      strType = "ORDER_TYPE_BUY_LIMIT";
+      break;
+    case ORDER_TYPE_SELL_LIMIT:
+      strType = "ORDER_TYPE_SELL_LIMIT";
+      break;
+    case ORDER_TYPE_BUY_STOP:
+      strType = "ORDER_TYPE_BUY_STOP";
+      break;
+    case ORDER_TYPE_SELL_STOP:
+      strType = "ORDER_TYPE_SELL_STOP";
+      break;
+    case ORDER_TYPE_BUY_STOP_LIMIT:
+      strType = "ORDER_TYPE_BUY_STOP_LIMIT";
+      break;
+    case ORDER_TYPE_SELL_STOP_LIMIT:
+      strType = "ORDER_TYPE_SELL_STOP_LIMIT";
+      break;
+    case ORDER_TYPE_CLOSE_BY:
+      strType = "ORDER_TYPE_CLOSE_BY";
+      break;
+    }
+
     string strReason = "";
 
     switch (reason) {
@@ -564,7 +598,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
     Print("strReason: ", strReason);
 
     if ((ENUM_DEAL_REASON)reason == DEAL_REASON_SL) {
-      string message = "Stop Loss activation";
+      string message = "SL " + strType + " " + (string)trans.volume;
 
       Alert(message);
 
@@ -573,7 +607,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
 
-      string message = "Take Profit activation";
+      string message = "TP " + strType + " " + (string)trans.volume;
 
       Alert(message);
 
