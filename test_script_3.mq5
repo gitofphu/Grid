@@ -22,12 +22,21 @@ void OnStart() {
   //   Print("cDealInfo.Comment(): ", cDealInfo.Comment());
 
   // use this method
-  // //  Order ticket
-  if (HistoryOrderSelect(306590481)) {
-    Print("Price: ", HistoryOrderGetDouble(306590481, ORDER_PRICE_OPEN));
-    Print("TP: ", HistoryOrderGetDouble(306590481, ORDER_TP));
-    Print("Symbol: ", HistoryOrderGetString(306590481, ORDER_SYMBOL));
-    Print("Comment: ", HistoryOrderGetString(306590481, ORDER_COMMENT));
+  // History ticket
+  ulong ticket = 312255731;
+  if (HistoryOrderSelect(ticket)) {
+    Print("Price: ", HistoryOrderGetDouble(ticket, ORDER_PRICE_OPEN));
+    Print("TP: ", HistoryOrderGetDouble(ticket, ORDER_TP));
+    Print("Volume: ", HistoryOrderGetDouble(ticket, ORDER_VOLUME_CURRENT));
+    long orderType;
+    HistoryOrderGetInteger(ticket, ORDER_TYPE, orderType);
+    Print("ORDER_TYPE: ", orderType);
+    Print("ORDER_TYPE: ", GetOrderType(orderType));
+    Print("ORDER_TICKET: ", HistoryOrderGetInteger(ticket, ORDER_TICKET));
+    Print("ORDER_POSITION_ID: ",
+          HistoryOrderGetInteger(ticket, ORDER_POSITION_ID));
+    Print("Symbol: ", HistoryOrderGetString(ticket, ORDER_SYMBOL));
+    Print("Comment: ", HistoryOrderGetString(ticket, ORDER_COMMENT));
   }
 
   // Deal ticket
@@ -37,4 +46,40 @@ void OnStart() {
   //     Print("Symbol: ", HistoryDealGetString(313115050, DEAL_SYMBOL));
   //     Print("Comment: ", HistoryDealGetString(313115050, DEAL_COMMENT));
   //   }
+}
+
+string GetOrderType(long orderType) {
+  string strType = "";
+
+  switch (orderType) {
+  case ORDER_TYPE_BUY:
+    strType = "ORDER_TYPE_BUY";
+    break;
+  case ORDER_TYPE_SELL:
+    strType = "ORDER_TYPE_SELL";
+    break;
+  case ORDER_TYPE_BUY_LIMIT:
+    strType = "ORDER_TYPE_BUY_LIMIT";
+    break;
+  case ORDER_TYPE_SELL_LIMIT:
+    strType = "ORDER_TYPE_SELL_LIMIT";
+    break;
+  case ORDER_TYPE_BUY_STOP:
+    strType = "ORDER_TYPE_BUY_STOP";
+    break;
+  case ORDER_TYPE_SELL_STOP:
+    strType = "ORDER_TYPE_SELL_STOP";
+    break;
+  case ORDER_TYPE_BUY_STOP_LIMIT:
+    strType = "ORDER_TYPE_BUY_STOP_LIMIT";
+    break;
+  case ORDER_TYPE_SELL_STOP_LIMIT:
+    strType = "ORDER_TYPE_SELL_STOP_LIMIT";
+    break;
+  default:
+    strType = "UNKNOWN";
+    break;
+  }
+
+  return strType;
 }

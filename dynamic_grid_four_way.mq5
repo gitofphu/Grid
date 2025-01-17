@@ -515,87 +515,11 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
     int orderType = (int)HistoryOrderGetInteger(trans.deal, ORDER_TYPE);
 
-    string strType = "";
-
-    switch (orderType) {
-    case ORDER_TYPE_BUY:
-      strType = "ORDER_TYPE_BUY";
-      break;
-    case ORDER_TYPE_SELL:
-      strType = "ORDER_TYPE_SELL";
-      break;
-    case ORDER_TYPE_BUY_LIMIT:
-      strType = "ORDER_TYPE_BUY_LIMIT";
-      break;
-    case ORDER_TYPE_SELL_LIMIT:
-      strType = "ORDER_TYPE_SELL_LIMIT";
-      break;
-    case ORDER_TYPE_BUY_STOP:
-      strType = "ORDER_TYPE_BUY_STOP";
-      break;
-    case ORDER_TYPE_SELL_STOP:
-      strType = "ORDER_TYPE_SELL_STOP";
-      break;
-    case ORDER_TYPE_BUY_STOP_LIMIT:
-      strType = "ORDER_TYPE_BUY_STOP_LIMIT";
-      break;
-    case ORDER_TYPE_SELL_STOP_LIMIT:
-      strType = "ORDER_TYPE_SELL_STOP_LIMIT";
-      break;
-    case ORDER_TYPE_CLOSE_BY:
-      strType = "ORDER_TYPE_CLOSE_BY";
-      break;
-    }
-
-    string strReason = "";
-
-    switch (reason) {
-    case DEAL_REASON_CLIENT:
-      strReason = "The deal was executed as a result of activation of an order "
-                  "placed from a desktop terminal.";
-      break;
-    case DEAL_REASON_MOBILE:
-      strReason = "The deal was executed as a result of activation of an order "
-                  "placed from a mobile application.";
-      break;
-    case DEAL_REASON_WEB:
-      strReason = "The deal was executed as a result of activation of an order "
-                  "placed from the web platform.";
-      break;
-    case DEAL_REASON_EXPERT:
-      strReason =
-          "The deal was executed as a result of activation of an order placed "
-          "from an MQL5 program, i.e. an Expert Advisor or a script.";
-      break;
-    case DEAL_REASON_SL:
-      strReason = "The deal was executed as a result of Stop Loss activation.";
-      break;
-    case DEAL_REASON_TP:
-      strReason =
-          "The deal was executed as a result of Take Profit activation.";
-      break;
-    case DEAL_REASON_SO:
-      strReason = "The deal was executed as a result of the Stop Out event.";
-      break;
-    case DEAL_REASON_ROLLOVER:
-      strReason = "The deal was executed due to a rollover.";
-      break;
-    case DEAL_REASON_VMARGIN:
-      strReason = "The deal was executed after charging the variation margin.";
-      break;
-    case DEAL_REASON_SPLIT:
-      strReason =
-          "The deal was executed after the split (price reduction) of an "
-          "instrument, which had an open position during split announcement.";
-      break;
-    case DEAL_REASON_CORPORATE_ACTION:
-      strReason =
-          "The deal was executed as a result of a corporate action: merging or "
-          "renaming a security, transferring a client to another account, etc.";
-      break;
-    }
+    string strReason = Utility.GetDealReasonString((ENUM_DEAL_REASON)reason);
 
     Print("strReason: ", strReason);
+
+    string strType = Utility.GetOrderTypeStringFromTransDeal(trans);
 
     if ((ENUM_DEAL_REASON)reason == DEAL_REASON_SL) {
       string message = "SL " + strType + " " + (string)trans.volume;

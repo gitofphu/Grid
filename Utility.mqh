@@ -70,6 +70,8 @@ public:
                           string comment, bool &orderPriceInvalid);
 
   string GetOrderTypeString(ENUM_ORDER_TYPE type);
+  string GetDealReasonString(ENUM_DEAL_REASON reason);
+  string GetOrderTypeStringFromTransDeal(const MqlTradeTransaction &trans);
 
 private:
 };
@@ -257,35 +259,6 @@ void MyUtility::CloseOrderOutsideArrayPrices(const CArrayDouble &arrayPrices,
       uint retcode = cTrade.ResultRetcode();
       Print("MyUtility::CloseOrderOutsideArrayPrices retcode: ", retcode);
     }
-  }
-}
-
-//+------------------------------------------------------------------+
-//| Access functions GetOrderTypeString().                           |
-//| INPUT:  type     - enum order type,                              |
-//+------------------------------------------------------------------+
-string MyUtility::GetOrderTypeString(ENUM_ORDER_TYPE type) {
-  switch (type) {
-  case ORDER_TYPE_BUY:
-    return "ORDER_TYPE_BUY";
-  case ORDER_TYPE_SELL:
-    return "ORDER_TYPE_SELL";
-  case ORDER_TYPE_BUY_LIMIT:
-    return "ORDER_TYPE_BUY_LIMIT";
-  case ORDER_TYPE_SELL_LIMIT:
-    return "ORDER_TYPE_SELL_LIMIT";
-  case ORDER_TYPE_BUY_STOP:
-    return "ORDER_TYPE_BUY_STOP";
-  case ORDER_TYPE_SELL_STOP:
-    return "ORDER_TYPE_SELL_STOP";
-  case ORDER_TYPE_BUY_STOP_LIMIT:
-    return "ORDER_TYPE_BUY_STOP_LIMIT";
-  case ORDER_TYPE_SELL_STOP_LIMIT:
-    return "ORDER_TYPE_SELL_STOP_LIMIT";
-  case ORDER_TYPE_CLOSE_BY:
-    return "ORDER_TYPE_CLOSE_BY";
-  default:
-    return "UNKNOWN";
   }
 }
 
@@ -883,4 +856,96 @@ void MyUtility::PlaceSellStopOrder(double price, double lot, double gridGapSize,
     uint retcode = cTrade.ResultRetcode();
     Print("retcode: ", retcode);
   }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetOrderTypeString().                           |
+//| INPUT:  type     - enum order type,                              |
+//+------------------------------------------------------------------+
+string MyUtility::GetOrderTypeString(ENUM_ORDER_TYPE type) {
+  switch (type) {
+  case ORDER_TYPE_BUY:
+    return "ORDER_TYPE_BUY";
+  case ORDER_TYPE_SELL:
+    return "ORDER_TYPE_SELL";
+  case ORDER_TYPE_BUY_LIMIT:
+    return "ORDER_TYPE_BUY_LIMIT";
+  case ORDER_TYPE_SELL_LIMIT:
+    return "ORDER_TYPE_SELL_LIMIT";
+  case ORDER_TYPE_BUY_STOP:
+    return "ORDER_TYPE_BUY_STOP";
+  case ORDER_TYPE_SELL_STOP:
+    return "ORDER_TYPE_SELL_STOP";
+  case ORDER_TYPE_BUY_STOP_LIMIT:
+    return "ORDER_TYPE_BUY_STOP_LIMIT";
+  case ORDER_TYPE_SELL_STOP_LIMIT:
+    return "ORDER_TYPE_SELL_STOP_LIMIT";
+  case ORDER_TYPE_CLOSE_BY:
+    return "ORDER_TYPE_CLOSE_BY";
+  default:
+    return "UNKNOWN";
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetDealReasonString().                          |
+//| INPUT:  type     - enum deal reason,                             |
+//+------------------------------------------------------------------+
+string MyUtility::GetDealReasonString(ENUM_DEAL_REASON reason) {
+  switch (reason) {
+  case DEAL_REASON_CLIENT:
+    return "The deal was executed as a result of activation of an order "
+           "placed from a desktop terminal.";
+  case DEAL_REASON_MOBILE:
+    return "The deal was executed as a result of activation of an order "
+           "placed from a mobile application.";
+  case DEAL_REASON_WEB:
+    return "The deal was executed as a result of activation of an order "
+           "placed from the web platform.";
+  case DEAL_REASON_EXPERT:
+    return "The deal was executed as a result of activation of an order placed "
+           "from an MQL5 program, i.e. an Expert Advisor or a script.";
+  case DEAL_REASON_SL:
+    return "The deal was executed as a result of Stop Loss activation.";
+  case DEAL_REASON_TP:
+    return "The deal was executed as a result of Take Profit activation.";
+  case DEAL_REASON_SO:
+    return "The deal was executed as a result of the Stop Out event.";
+  case DEAL_REASON_ROLLOVER:
+    return "The deal was executed due to a rollover.";
+  case DEAL_REASON_VMARGIN:
+    return "The deal was executed after charging the variation margin.";
+  case DEAL_REASON_SPLIT:
+    return "The deal was executed after the split (price reduction) of an "
+           "instrument, which had an open position during split announcement.";
+  case DEAL_REASON_CORPORATE_ACTION:
+    return "The deal was executed as a result of a corporate action: merging "
+           "or "
+           "renaming a security, transferring a client to another account, "
+           "etc.";
+  default:
+    return "UNKNOWN";
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetOrderTypeStringFromTransDeal().              |
+//| INPUT:  trans     - &trans,                                      |
+//+------------------------------------------------------------------+
+string
+MyUtility::GetOrderTypeStringFromTransDeal(const MqlTradeTransaction &trans) {
+  string strType = "";
+
+  if (HistoryDealSelect(trans.deal)) {
+    long deal_pos_id = HistoryDealGetInteger(trans.deal, DEAL_POSITION_ID);
+
+    if (HistoryOrderSelect(deal_pos_id)) {
+      long orderType;
+      HistoryOrderGetInteger(deal_pos_id, ORDER_TYPE, orderType);
+
+      strType = GetOrderTypeString((ENUM_ORDER_TYPE)orderType);
+    }
+  }
+
+  return strType;
 }
