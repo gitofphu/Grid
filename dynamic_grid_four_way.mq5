@@ -13,26 +13,46 @@ MyUtility Utility;
 #include <Trade/DealInfo.mqh>
 CDealInfo cDealInfo;
 
+//+------------------------------------------------------------------+
+//| Input                                                            |
+//+------------------------------------------------------------------+
 input double PriceRange = 10;
 input int MaxOrders = NULL;
 
 input double BuyStopLot = NULL;
 input double BuyStopGapSize = NULL;
+input double BuyStopTP = NULL;
+
 input double BuyLimitLot = NULL;
 input double BuyLimitGapSize = NULL;
+input double BuyLimitTP = NULL;
+
 input double SellLimitLot = NULL;
 input double SellLimitGapSize = NULL;
+input double SellLimitTP = NULL;
+
 input double SellStopLot = NULL;
 input double SellStopGapSize = NULL;
+input double SellStopTP = NULL;
 
+//+------------------------------------------------------------------+
+//| Global variables                                                 |
+//+------------------------------------------------------------------+
 double buyStopLot = NULL;
 double buyStopGapSize = NULL;
+double buyStopTP = NULL;
+
 double buyLimitLot = NULL;
 double buyLimitGapSize = NULL;
+double buyLimitTP = NULL;
+
 double sellLimitLot = NULL;
 double sellLimitGapSize = NULL;
+double sellLimitTP = NULL;
+
 double sellStopLot = NULL;
 double sellStopGapSize = NULL;
+double sellStopTP = NULL;
 
 input bool useNotification = false;
 
@@ -49,21 +69,27 @@ string Comment = "dynamic_grid";
 int OnInit() {
 
   if (BuyStopLot == buyStopLot && BuyStopGapSize == buyStopGapSize &&
-      BuyLimitLot == buyLimitLot && BuyLimitGapSize == buyLimitGapSize &&
+      BuyStopTP == buyStopTP && BuyLimitLot == buyLimitLot &&
+      BuyLimitGapSize == buyLimitGapSize && BuyLimitTP == buyLimitTP &&
       SellLimitLot == sellLimitLot && SellLimitGapSize == sellLimitGapSize &&
-      SellStopLot == sellStopLot && SellStopGapSize == sellStopGapSize) {
+      SellLimitTP == sellLimitTP && SellStopLot == sellStopLot &&
+      SellStopGapSize == sellStopGapSize && SellStopTP == sellStopTP) {
     Print("Parameters are already set.");
     return (INIT_SUCCEEDED);
   }
 
   buyStopLot = BuyStopLot;
   buyStopGapSize = BuyStopGapSize;
+  buyStopTP = BuyStopTP;
   buyLimitLot = BuyLimitLot;
   buyLimitGapSize = BuyLimitGapSize;
+  buyLimitTP = BuyLimitTP;
   sellLimitLot = SellLimitLot;
   sellLimitGapSize = SellLimitGapSize;
+  sellLimitTP = SellLimitTP;
   sellStopLot = SellStopLot;
   sellStopGapSize = SellStopGapSize;
+  sellStopTP = SellStopTP;
 
   if (useNotification && !TerminalInfoInteger(TERMINAL_NOTIFICATIONS_ENABLED)) {
     Utility.AlertAndExit("Error. The client terminal does not have permission "
@@ -77,22 +103,27 @@ int OnInit() {
   }
 
   if ((buyStopLot != NULL && buyStopGapSize == NULL) ||
-      (buyStopLot == NULL && buyStopGapSize != NULL)) {
+      (buyStopLot == NULL && buyStopGapSize != NULL) ||
+      (buyStopLot == NULL && buyStopGapSize == NULL && buyStopTP != NULL)) {
     Utility.AlertAndExit("buyStopLot andbuyStopGapSize is required!");
   }
 
   if ((buyLimitLot != NULL && buyLimitGapSize == NULL) ||
-      (buyLimitLot == NULL && buyLimitGapSize != NULL)) {
+      (buyLimitLot == NULL && buyLimitGapSize != NULL) ||
+      (buyLimitLot == NULL && buyLimitGapSize == NULL && buyLimitTP != NULL)) {
     Utility.AlertAndExit("buyLimitLot and buyLimitGapSize is required!");
   }
 
   if ((sellLimitLot != NULL && sellLimitGapSize == NULL) ||
-      (sellLimitLot == NULL && sellLimitGapSize != NULL)) {
+      (sellLimitLot == NULL && sellLimitGapSize != NULL) ||
+      (sellLimitLot == NULL && sellLimitGapSize == NULL &&
+       sellLimitTP != NULL)) {
     Utility.AlertAndExit("sellLimitLot and sellLimitGapSize is required!");
   }
 
   if ((sellStopLot != NULL && sellStopGapSize == NULL) ||
-      (sellStopLot == NULL && sellStopGapSize != NULL)) {
+      (sellStopLot == NULL && sellStopGapSize != NULL) ||
+      (sellStopLot == NULL && sellStopGapSize == NULL && sellStopTP != NULL)) {
     Utility.AlertAndExit("sellStopLot and sellStopGapSize is required!");
   }
 
@@ -233,7 +264,10 @@ void CheckAndPlaceOrders() {
       for (int i = 0; i < buyStopMissingDeals.Total(); i++) {
         Print("PlaceBuyStopOrder: ", buyStopMissingDeals[i]);
         Utility.PlaceBuyStopOrder(buyStopMissingDeals[i], buyStopLot,
-                                  buyStopGapSize, Comment, orderPriceInvalid);
+                                  buyStopTP != NULL
+                                      ? buyStopMissingDeals[i] + buyStopTP
+                                      : buyStopMissingDeals[i] + buyStopGapSize,
+                                  Comment, orderPriceInvalid);
       }
     }
 
@@ -247,8 +281,11 @@ void CheckAndPlaceOrders() {
 
       for (int i = 0; i < buyLimitMissingDeals.Total(); i++) {
         Print("PlaceBuyLimitOrder: ", buyLimitMissingDeals[i]);
-        Utility.PlaceBuyLimitOrder(buyLimitMissingDeals[i], buyLimitLot,
-                                   buyLimitGapSize, Comment, orderPriceInvalid);
+        Utility.PlaceBuyLimitOrder(
+            buyLimitMissingDeals[i], buyLimitLot,
+            buyLimitTP != NULL ? buyLimitMissingDeals[i] + buyLimitTP
+                               : buyLimitMissingDeals[i] + buyLimitGapSize,
+            Comment, orderPriceInvalid);
       }
     }
 
@@ -262,9 +299,11 @@ void CheckAndPlaceOrders() {
 
       for (int i = 0; i < sellLimitMissingDeals.Total(); i++) {
         Print("PlaceSellLimitOrder: ", sellLimitMissingDeals[i]);
-        Utility.PlaceSellLimitOrder(sellLimitMissingDeals[i], sellLimitLot,
-                                    sellLimitGapSize, Comment,
-                                    orderPriceInvalid);
+        Utility.PlaceSellLimitOrder(
+            sellLimitMissingDeals[i], sellLimitLot,
+            sellLimitTP != NULL ? sellLimitMissingDeals[i] - sellLimitTP
+                                : sellLimitMissingDeals[i] - sellLimitGapSize,
+            Comment, orderPriceInvalid);
       }
     }
 
@@ -278,8 +317,11 @@ void CheckAndPlaceOrders() {
 
       for (int i = 0; i < sellStopMissingDeals.Total(); i++) {
         Print("PlaceSellStopOrder: ", sellStopMissingDeals[i]);
-        Utility.PlaceSellStopOrder(sellStopMissingDeals[i], sellStopLot,
-                                   sellStopGapSize, Comment, orderPriceInvalid);
+        Utility.PlaceSellStopOrder(
+            sellStopMissingDeals[i], sellStopLot,
+            sellStopTP != NULL ? sellStopMissingDeals[i] - sellStopTP
+                               : sellStopMissingDeals[i] - sellStopGapSize,
+            Comment, orderPriceInvalid);
       }
     }
 
@@ -389,7 +431,10 @@ void OnTick() {
 
     for (int i = 0; i < buyStopMissingDeals.Total(); i++) {
       Utility.PlaceBuyStopOrder(buyStopMissingDeals[i], buyStopLot,
-                                buyStopGapSize, Comment, orderPriceInvalid);
+                                buyStopTP != NULL
+                                    ? buyStopMissingDeals[i] + buyStopTP
+                                    : buyStopMissingDeals[i] + buyStopGapSize,
+                                Comment, orderPriceInvalid);
     }
   }
 
@@ -418,8 +463,11 @@ void OnTick() {
     Print("buyLimitMissingDeals: ", buyLimitMissingDeals.Total());
 
     for (int i = 0; i < buyLimitMissingDeals.Total(); i++) {
-      Utility.PlaceBuyLimitOrder(buyLimitMissingDeals[i], buyLimitLot,
-                                 buyLimitGapSize, Comment, orderPriceInvalid);
+      Utility.PlaceBuyLimitOrder(
+          buyLimitMissingDeals[i], buyLimitLot,
+          buyLimitTP != NULL ? buyLimitMissingDeals[i] + buyLimitTP
+                             : buyLimitMissingDeals[i] + buyLimitGapSize,
+          Comment, orderPriceInvalid);
     }
   }
 
@@ -452,8 +500,11 @@ void OnTick() {
 
     for (int i = 0; i < sellLimitMissingDeals.Total(); i++) {
       Print("PlaceSellLimitOrder: ", sellLimitMissingDeals[i]);
-      Utility.PlaceSellLimitOrder(sellLimitMissingDeals[i], sellLimitLot,
-                                  sellLimitGapSize, Comment, orderPriceInvalid);
+      Utility.PlaceSellLimitOrder(
+          sellLimitMissingDeals[i], sellLimitLot,
+          sellLimitTP != NULL ? sellLimitMissingDeals[i] - sellLimitTP
+                              : sellLimitMissingDeals[i] - sellLimitGapSize,
+          Comment, orderPriceInvalid);
     }
   }
 
@@ -482,8 +533,11 @@ void OnTick() {
     Print("sellStopMissingDeals: ", sellStopMissingDeals.Total());
 
     for (int i = 0; i < sellStopMissingDeals.Total(); i++) {
-      Utility.PlaceSellStopOrder(sellStopMissingDeals[i], sellStopLot,
-                                 sellStopGapSize, Comment, orderPriceInvalid);
+      Utility.PlaceSellStopOrder(
+          sellStopMissingDeals[i], sellStopLot,
+          sellStopTP != NULL ? sellStopMissingDeals[i] - sellStopTP
+                             : sellStopMissingDeals[i] - sellStopGapSize,
+          Comment, orderPriceInvalid);
     }
   }
 }

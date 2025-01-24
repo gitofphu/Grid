@@ -52,3 +52,4 @@
 // [x] CheckAndPlaceOrders on pending order exceute
 // [x] Trailing pending Order
 // [ ] add min max price to four way
+// [ ] alert sum of swap profit loss

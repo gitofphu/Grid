@@ -23,7 +23,7 @@ void OnStart() {
 
   // use this method
   // History ticket
-  ulong ticket = 312255731;
+  ulong ticket = 311179958;
   if (HistoryOrderSelect(ticket)) {
     Print("Price: ", HistoryOrderGetDouble(ticket, ORDER_PRICE_OPEN));
     Print("TP: ", HistoryOrderGetDouble(ticket, ORDER_TP));
@@ -35,6 +35,8 @@ void OnStart() {
     Print("ORDER_TICKET: ", HistoryOrderGetInteger(ticket, ORDER_TICKET));
     Print("ORDER_POSITION_ID: ",
           HistoryOrderGetInteger(ticket, ORDER_POSITION_ID));
+    Print("ORDER_POSITION_BY_ID: ",
+          HistoryOrderGetInteger(ticket, ORDER_POSITION_BY_ID));
     Print("Symbol: ", HistoryOrderGetString(ticket, ORDER_SYMBOL));
     Print("Comment: ", HistoryOrderGetString(ticket, ORDER_COMMENT));
   }
