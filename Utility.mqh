@@ -71,12 +71,14 @@ public:
                            bool &orderPriceInvalid);
   void PlaceSellStopOrder(double price, double lot, double tp, string comment,
                           bool &orderPriceInvalid);
+  void CloseAllOrders();
 
   string GetOrderTypeString(ENUM_ORDER_TYPE type);
   string GetDealReasonString(ENUM_DEAL_REASON reason);
   string GetOrderTypeStringFromTransDeal(const MqlTradeTransaction &trans);
 
 private:
+  void deleteOrder(ulong ticket);
 };
 
 //+------------------------------------------------------------------+
@@ -315,10 +317,11 @@ void MyUtility::CloseOrderOutsideArrayPricesByType(
 
       int index = arrayPrices.SearchLinear(orderPrice);
 
-      Print(
-          // "MyUtility::CloseOrderOutsideArrayPricesByType isFillIn: ", isFillIn,
-          // ", orderComment: ", orderComment, ", orderPrice: ", orderPrice,
-          // ", index: ", index, ", orderTicket: ", orderTicket);
+      // Print(
+      //     "MyUtility::CloseOrderOutsideArrayPricesByType isFillIn: ",
+      //     isFillIn,
+      //     ", orderComment: ", orderComment, ", orderPrice: ", orderPrice,
+      //     ", index: ", index, ", orderTicket: ", orderTicket);
 
       // if order not found in array price, remove
       if (index == -1) {
@@ -996,4 +999,42 @@ MyUtility::GetOrderTypeStringFromTransDeal(const MqlTradeTransaction &trans) {
   }
 
   return strType;
+}
+
+//+------------------------------------------------------------------+
+//| Access functions CloseAllOrders().                               |
+//+------------------------------------------------------------------+
+void MyUtility::CloseAllOrders() {
+  Print("CloseAllOrders: ", _Symbol);
+  cTrade.SetAsyncMode(false);
+  int ordersTotal = OrdersTotal();
+  CArrayLong tickets;
+  if (ordersTotal > 0) {
+    for (int i = 0; i < ordersTotal; i++) {
+      ulong orderTicket = OrderGetTicket(i);
+      if (OrderSelect(orderTicket))
+        if (OrderGetString(ORDER_SYMBOL) == _Symbol)
+          tickets.Add(orderTicket);
+    }
+    for (int i = 0; i < tickets.Total(); i++) {
+      Print("ticket: ", tickets[i]);
+      deleteOrder(tickets[i]);
+    }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Private functions deleteOrder().                                 |
+//| INPUT:  ticket     - ticket,                                     |
+//+------------------------------------------------------------------+
+void MyUtility::deleteOrder(ulong ticket) {
+  if (cTrade.OrderDelete(ticket)) {
+    Print("Order ", ticket, " deleted.");
+    uint retcode = cTrade.ResultRetcode();
+    Print("retcode: ", retcode);
+  } else {
+    Print("Failed to delete order ", ticket, ". Error: ", GetLastError());
+    uint retcode = cTrade.ResultRetcode();
+    Print("retcode: ", retcode);
+  }
 }

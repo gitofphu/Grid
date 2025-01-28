@@ -195,7 +195,9 @@ int OnInit() {
     Utility.AlertAndExit("Totals lots must be less then volume limit.");
   }
 
-  CloseOrderOutSideArray();
+  // CloseOrderOutSideArray();
+
+  Utility.CloseAllOrders();
 
   CheckAndPlaceOrders();
 
