@@ -18,20 +18,30 @@ void OnStart() {
   PriceVolume data[];
 
   // Populate the array with data
+
   PriceVolume item1;
+
+  Print("item1 before time: ", item1.price, ", ", item1.volume);
+
   item1.price = 200;
+
+  Print("item1 before: ", item1.price, ", ", item1.volume);
+
   item1.volume = 10;
-  ArrayResize(data, ArraySize(data) + 1);
-  data[ArraySize(data) - 1] = item1;
 
-  PriceVolume item2;
-  item2.price = 100;
-  item2.volume = 5;
-  ArrayResize(data, ArraySize(data) + 1);
-  data[ArraySize(data) - 1] = item2;
+  Print("item1 after: ", item1.price, ", ", item1.volume);
 
-  // Print the data
-  for (int i = 0; i < ArraySize(data); i++) {
-    Print("Price: ", data[i].price, ", Volume: ", data[i].volume);
-  }
+  // ArrayResize(data, ArraySize(data) + 1);
+  // data[ArraySize(data) - 1] = item1;
+
+  // PriceVolume item2;
+  // item2.price = 100;
+  // item2.volume = 5;
+  // ArrayResize(data, ArraySize(data) + 1);
+  // data[ArraySize(data) - 1] = item2;
+
+  // // Print the data
+  // for (int i = 0; i < ArraySize(data); i++) {
+  //   Print("Price: ", data[i].price, ", Volume: ", data[i].volume);
+  // }
 }

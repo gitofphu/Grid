@@ -59,6 +59,9 @@ public:
                        bool &orderPriceInvalid);
   void getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
                      double price, CArrayDouble &existDeals);
+  void getExistDealsWithLots(CArrayDouble &arrayPrices, double gridGapSize,
+                             double price, double lot, CArrayDouble &existDeals,
+                             CArrayDouble &existDealsLots);
 
   void PlaceBuyLimitOrder(double price, double lot, double tp, string comment,
                           bool &orderPriceInvalid);
@@ -272,6 +275,7 @@ void MyUtility::CloseOrderOutsideArrayPrices(const CArrayDouble &arrayPrices,
 void MyUtility::CloseOrderOutsideArrayPricesByType(
     const CArrayDouble &arrayPrices, const string comment, const double lot,
     const ENUM_ORDER_TYPE type) {
+  // comment pattern: <ea_name>|<IsFillIn>
 
   Print("CloseOrderOutsideArrayPricesByType arrayPrices.Total():",
         arrayPrices.Total(), ", comment: ", comment, ", lot: ", lot,
@@ -287,21 +291,43 @@ void MyUtility::CloseOrderOutsideArrayPricesByType(
     ulong orderTicket = OrderGetTicket(i);
     if (OrderSelect(orderTicket)) {
       string symbol = OrderGetString(ORDER_SYMBOL);
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
       string orderComment = OrderGetString(ORDER_COMMENT);
       long orderType = OrderGetInteger(ORDER_TYPE);
 
-      if (orderComment != comment || symbol != _Symbol || orderType != type)
+      string splitComment[];
+      int count = StringSplit(orderComment, '|', splitComment);
+
+      if (count == 1 && orderComment != comment)
+        continue;
+      else if (count > 1 && splitComment[0] != comment)
+        continue;
+      else if (symbol != _Symbol || orderType != type)
         continue;
 
-      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      bool isFillIn = false;
+
+      if (count > 1) {
+        isFillIn = splitComment[1] == "T";
+      }
+
       double orderVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
 
       int index = arrayPrices.SearchLinear(orderPrice);
 
-      if (index != -1 && lot == orderVolume)
-        continue;
+      Print(
+          // "MyUtility::CloseOrderOutsideArrayPricesByType isFillIn: ", isFillIn,
+          // ", orderComment: ", orderComment, ", orderPrice: ", orderPrice,
+          // ", index: ", index, ", orderTicket: ", orderTicket);
 
-      tickets.Add(orderTicket);
+      // if order not found in array price, remove
+      if (index == -1) {
+        tickets.Add(orderTicket);
+      }
+      // if order found in array price but lot not match, remove
+      else if (index != -1 && (lot != orderVolume && !isFillIn)) {
+        tickets.Add(orderTicket);
+      }
     }
   }
 
@@ -342,6 +368,28 @@ void MyUtility::getExistDeals(CArrayDouble &arrayPrices, double gridGapSize,
     if (price >= arrayPrices[j] &&
         price <= arrayPrices[j] + gridGapSize - _Point) {
       existDeals.Add(arrayPrices[j]);
+    }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions getExistDealsWithLots(...).                     |
+//| INPUT:  arrayPrices     - grid price array,                      |
+//|         gridGapSize     - grid gap size,                         |
+//|         price           - current price,                         |
+//|         lot             - current price lot,                     |
+//|         existDeals      - existing deal array,                   |
+//|         existDealsLots  - existing deal lots array,              |
+//+------------------------------------------------------------------+
+void MyUtility::getExistDealsWithLots(CArrayDouble &arrayPrices,
+                                      double gridGapSize, double price,
+                                      double lot, CArrayDouble &existDeals,
+                                      CArrayDouble &existDealsLots) {
+  for (int j = 0; j < arrayPrices.Total(); j++) {
+    if (price >= arrayPrices[j] &&
+        price <= arrayPrices[j] + gridGapSize - _Point) {
+      existDeals.Add(arrayPrices[j]);
+      existDealsLots.Add(lot);
     }
   }
 }
@@ -689,9 +737,11 @@ void MyUtility::PlaceBuyOrders(CArrayDouble &buyLimitPrices,
 void MyUtility::PlaceBuyLimitOrder(double price, double lot, double tp,
                                    string comment, bool &orderPriceInvalid) {
 
-  Print("Basic info: PlaceBuyLimitOrder = ", price, ", TP = ", tp);
+  Print("Basic info: PlaceBuyLimitOrder = ", price,
+        ", TP = ", NormalizeDoubleTwoDigits(tp));
 
-  if (cTrade.BuyLimit(lot, price, _Symbol, 0, tp, ORDER_TIME_GTC, 0, comment)) {
+  if (cTrade.BuyLimit(lot, price, _Symbol, 0, NormalizeDoubleTwoDigits(tp),
+                      ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
     ulong orderTicket = cTrade.ResultOrder();
@@ -726,9 +776,11 @@ void MyUtility::PlaceBuyLimitOrder(double price, double lot, double tp,
 void MyUtility::PlaceBuyStopOrder(double price, double lot, double tp,
                                   string comment, bool &orderPriceInvalid) {
 
-  Print("Basic info: PlaceBuyStopOrder = ", price, ", TP = ", tp);
+  Print("Basic info: PlaceBuyStopOrder = ", price,
+        ", TP = ", NormalizeDoubleTwoDigits(tp));
 
-  if (cTrade.BuyStop(lot, price, _Symbol, 0, tp, ORDER_TIME_GTC, 0, comment)) {
+  if (cTrade.BuyStop(lot, price, _Symbol, 0, NormalizeDoubleTwoDigits(tp),
+                     ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
     ulong orderTicket = cTrade.ResultOrder();
@@ -788,10 +840,11 @@ void MyUtility::PlaceSellOrders(CArrayDouble &sellLimitPrices,
 void MyUtility::PlaceSellLimitOrder(double price, double lot, double tp,
                                     string comment, bool &orderPriceInvalid) {
 
-  Print("Basic info: PlaceSellLimitOrder = ", price, ", TP = ", tp);
+  Print("Basic info: PlaceSellLimitOrder = ", price,
+        ", TP = ", NormalizeDoubleTwoDigits(tp));
 
-  if (cTrade.SellLimit(lot, price, _Symbol, 0, price - tp, ORDER_TIME_GTC, 0,
-                       comment)) {
+  if (cTrade.SellLimit(lot, price, _Symbol, 0, NormalizeDoubleTwoDigits(tp),
+                       ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
     ulong orderTicket = cTrade.ResultOrder();
@@ -826,9 +879,11 @@ void MyUtility::PlaceSellLimitOrder(double price, double lot, double tp,
 void MyUtility::PlaceSellStopOrder(double price, double lot, double tp,
                                    string comment, bool &orderPriceInvalid) {
 
-  Print("Basic info: PlaceSellStopOrder = ", price, ", TP = ", tp);
+  Print("Basic info: PlaceSellStopOrder = ", price,
+        ", TP = ", NormalizeDoubleTwoDigits(tp));
 
-  if (cTrade.SellStop(lot, price, _Symbol, 0, tp, ORDER_TIME_GTC, 0, comment)) {
+  if (cTrade.SellStop(lot, price, _Symbol, 0, NormalizeDoubleTwoDigits(tp),
+                      ORDER_TIME_GTC, 0, comment)) {
 
     uint retcode = cTrade.ResultRetcode();
     ulong orderTicket = cTrade.ResultOrder();
