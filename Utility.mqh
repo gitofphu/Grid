@@ -72,6 +72,8 @@ public:
   void PlaceSellStopOrder(double price, double lot, double tp, string comment,
                           bool &orderPriceInvalid);
   void CloseAllOrders();
+  double Clamp(double value, double min_value, double max_value);
+  bool IsInRange(double value, double min_value, double max_value);
 
   string GetOrderTypeString(ENUM_ORDER_TYPE type);
   string GetDealReasonString(ENUM_DEAL_REASON reason);
@@ -672,21 +674,21 @@ void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
 
 //+------------------------------------------------------------------+
 //| Access functions GetArrayPrice(...).                             |
-//| INPUT:  minPrice          - min price of array,                  |
-//|         maxPrice          - max price of array,                  |
+//| INPUT:  startPrice        - start price of array,                |
+//|         endPrice          - end price of array,                  |
 //|         gridGapSize       - grid gap size,                       |
 //|         arrayPrices       - return array of price,               |
 //+------------------------------------------------------------------+
-void MyUtility::GetArrayPrice(double minPrice, double maxPrice,
+void MyUtility::GetArrayPrice(double startPrice, double endPrice,
                               double gridGapSize, CArrayDouble &arrayPrices) {
-  Print("minPrice: ", minPrice, ", maxPrice: ", maxPrice,
+  Print("startPrice: ", startPrice, ", endPrice: ", endPrice,
         ", gridGapSize: ", gridGapSize);
 
   if (arrayPrices.Total() > 0) {
     arrayPrices.Shutdown();
   }
 
-  for (double price = maxPrice; price >= minPrice;
+  for (double price = endPrice; price >= startPrice;
        price = NormalizeDoubleTwoDigits(price - gridGapSize)) {
     if (price != 0) {
       arrayPrices.Add(NormalizeDoubleTwoDigits(price));
@@ -1037,4 +1039,28 @@ void MyUtility::deleteOrder(ulong ticket) {
     uint retcode = cTrade.ResultRetcode();
     Print("retcode: ", retcode);
   }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions Clamp(...).                                     |
+//| INPUT:  value             - value,                               |
+//|         min_value         - min_value,                           |
+//|         max_value         - max_value,                           |
+//+------------------------------------------------------------------+
+double MyUtility::Clamp(double value, double min_value, double max_value) {
+  if (value < min_value)
+    return min_value;
+  if (value > max_value)
+    return max_value;
+  return value;
+}
+
+//+------------------------------------------------------------------+
+//| Access functions Clamp(...).                                     |
+//| INPUT:  value             - value,                               |
+//|         min_value         - min_value,                           |
+//|         max_value         - max_value,                           |
+//+------------------------------------------------------------------+
+bool MyUtility::IsInRange(double value, double min_value, double max_value) {
+  return (value >= min_value && value <= max_value);
 }
