@@ -19,25 +19,29 @@ CDealInfo cDealInfo;
 input double PriceRange = 5;
 input int MaxOrders = NULL;
 
-input double BuyStopLot = NULL;
-input double BuyStopGapSize = NULL;
-input double BuyStopTP = NULL;
-input bool FillInBuyStopLots = false;
+input group "Buy Stop";
+input double BuyStopLot = NULL;       // Lot size
+input double BuyStopGapSize = NULL;   // Gap size
+input double BuyStopTP = NULL;        // Take profit
+input bool FillInBuyStopLots = false; // Fill in lots
 
-input double BuyLimitLot = NULL;
-input double BuyLimitGapSize = NULL;
-input double BuyLimitTP = NULL;
-input bool FillInBuyLimitLots = false;
+input group "Buy Limit";
+input double BuyLimitLot = NULL;       // Lot size
+input double BuyLimitGapSize = NULL;   // Gap size
+input double BuyLimitTP = NULL;        // Take profit
+input bool FillInBuyLimitLots = false; // Fill in lots
 
-input double SellLimitLot = NULL;
-input double SellLimitGapSize = NULL;
-input double SellLimitTP = NULL;
-input bool FillInSellLimitLots = false;
+input group "Sell Limit";
+input double SellLimitLot = NULL;       // Lot size
+input double SellLimitGapSize = NULL;   // Gap size
+input double SellLimitTP = NULL;        // Take profit
+input bool FillInSellLimitLots = false; // Fill in lots
 
-input double SellStopLot = NULL;
-input double SellStopGapSize = NULL;
-input double SellStopTP = NULL;
-input bool FillInSellStopLots = false;
+input group "Sell Stop";
+input double SellStopLot = NULL;       // Lot size
+input double SellStopGapSize = NULL;   // Gap size
+input double SellStopTP = NULL;        // Take profit
+input bool FillInSellStopLots = false; // Fill in lots
 
 //+------------------------------------------------------------------+
 //| Global variables                                                 |
