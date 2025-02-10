@@ -296,16 +296,15 @@ void GetArrayPrices() {
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-  Print("GetArrayPrices ask: ", ask);
-  Print("GetArrayPrices bid: ", bid);
+  Print("GetArrayPrices ask: ", ask, ", bid: ", bid);
 
   if (buyStopGapSize) {
 
     double startPrice = 0;
     double endPrice = 0;
 
-    Print("buyStopMaxPrice: ", buyStopMaxPrice);
-    Print("buyStopMinPrice: ", buyStopMinPrice);
+    Print("buyStopMaxPrice: ", buyStopMaxPrice,
+          ", buyStopMinPrice: ", buyStopMinPrice);
 
     if (buyStopMaxPrice && buyStopMinPrice) {
 
@@ -322,8 +321,8 @@ void GetArrayPrices() {
       endPrice = ask + PriceRange;
     }
 
-    Print("startPrice: ", startPrice);
-    Print("endPrice: ", endPrice);
+    Print("buyStopArrayPrices startPrice: ", startPrice,
+          ", endPrice: ", endPrice);
 
     if (startPrice && endPrice)
       Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
@@ -355,6 +354,9 @@ void GetArrayPrices() {
       endPrice = bid - buyLimitGapSize;
     }
 
+    Print("buyLimitArrayPrices startPrice: ", startPrice,
+          ", endPrice: ", endPrice);
+
     if (startPrice && endPrice)
       Utility.GetArrayPrice(startPrice, endPrice, buyLimitGapSize,
                             buyLimitArrayPrices);
@@ -383,9 +385,13 @@ void GetArrayPrices() {
       endPrice = ask + PriceRange;
     }
 
-    Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
-                          NormalizeDouble(endPrice, 1), sellLimitGapSize,
-                          sellLimitArrayPrices);
+    Print("sellLimitArrayPrices startPrice: ", startPrice,
+          ", endPrice: ", endPrice);
+
+    if (startPrice && endPrice)
+      Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
+                            NormalizeDouble(endPrice, 1), sellLimitGapSize,
+                            sellLimitArrayPrices);
 
     for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
       Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
@@ -410,6 +416,9 @@ void GetArrayPrices() {
       startPrice = bid - PriceRange;
       endPrice = bid - sellStopGapSize;
     }
+
+    Print("sellStopArrayPrices startPrice: ", startPrice,
+          ", endPrice: ", endPrice);
 
     if (startPrice && endPrice)
       Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
@@ -575,13 +584,13 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
     int foundPositionIndex = existPositions.SearchLinear(arrayPrices[i]);
     int foundOrderIndex = existOrders.SearchLinear(arrayPrices[i]);
 
-    Print("arrayPrices[i]: ", arrayPrices[i],
-          ", foundOrderIndex: ", foundOrderIndex,
-          ", foundPositionIndex: ", foundPositionIndex);
+    // Print("arrayPrices[i]: ", arrayPrices[i],
+    //       ", foundOrderIndex: ", foundOrderIndex,
+    //       ", foundPositionIndex: ", foundPositionIndex);
 
     // if not found order and position add to missing deals
     if (foundOrderIndex == -1 && foundPositionIndex == -1) {
-      Print("case new order: ", arrayPrices[i], ", lot: ", lot);
+      // Print("case new order: ", arrayPrices[i], ", lot: ", lot);
       missingDeals.Add(arrayPrices[i]);
       missingDealsLots.Add(lot);
       continue;
@@ -589,7 +598,7 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
 
     // if found order continue, no need to check for position
     if (foundOrderIndex != -1) {
-      Print("case alreay have pending order: ", arrayPrices[i]);
+      // Print("case alreay have pending order: ", arrayPrices[i]);
       continue;
     }
 
@@ -599,8 +608,6 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
     // if found position check for lot size, if less than lot fill in
     double totalLots = 0;
     for (int j = 0; j < existPositions.Total(); j++) {
-      Print("existPositions: ", existPositions[j]);
-
       if (existPositions[j] >= arrayPrices[i] &&
           existPositions[j] <= arrayPrices[i] + gridGapSize - _Point) {
 
@@ -610,7 +617,6 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
     }
 
     if (totalLots < lot) {
-      Print("case fill in lots: ", arrayPrices[i], ", lot: ", lot);
       missingDeals.Add(arrayPrices[i]);
       missingDealsLots.Add(lot - totalLots);
     }
@@ -787,10 +793,6 @@ void OnTick() {
                             NormalizeDouble(endPrice, 1), buyLimitGapSize,
                             buyLimitArrayPrices);
 
-    // for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
-    //   Print("buyLimitArrayPrices: ", i, " = ", buyLimitArrayPrices[i]);
-    // }
-
     Utility.CloseOrderOutsideArrayPricesByType(
         buyLimitArrayPrices, Comment, buyLimitLot, ORDER_TYPE_BUY_LIMIT);
 
@@ -836,10 +838,6 @@ void OnTick() {
                             NormalizeDouble(endPrice, 1), sellLimitGapSize,
                             sellLimitArrayPrices);
 
-    // for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
-    //   Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
-    // }
-
     Utility.CloseOrderOutsideArrayPricesByType(
         sellLimitArrayPrices, Comment, sellLimitLot, ORDER_TYPE_SELL_LIMIT);
 
@@ -880,10 +878,6 @@ void OnTick() {
       Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
                             NormalizeDouble(endPrice, 1), sellStopGapSize,
                             sellStopArrayPrices);
-
-    // for (int i = 0; i < sellStopArrayPrices.Total(); i++) {
-    //   Print("sellStopArrayPrices: ", i, " = ", sellStopArrayPrices[i]);
-    // }
 
     Utility.CloseOrderOutsideArrayPricesByType(
         sellStopArrayPrices, Comment, sellStopLot, ORDER_TYPE_SELL_STOP);
