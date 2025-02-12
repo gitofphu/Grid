@@ -78,6 +78,7 @@ public:
   string GetOrderTypeString(ENUM_ORDER_TYPE type);
   string GetDealReasonString(ENUM_DEAL_REASON reason);
   string GetOrderTypeStringFromTransDeal(const MqlTradeTransaction &trans);
+  long GetOrderTypeFromTransDeal(const MqlTradeTransaction &trans);
 
 private:
   void deleteOrder(ulong ticket);
@@ -1001,6 +1002,24 @@ MyUtility::GetOrderTypeStringFromTransDeal(const MqlTradeTransaction &trans) {
   }
 
   return strType;
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetOrderTypeFromTransDeal().                    |
+//| INPUT:  trans     - &trans,                                      |
+//+------------------------------------------------------------------+
+long MyUtility::GetOrderTypeFromTransDeal(const MqlTradeTransaction &trans) {
+  long orderType = -1;
+
+  if (HistoryDealSelect(trans.deal)) {
+    long deal_pos_id = HistoryDealGetInteger(trans.deal, DEAL_POSITION_ID);
+
+    if (HistoryOrderSelect(deal_pos_id)) {
+      HistoryOrderGetInteger(deal_pos_id, ORDER_TYPE, orderType);
+    }
+  }
+
+  return orderType;
 }
 
 //+------------------------------------------------------------------+
