@@ -14,10 +14,10 @@ MyUtility Utility;
 CDealInfo cDealInfo;
 
 #resource "buy_tp_alert.wav"
-#define BUY_TP_ALERT_FILE "::sl_alert.wav"
+#define BUY_TP_ALERT_FILE "::buy_tp_alert.wav"
 
 #resource "sell_tp_alert.wav"
-#define SELL_TP_ALERT_FILE "::sl_alert.wav"
+#define SELL_TP_ALERT_FILE "::sell_tp_alert.wav"
 
 #resource "sl_alert.wav"
 #define SL_ALERT_FILE "::sl_alert.wav"
