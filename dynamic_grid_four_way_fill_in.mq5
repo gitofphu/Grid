@@ -155,6 +155,7 @@ int OnInit() {
   if (useNotification && !TerminalInfoInteger(TERMINAL_NOTIFICATIONS_ENABLED)) {
     Utility.AlertAndExit("Error. The client terminal does not have permission "
                          "to send notifications");
+    return (INIT_PARAMETERS_INCORRECT);
   }
 
   if (SymbolInfoString(_Symbol, SYMBOL_CURRENCY_MARGIN) !=
