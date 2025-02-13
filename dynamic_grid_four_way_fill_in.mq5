@@ -368,9 +368,9 @@ void GetArrayPrices() {
                             NormalizeDouble(endPrice, 1), buyStopGapSize,
                             buyStopArrayPrices);
 
-    for (int i = 0; i < buyStopArrayPrices.Total(); i++) {
-      Print("buyStopArrayPrices: ", i, " = ", buyStopArrayPrices[i]);
-    }
+    // for (int i = 0; i < buyStopArrayPrices.Total(); i++) {
+    //   Print("buyStopArrayPrices: ", i, " = ", buyStopArrayPrices[i]);
+    // }
   }
 
   if (buyLimitGapSize) {
@@ -400,9 +400,9 @@ void GetArrayPrices() {
       Utility.GetArrayPrice(startPrice, endPrice, buyLimitGapSize,
                             buyLimitArrayPrices);
 
-    for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
-      Print("buyLimitArrayPrices: ", i, " = ", buyLimitArrayPrices[i]);
-    }
+    // for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
+    //   Print("buyLimitArrayPrices: ", i, " = ", buyLimitArrayPrices[i]);
+    // }
   }
 
   if (sellLimitGapSize) {
@@ -432,9 +432,9 @@ void GetArrayPrices() {
                             NormalizeDouble(endPrice, 1), sellLimitGapSize,
                             sellLimitArrayPrices);
 
-    for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
-      Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
-    }
+    // for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
+    //   Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
+    // }
   }
 
   if (sellStopGapSize) {
@@ -464,9 +464,9 @@ void GetArrayPrices() {
                             NormalizeDouble(endPrice, 1), sellStopGapSize,
                             sellStopArrayPrices);
 
-    for (int i = 0; i < sellStopArrayPrices.Total(); i++) {
-      Print("sellStopArrayPrices: ", i, " = ", sellStopArrayPrices[i]);
-    }
+    // for (int i = 0; i < sellStopArrayPrices.Total(); i++) {
+    //   Print("sellStopArrayPrices: ", i, " = ", sellStopArrayPrices[i]);
+    // }
   }
 }
 
