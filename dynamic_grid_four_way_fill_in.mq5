@@ -152,6 +152,22 @@ int OnInit() {
   sellStopMinPrice = SellStopMinPrice;
   fillInSellStopLots = FillInSellStopLots;
 
+  if (buyStopArrayPrices.Total() > 0) {
+    buyStopArrayPrices.Shutdown();
+  }
+
+  if (buyLimitArrayPrices.Total() > 0) {
+    buyLimitArrayPrices.Shutdown();
+  }
+
+  if (sellLimitArrayPrices.Total() > 0) {
+    sellLimitArrayPrices.Shutdown();
+  }
+
+  if (sellStopArrayPrices.Total() > 0) {
+    sellStopArrayPrices.Shutdown();
+  }
+
   if (useNotification && !TerminalInfoInteger(TERMINAL_NOTIFICATIONS_ENABLED)) {
     Utility.AlertAndExit("Error. The client terminal does not have permission "
                          "to send notifications");
@@ -767,14 +783,16 @@ void OnTick() {
       endPrice = ask + priceRange;
     }
 
-    // for (int i = 0; i < buyStopArrayPrices.Total(); i++) {
-    //   Print("buyStopArrayPrices: ", i, " = ", buyStopArrayPrices[i]);
-    // }
-
     if (startPrice && endPrice)
       Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
                             NormalizeDouble(endPrice, 1), buyStopGapSize,
                             buyStopArrayPrices);
+
+    for (int i = 0; i < buyStopArrayPrices.Total(); i++) {
+      Print("buyStopArrayPrices: ", i, " = ", buyStopArrayPrices[i]);
+    }
+
+    Print("startPrice: ", startPrice, ", endPrice: ", endPrice);
 
     Utility.CloseOrderOutsideArrayPricesByType(buyStopArrayPrices, Comment,
                                                buyStopLot, ORDER_TYPE_BUY_STOP);
@@ -813,14 +831,16 @@ void OnTick() {
       endPrice = bid - buyLimitGapSize;
     }
 
-    // for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
-    //   Print("buyLimitArrayPrices: ", i, " = ", buyLimitArrayPrices[i]);
-    // }
-
     if (startPrice && endPrice)
       Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
                             NormalizeDouble(endPrice, 1), buyLimitGapSize,
                             buyLimitArrayPrices);
+
+    for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
+      Print("buyLimitArrayPrices: ", i, " = ", buyLimitArrayPrices[i]);
+    }
+
+    Print("startPrice: ", startPrice, ", endPrice: ", endPrice);
 
     Utility.CloseOrderOutsideArrayPricesByType(
         buyLimitArrayPrices, Comment, buyLimitLot, ORDER_TYPE_BUY_LIMIT);
@@ -862,14 +882,16 @@ void OnTick() {
       endPrice = ask + priceRange;
     }
 
-    // for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
-    //   Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
-    // }
-
     if (startPrice && endPrice)
       Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
                             NormalizeDouble(endPrice, 1), sellLimitGapSize,
                             sellLimitArrayPrices);
+
+    for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
+      Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
+    }
+
+    Print("startPrice: ", startPrice, ", endPrice: ", endPrice);
 
     Utility.CloseOrderOutsideArrayPricesByType(
         sellLimitArrayPrices, Comment, sellLimitLot, ORDER_TYPE_SELL_LIMIT);
@@ -908,14 +930,16 @@ void OnTick() {
       endPrice = bid - sellStopGapSize;
     }
 
-    // for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
-    //   Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
-    // }
-
     if (startPrice && endPrice)
       Utility.GetArrayPrice(NormalizeDouble(startPrice, 1),
                             NormalizeDouble(endPrice, 1), sellStopGapSize,
                             sellStopArrayPrices);
+
+    for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
+      Print("sellLimitArrayPrices: ", i, " = ", sellLimitArrayPrices[i]);
+    }
+
+    Print("startPrice: ", startPrice, ", endPrice: ", endPrice);
 
     Utility.CloseOrderOutsideArrayPricesByType(
         sellStopArrayPrices, Comment, sellStopLot, ORDER_TYPE_SELL_STOP);
