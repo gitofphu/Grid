@@ -54,6 +54,9 @@ input bool FillInSellStopLots = false; // Fill in lots
 //+------------------------------------------------------------------+
 //| Global variables                                                 |
 //+------------------------------------------------------------------+
+double priceRange = NULL;
+int maxOrders = NULL;
+
 double buyStopLot = NULL;
 double buyStopGapSize = NULL;
 double buyStopTP = NULL;
@@ -97,7 +100,8 @@ string Comment = "dynamic_grid";
 //+------------------------------------------------------------------+
 int OnInit() {
 
-  if (BuyStopLot == buyStopLot && BuyStopGapSize == buyStopGapSize &&
+  if (PriceRange == priceRange && MaxOrders == maxOrders &&
+      BuyStopLot == buyStopLot && BuyStopGapSize == buyStopGapSize &&
       BuyStopTP == buyStopTP && BuyStopMaxPrice == buyStopMaxPrice &&
       BuyStopMinPrice == buyStopMinPrice &&
       FillInBuyStopLots == fillInBuyStopLots && BuyLimitLot == buyLimitLot &&
@@ -116,6 +120,9 @@ int OnInit() {
     Print("Parameters are already set.");
     return (INIT_SUCCEEDED);
   }
+
+  priceRange = PriceRange;
+  maxOrders = MaxOrders;
 
   buyStopLot = BuyStopLot;
   buyStopGapSize = BuyStopGapSize;
@@ -222,9 +229,9 @@ int OnInit() {
         "sellStopMaxPrice must be greater than sellStopMinPrice!");
   }
 
-  if (PriceRange < buyStopGapSize || PriceRange < buyLimitGapSize ||
-      PriceRange < sellLimitGapSize || PriceRange < sellStopGapSize) {
-    Utility.AlertAndExit("PriceRange must be greater than all gap sizes.");
+  if (priceRange < buyStopGapSize || priceRange < buyLimitGapSize ||
+      priceRange < sellLimitGapSize || priceRange < sellStopGapSize) {
+    Utility.AlertAndExit("priceRange must be greater than all gap sizes.");
   }
 
   double volumeMin = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
@@ -241,12 +248,12 @@ int OnInit() {
 
   Print("accoutnLimitOrders: ", accoutnLimitOrders);
 
-  if (MaxOrders == NULL) {
+  if (maxOrders == NULL) {
     limitOrders = accoutnLimitOrders;
-  } else if (MaxOrders > accoutnLimitOrders) {
-    Utility.AlertAndExit("MaxOrders must be less than ACCOUNT_LIMIT_ORDERS.");
+  } else if (maxOrders > accoutnLimitOrders) {
+    Utility.AlertAndExit("maxOrders must be less than ACCOUNT_LIMIT_ORDERS.");
   } else {
-    limitOrders = MaxOrders;
+    limitOrders = maxOrders;
   }
 
   Print("limitOrders: ", limitOrders);
@@ -313,12 +320,12 @@ void GetArrayPrices() {
         startPrice = Utility.Clamp(ask + buyStopGapSize, buyStopMinPrice,
                                    buyStopMaxPrice);
         endPrice =
-            Utility.Clamp(ask + PriceRange, buyStopMinPrice, buyStopMaxPrice);
+            Utility.Clamp(ask + priceRange, buyStopMinPrice, buyStopMaxPrice);
       }
 
     } else {
       startPrice = ask + buyStopGapSize;
-      endPrice = ask + PriceRange;
+      endPrice = ask + priceRange;
     }
 
     Print("buyStopArrayPrices startPrice: ", startPrice,
@@ -344,13 +351,13 @@ void GetArrayPrices() {
       if (Utility.IsInRange(bid, buyLimitMinPrice, buyLimitMaxPrice)) {
 
         startPrice =
-            Utility.Clamp(bid - PriceRange, buyLimitMinPrice, buyLimitMaxPrice);
+            Utility.Clamp(bid - priceRange, buyLimitMinPrice, buyLimitMaxPrice);
         endPrice = Utility.Clamp(bid - buyLimitGapSize, buyLimitMinPrice,
                                  buyLimitMaxPrice);
       }
 
     } else {
-      startPrice = bid - PriceRange;
+      startPrice = bid - priceRange;
       endPrice = bid - buyLimitGapSize;
     }
 
@@ -377,12 +384,12 @@ void GetArrayPrices() {
 
         startPrice = Utility.Clamp(ask + sellLimitGapSize, sellLimitMinPrice,
                                    sellLimitMaxPrice);
-        endPrice = Utility.Clamp(ask + PriceRange, sellLimitMinPrice,
+        endPrice = Utility.Clamp(ask + priceRange, sellLimitMinPrice,
                                  sellLimitMaxPrice);
       }
     } else {
       startPrice = ask + sellLimitGapSize;
-      endPrice = ask + PriceRange;
+      endPrice = ask + priceRange;
     }
 
     Print("sellLimitArrayPrices startPrice: ", startPrice,
@@ -408,12 +415,12 @@ void GetArrayPrices() {
       if (Utility.IsInRange(bid, sellStopMinPrice, sellStopMaxPrice)) {
 
         startPrice =
-            Utility.Clamp(bid - PriceRange, sellStopMinPrice, sellStopMaxPrice);
+            Utility.Clamp(bid - priceRange, sellStopMinPrice, sellStopMaxPrice);
         endPrice = Utility.Clamp(bid - sellStopGapSize, sellStopMinPrice,
                                  sellStopMaxPrice);
       }
     } else {
-      startPrice = bid - PriceRange;
+      startPrice = bid - priceRange;
       endPrice = bid - sellStopGapSize;
     }
 
@@ -735,12 +742,12 @@ void OnTick() {
         startPrice = Utility.Clamp(ask + buyStopGapSize, buyStopMinPrice,
                                    buyStopMaxPrice);
         endPrice =
-            Utility.Clamp(ask + PriceRange, buyStopMinPrice, buyStopMaxPrice);
+            Utility.Clamp(ask + priceRange, buyStopMinPrice, buyStopMaxPrice);
       }
 
     } else {
       startPrice = ask + buyStopGapSize;
-      endPrice = ask + PriceRange;
+      endPrice = ask + priceRange;
     }
 
     if (startPrice && endPrice)
@@ -778,13 +785,13 @@ void OnTick() {
       if (Utility.IsInRange(bid, buyLimitMinPrice, buyLimitMaxPrice)) {
 
         startPrice =
-            Utility.Clamp(bid - PriceRange, buyLimitMinPrice, buyLimitMaxPrice);
+            Utility.Clamp(bid - priceRange, buyLimitMinPrice, buyLimitMaxPrice);
         endPrice = Utility.Clamp(bid - buyLimitGapSize, buyLimitMinPrice,
                                  buyLimitMaxPrice);
       }
 
     } else {
-      startPrice = bid - PriceRange;
+      startPrice = bid - priceRange;
       endPrice = bid - buyLimitGapSize;
     }
 
@@ -824,13 +831,13 @@ void OnTick() {
 
         startPrice = Utility.Clamp(ask + sellLimitGapSize, sellLimitMinPrice,
                                    sellLimitMaxPrice);
-        endPrice = Utility.Clamp(ask + PriceRange, sellLimitMinPrice,
+        endPrice = Utility.Clamp(ask + priceRange, sellLimitMinPrice,
                                  sellLimitMaxPrice);
       }
 
     } else {
       startPrice = ask + sellLimitGapSize;
-      endPrice = ask + PriceRange;
+      endPrice = ask + priceRange;
     }
 
     if (startPrice && endPrice)
@@ -864,13 +871,13 @@ void OnTick() {
       if (Utility.IsInRange(bid, sellStopMinPrice, sellStopMaxPrice)) {
 
         startPrice =
-            Utility.Clamp(bid - PriceRange, sellStopMinPrice, sellStopMaxPrice);
+            Utility.Clamp(bid - priceRange, sellStopMinPrice, sellStopMaxPrice);
         endPrice = Utility.Clamp(bid - sellStopGapSize, sellStopMinPrice,
                                  sellStopMaxPrice);
       }
 
     } else {
-      startPrice = bid - PriceRange;
+      startPrice = bid - priceRange;
       endPrice = bid - sellStopGapSize;
     }
 
