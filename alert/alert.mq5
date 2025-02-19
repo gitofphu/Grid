@@ -13,8 +13,14 @@ MyUtility Utility;
 #include <Trade/DealInfo.mqh>
 CDealInfo cDealInfo;
 
+#resource "buy_entry_alert.wav"
+#define BUY_ENTRY_ALERT_FILE "::buy_entry_alert.wav"
+
 #resource "buy_tp_alert.wav"
 #define BUY_TP_ALERT_FILE "::buy_tp_alert.wav"
+
+#resource "sell_entry_alert.wav"
+#define SELL_ENTRY_ALERT_FILE "::sell_entry_alert.wav"
 
 #resource "sell_tp_alert.wav"
 #define SELL_TP_ALERT_FILE "::sell_tp_alert.wav"
@@ -78,14 +84,23 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       if (orderType == ORDER_TYPE_BUY || orderType == ORDER_TYPE_BUY_LIMIT ||
           orderType == ORDER_TYPE_BUY_STOP) {
         PlaySound(BUY_TP_ALERT_FILE);
-      } else if (orderType == ORDER_TYPE_SELL ||
-                 orderType == ORDER_TYPE_SELL_LIMIT ||
+      } else if (orderType == ORDER_TYPE_SELL_LIMIT ||
                  orderType == ORDER_TYPE_SELL_STOP) {
         PlaySound(SELL_TP_ALERT_FILE);
       }
 
       string message = "TP " + " " + strType + " " + (string)trans.volume;
       Print(message);
+    } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
+      long orderType = Utility.GetOrderTypeFromTransDeal(trans);
+
+      if (orderType == ORDER_TYPE_BUY_LIMIT ||
+          orderType == ORDER_TYPE_BUY_STOP) {
+        PlaySound(BUY_ENTRY_ALERT_FILE);
+      } else if (orderType == ORDER_TYPE_SELL_LIMIT ||
+                 orderType == ORDER_TYPE_SELL_STOP) {
+        PlaySound(SELL_ENTRY_ALERT_FILE);
+      }
     }
   }
 }
