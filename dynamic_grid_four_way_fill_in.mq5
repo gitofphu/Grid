@@ -545,7 +545,10 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
       //       ", orderComment: ", orderComment, ", orderType: ", orderType,
       //       ", count: ", count, ", orderTicket: ", orderTicket);
 
-      if (count == 1 && orderComment != comment) {
+      if (count == 0)
+        continue;
+
+      else if (count == 1 && orderComment != comment) {
         continue;
       }
 
@@ -582,7 +585,10 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
       string splitComment[];
       int count = StringSplit(positionComment, '|', splitComment);
 
-      if (count == 1 && positionComment != comment) {
+      if (count == 0)
+        continue;
+
+      else if (count == 1 && positionComment != comment) {
         continue;
       }
 
