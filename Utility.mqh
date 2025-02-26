@@ -303,10 +303,15 @@ void MyUtility::CloseOrderOutsideArrayPricesByType(
       string splitComment[];
       int count = StringSplit(orderComment, '|', splitComment);
 
-      if (count == 1 && orderComment != comment)
+      if (count == 0)
         continue;
+
+      else if (count == 1 && orderComment != comment)
+        continue;
+
       else if (count > 1 && splitComment[0] != comment)
         continue;
+
       else if (symbol != _Symbol || orderType != type)
         continue;
 
