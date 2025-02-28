@@ -5,32 +5,82 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 20XX, MyName"
 #property link "https://www.mysite.com/"
-#property version "Version = 1.00"
+#property version "1.00"
+
+#include <../Experts/Grid/Utility.mqh>
+MyUtility Utility;
 
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
 void OnStart() {
 
-  int ordersTotal = OrdersTotal();
-  Print("Orders Total: ", ordersTotal);
+  CArrayDouble sellPrices;
+  CArrayDouble sellLots;
 
-  for (int i = 0; i < ordersTotal; i++) {
-    ulong orderTicket = OrderGetTicket(i);
+  CArrayDouble buyPrices;
+  CArrayDouble buyLots;
 
-    if (OrderSelect(orderTicket)) {
-      string symbol = OrderGetString(ORDER_SYMBOL);
-      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-      string orderComment = OrderGetString(ORDER_COMMENT);
-      long orderType = OrderGetInteger(ORDER_TYPE);
+  for (int i = 0; i < PositionsTotal(); i++) {
+    ulong positionTicket = PositionGetTicket(i);
+    if (PositionSelectByTicket(positionTicket)) {
+      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      double positionLots = PositionGetDouble(POSITION_VOLUME);
+      string symbol = PositionGetString(POSITION_SYMBOL);
+      string positionComment = PositionGetString(POSITION_COMMENT);
+      long positionType = PositionGetInteger(POSITION_TYPE);
 
-      string splitComment[];
-      int count = StringSplit(orderComment, '|', splitComment);
+      Print("symbol: ", symbol, " positionPrice: ", positionPrice,
+            " positionComment: ", positionComment,
+            " positionType: ", positionType, " positionLots: ", positionLots);
 
-      Print("symbol: ", symbol, " orderPrice: ", orderPrice,
-            " orderComment: ", orderComment, " orderType: ", orderType,
-            " count: ", count);
+      if (symbol != _Symbol)
+        continue;
+
+      if (positionType == POSITION_TYPE_BUY) {
+        buyPrices.Add(positionPrice);
+        buyLots.Add(positionLots);
+      } else if (positionType == POSITION_TYPE_SELL) {
+        sellPrices.Add(positionPrice);
+        sellLots.Add(positionLots);
+      }
     }
   }
+
+  double averageBuyPrice = 0;
+  double totalBuyLots = 0;
+  for (int i = 0; i < buyPrices.Total(); i++) {
+    averageBuyPrice += buyPrices[i] * buyLots[i];
+    totalBuyLots += buyLots[i];
+  }
+  averageBuyPrice /= totalBuyLots;
+
+  Print("averageBuyPrice: ", NormalizeDouble(averageBuyPrice, 2));
+
+  double buyProfit = cAccountInfo.OrderProfitCheck(
+      _Symbol, ORDER_TYPE_BUY, totalBuyLots, averageBuyPrice,
+      SymbolInfoDouble(_Symbol, SYMBOL_BID));
+
+  Print("buyProfit: ", NormalizeDouble(buyProfit, 2));
+
+  double averageSellPrice = 0;
+  double totalSellLots = 0;
+  for (int i = 0; i < sellPrices.Total(); i++) {
+    averageSellPrice += sellPrices[i] * sellLots[i];
+    totalSellLots += sellLots[i];
+  }
+  averageSellPrice /= totalSellLots;
+
+  Print("averageSellPrice: ", NormalizeDouble(averageSellPrice, 2));
+
+  double sellProfit = cAccountInfo.OrderProfitCheck(
+      _Symbol, ORDER_TYPE_SELL, totalSellLots, averageSellPrice,
+      SymbolInfoDouble(_Symbol, SYMBOL_ASK));
+
+  Print("sellProfit: ", NormalizeDouble(sellProfit, 2));
+
+  double totalProfit = buyProfit + sellProfit;
+
+  Print("totalProfit: ", NormalizeDouble(totalProfit, 2));
 }
 //+------------------------------------------------------------------+

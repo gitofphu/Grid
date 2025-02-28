@@ -101,6 +101,11 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
                  orderType == ORDER_TYPE_SELL_STOP) {
         PlaySound(SELL_ENTRY_ALERT_FILE);
       }
+
+      if (orderType != -1) {
+        string message = "Entry " + " " + strType + " " + (string)trans.volume;
+        Print(message);
+      }
     }
   }
 }

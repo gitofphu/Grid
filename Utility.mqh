@@ -406,6 +406,7 @@ void MyUtility::getExistDealsWithLots(CArrayDouble &arrayPrices,
 }
 
 /**
+ * OrderGetInteger(ORDER_TYPE)
  * ORDER_TYPE_BUY
  * ORDER_TYPE_SELL
  * ORDER_TYPE_BUY_LIMIT
@@ -418,6 +419,7 @@ void MyUtility::getExistDealsWithLots(CArrayDouble &arrayPrices,
  */
 
 /**
+ * PositionGetInteger(POSITION_TYPE)
  * POSITION_TYPE_BUY
  * POSITION_TYPE_SELL
  */
