@@ -312,7 +312,9 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  Utility.CloseAllOrders();
+  // Utility.CloseAllOrders();
+
+  CloseOrderOutSideArray();
 
   CheckAndPlaceOrders();
 
