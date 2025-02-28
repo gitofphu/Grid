@@ -74,7 +74,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
       PlaySound(SL_ALERT_FILE);
 
-      string message = "SL " + " " + strType + " " + (string)trans.volume;
+      string message = "SL " + strType + " " + (string)trans.volume;
       Print(message);
 
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
@@ -89,7 +89,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
         PlaySound(SELL_TP_ALERT_FILE);
       }
 
-      string message = "TP " + " " + strType + " " + (string)trans.volume;
+      string message = "TP " + strType + " " + (string)trans.volume;
       Print(message);
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
       long orderType = Utility.GetOrderTypeFromTransDeal(trans);
@@ -103,7 +103,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       }
 
       if (orderType != -1) {
-        string message = "Entry " + " " + strType + " " + (string)trans.volume;
+        string message = "Entry " + strType + " " + (string)trans.volume;
         Print(message);
       }
     }
