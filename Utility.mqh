@@ -79,6 +79,8 @@ public:
   string GetDealReasonString(ENUM_DEAL_REASON reason);
   string GetOrderTypeStringFromTransDeal(const MqlTradeTransaction &trans);
   long GetOrderTypeFromTransDeal(const MqlTradeTransaction &trans);
+  void GetAveragePriceAndLots(double &averageBuyPrice, double &totalBuyLots,
+                              double &averageSellPrice, double &totalSellLots);
 
 private:
   void deleteOrder(ulong ticket);
@@ -1089,4 +1091,62 @@ double MyUtility::Clamp(double value, double min_value, double max_value) {
 //+------------------------------------------------------------------+
 bool MyUtility::IsInRange(double value, double min_value, double max_value) {
   return (value >= min_value && value <= max_value);
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetAveragePriceAndLots(...).                    |
+//| INPUT:  averageBuyPrice      - averageBuyPrice,                  |
+//|         totalBuyLots         - totalBuyLots,                     |
+//|         averageSellPrice     - averageSellPrice,                 |
+//|         totalSellLots        - totalSellLots,                    |
+//+------------------------------------------------------------------+
+void MyUtility::GetAveragePriceAndLots(double &averageBuyPrice,
+                                       double &totalBuyLots,
+                                       double &averageSellPrice,
+                                       double &totalSellLots) {
+
+  averageBuyPrice = 0;
+  totalBuyLots = 0;
+  averageSellPrice = 0;
+  totalSellLots = 0;
+
+  CArrayDouble sellPrices;
+  CArrayDouble sellLots;
+
+  CArrayDouble buyPrices;
+  CArrayDouble buyLots;
+
+  for (int i = 0; i < PositionsTotal(); i++) {
+    ulong positionTicket = PositionGetTicket(i);
+    if (PositionSelectByTicket(positionTicket)) {
+      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      double positionLots = PositionGetDouble(POSITION_VOLUME);
+      string symbol = PositionGetString(POSITION_SYMBOL);
+      string positionComment = PositionGetString(POSITION_COMMENT);
+      long positionType = PositionGetInteger(POSITION_TYPE);
+
+      if (symbol != _Symbol)
+        continue;
+
+      if (positionType == POSITION_TYPE_BUY) {
+        buyPrices.Add(positionPrice);
+        buyLots.Add(positionLots);
+      } else if (positionType == POSITION_TYPE_SELL) {
+        sellPrices.Add(positionPrice);
+        sellLots.Add(positionLots);
+      }
+    }
+  }
+
+  for (int i = 0; i < buyPrices.Total(); i++) {
+    averageBuyPrice += buyPrices[i] * buyLots[i];
+    totalBuyLots = NormalizeDoubleTwoDigits(totalBuyLots + buyLots[i]);
+  }
+  averageBuyPrice = NormalizeDoubleTwoDigits(averageBuyPrice / totalBuyLots);
+
+  for (int i = 0; i < sellPrices.Total(); i++) {
+    averageSellPrice += sellPrices[i] * sellLots[i];
+    totalSellLots = NormalizeDoubleTwoDigits(totalSellLots + sellLots[i]);
+  }
+  averageSellPrice = NormalizeDoubleTwoDigits(averageSellPrice / totalSellLots);
 }

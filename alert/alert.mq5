@@ -28,6 +28,20 @@ CDealInfo cDealInfo;
 #resource "sl_alert.wav"
 #define SL_ALERT_FILE "::sl_alert.wav"
 
+input group "Averange Price Settings";
+input bool drawAveragePrice = false;
+double averageBuyPrice = NULL;
+double totalBuyLots = NULL;
+input color averageBuyPriceColor = clrGreen; // Buy Color
+double averageSellPrice = NULL;
+double totalSellLots = NULL;
+input color averageSellPriceColor = clrRed; // Sell Color
+
+color AverageBuyPriceColor = NULL;
+color AverageSellPriceColor = NULL;
+string buyLineName = "averageBuyPrice";
+string sellLineName = "averageSellPrice";
+
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -35,7 +49,43 @@ int OnInit() {
 
   Print("Alert initialized");
 
+  if (AverageBuyPriceColor == averageBuyPriceColor &&
+      AverageSellPriceColor == averageSellPriceColor)
+    return (INIT_SUCCEEDED);
+
+  AverageBuyPriceColor = averageBuyPriceColor;
+  AverageSellPriceColor = averageSellPriceColor;
+
+  if (drawAveragePrice) {
+    Utility.GetAveragePriceAndLots(averageBuyPrice, totalBuyLots,
+                                   averageSellPrice, totalSellLots);
+  }
+
   return (INIT_SUCCEEDED);
+}
+
+void OnTick() {
+
+  if (drawAveragePrice) {
+
+    if (averageBuyPrice == NULL || totalBuyLots == NULL ||
+        averageSellPrice == NULL || totalSellLots == NULL)
+      return;
+
+    double buyProfit = cAccountInfo.OrderProfitCheck(
+        _Symbol, ORDER_TYPE_BUY, totalBuyLots, averageBuyPrice,
+        SymbolInfoDouble(_Symbol, SYMBOL_BID));
+
+    DrawHorizontalLine(averageBuyPrice, buyLineName, AverageBuyPriceColor,
+                       totalSellLots, buyProfit);
+
+    double sellProfit = cAccountInfo.OrderProfitCheck(
+        _Symbol, ORDER_TYPE_SELL, totalSellLots, averageSellPrice,
+        SymbolInfoDouble(_Symbol, SYMBOL_ASK));
+
+    DrawHorizontalLine(averageSellPrice, sellLineName, AverageSellPriceColor,
+                       totalSellLots, sellProfit);
+  }
 }
 
 //+------------------------------------------------------------------+
@@ -108,5 +158,62 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       }
     }
   }
+
+  if (drawAveragePrice) {
+    Utility.GetAveragePriceAndLots(averageBuyPrice, totalBuyLots,
+                                   averageSellPrice, totalSellLots);
+  }
 }
+
+void OnDeinit(const int reason) {
+
+  if (drawAveragePrice) {
+    // Delete the horizontal line
+    ObjectDelete(0, buyLineName);
+    ObjectDelete(0, sellLineName);
+  }
+}
+
 //+------------------------------------------------------------------+
+
+void DrawHorizontalLine(double price, string lineName, color lineColor,
+                        double lot, double profit) {
+
+  // Print("Price: " + price + ", LineName: " + lineName +
+  //       ", LineColor: " + lineColor + ", Lot: " + lot + ", Profit: " +
+  //       profit);
+
+  // Check if line already exists
+  if (ObjectFind(0, lineName) != -1) {
+
+    ObjectSetString(0, lineName, OBJPROP_TEXT,
+                    "Price: " + DoubleToString(price, _Digits) +
+                        " Lot: " + DoubleToString(lot, 2) +
+                        " Profit: " + DoubleToString(profit, 2));
+
+    // Move the existing horizontal line to the new price
+    ObjectMove(0, lineName, 0, 0, price);
+
+  } else {
+    // Create a new horizontal line
+    if (!ObjectCreate(0, lineName, OBJ_HLINE, 0, 0, price)) {
+      Print("Failed to create horizontal line. Error: ", GetLastError());
+      return;
+    }
+
+    // Set line properties
+    ObjectSetInteger(0, lineName, OBJPROP_COLOR, lineColor);
+    ObjectSetInteger(0, lineName, OBJPROP_STYLE, STYLE_SOLID);
+    ObjectSetInteger(0, lineName, OBJPROP_WIDTH, 3);
+    ObjectSetInteger(0, lineName, OBJPROP_SELECTABLE, false);
+    ObjectSetInteger(0, lineName, OBJPROP_SELECTED, false);
+    ObjectSetInteger(0, lineName, OBJPROP_HIDDEN, true);
+    ObjectSetInteger(0, lineName, OBJPROP_ZORDER, 3);
+    ObjectSetString(0, lineName, OBJPROP_TEXT,
+                    "Price: " + DoubleToString(price, _Digits) +
+                        " Lot: " + DoubleToString(lot, 2) +
+                        " Profit: " + DoubleToString(profit, 2));
+  }
+
+  ChartRedraw(); // Refresh the chart
+}
