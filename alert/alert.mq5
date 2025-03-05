@@ -56,10 +56,7 @@ int OnInit() {
   AverageBuyPriceColor = averageBuyPriceColor;
   AverageSellPriceColor = averageSellPriceColor;
 
-  if (drawAveragePrice) {
-    Utility.GetAveragePriceAndLots(averageBuyPrice, totalBuyLots,
-                                   averageSellPrice, totalSellLots);
-  }
+  ReCalculateAveragePrice();
 
   return (INIT_SUCCEEDED);
 }
@@ -127,6 +124,8 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
       string message = "SL " + strType + " " + (string)trans.volume;
       Print(message);
 
+      ReCalculateAveragePrice();
+
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
 
       long orderType = Utility.GetOrderTypeFromTransDeal(trans);
@@ -141,6 +140,9 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
       string message = "TP " + strType + " " + (string)trans.volume;
       Print(message);
+
+      ReCalculateAveragePrice();
+
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
       long orderType = Utility.GetOrderTypeFromTransDeal(trans);
 
@@ -156,12 +158,9 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
         string message = "Entry " + strType + " " + (string)trans.volume;
         Print(message);
       }
-    }
-  }
 
-  if (drawAveragePrice) {
-    Utility.GetAveragePriceAndLots(averageBuyPrice, totalBuyLots,
-                                   averageSellPrice, totalSellLots);
+      ReCalculateAveragePrice();
+    }
   }
 }
 
@@ -175,6 +174,13 @@ void OnDeinit(const int reason) {
 }
 
 //+------------------------------------------------------------------+
+
+void ReCalculateAveragePrice() {
+  if (drawAveragePrice) {
+    Utility.GetAveragePriceAndLots(averageBuyPrice, totalBuyLots,
+                                   averageSellPrice, totalSellLots);
+  }
+}
 
 void DrawHorizontalLine(double price, string lineName, color lineColor,
                         double lot, double profit) {
