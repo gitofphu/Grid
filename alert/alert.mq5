@@ -50,8 +50,11 @@ int OnInit() {
   Print("Alert initialized");
 
   if (AverageBuyPriceColor == averageBuyPriceColor &&
-      AverageSellPriceColor == averageSellPriceColor)
+      AverageSellPriceColor == averageSellPriceColor) {
+    Print("Parameters are already set.");
+
     return (INIT_SUCCEEDED);
+  }
 
   AverageBuyPriceColor = averageBuyPriceColor;
   AverageSellPriceColor = averageSellPriceColor;
@@ -166,7 +169,9 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
 void OnDeinit(const int reason) {
 
-  if (drawAveragePrice) {
+  Print("OnDeinit reason: ", reason);
+
+  if (reason != REASON_CHARTCHANGE && drawAveragePrice) {
     // Delete the horizontal line
     ObjectDelete(0, buyLineName);
     ObjectDelete(0, sellLineName);

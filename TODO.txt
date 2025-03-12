@@ -51,6 +51,8 @@
 // [x] Fill lot if open position less than lotPerGrid
 // [x] CheckAndPlaceOrders on pending order exceute
 // [x] Trailing pending Order
-// [ ] add min max price to four way
+// [x] add min max price to four way
 // [ ] alert sum of swap profit loss
 // [ ] รวบไม้ order
+// [ ] max price without min price
+// [ ] min price without max price
