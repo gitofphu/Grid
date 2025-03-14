@@ -47,8 +47,9 @@ public:
   void GetFibonacciArrayPrices(double maxPrice, CArrayDouble &arrayPrices);
   void GetExpandArrayPrices(double minPrice, double maxPrice,
                             CArrayDouble &arrayPrices);
-  void GetArrayPrice(double minPrice, double maxPrice, double gridGapSize,
-                     CArrayDouble &arrayPrices);
+  void GetArrayPrice(double startPrice, double endPrice, double gridGapSize,
+                     CArrayDouble &arrayPrices, double minPrice = NULL,
+                     double maxPrice = NULL);
   double NormalizeDoubleTwoDigits(double num);
   void PlaceBuyOrders(CArrayDouble &buyLimitPrices, CArrayDouble &buyStopPrices,
                       double lot, double gridGapSize, string comment,
@@ -687,19 +688,35 @@ void MyUtility::GetExpandArrayPrices(double minPrice, double maxPrice,
 //| INPUT:  startPrice        - start price of array,                |
 //|         endPrice          - end price of array,                  |
 //|         gridGapSize       - grid gap size,                       |
+//|         minPrice          - min price,                           |
+//|         maxPrice          - max price,                           |
 //|         arrayPrices       - return array of price,               |
 //+------------------------------------------------------------------+
 void MyUtility::GetArrayPrice(double startPrice, double endPrice,
-                              double gridGapSize, CArrayDouble &arrayPrices) {
-  Print("startPrice: ", startPrice, ", endPrice: ", endPrice,
-        ", gridGapSize: ", gridGapSize);
+                              double gridGapSize, CArrayDouble &arrayPrices,
+                              double minPrice = NULL, double maxPrice = NULL) {
+  Print("startPrice: ", NormalizeDoubleTwoDigits(startPrice),
+        ", endPrice: ", NormalizeDoubleTwoDigits(endPrice),
+        ", gridGapSize: ", NormalizeDoubleTwoDigits(gridGapSize),
+        ", minPrice: ", NormalizeDoubleTwoDigits(minPrice),
+        ", maxPrice: ", NormalizeDoubleTwoDigits(maxPrice));
 
   if (arrayPrices.Total() > 0) {
     arrayPrices.Shutdown();
   }
 
-  for (double price = endPrice; price >= startPrice;
+  for (double price = NormalizeDoubleTwoDigits(endPrice);
+       price >= NormalizeDoubleTwoDigits(startPrice);
        price = NormalizeDoubleTwoDigits(price - gridGapSize)) {
+
+    if (minPrice != NULL && price < minPrice) {
+      break;
+    }
+
+    if (maxPrice != NULL && price > maxPrice) {
+      break;
+    }
+
     if (price != 0) {
       arrayPrices.Add(NormalizeDoubleTwoDigits(price));
     } else {

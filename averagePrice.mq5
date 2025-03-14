@@ -61,7 +61,8 @@ void OnStart() {
       _Symbol, ORDER_TYPE_BUY, totalBuyLots, averageBuyPrice,
       SymbolInfoDouble(_Symbol, SYMBOL_BID));
 
-  Print("buyProfit: ", NormalizeDouble(buyProfit, 2));
+  Print("buyProfit: ", NormalizeDouble(buyProfit, 2),
+        " totalBuyLots: ", NormalizeDouble(totalBuyLots, 2));
 
   double averageSellPrice = 0;
   double totalSellLots = 0;
@@ -77,7 +78,8 @@ void OnStart() {
       _Symbol, ORDER_TYPE_SELL, totalSellLots, averageSellPrice,
       SymbolInfoDouble(_Symbol, SYMBOL_ASK));
 
-  Print("sellProfit: ", NormalizeDouble(sellProfit, 2));
+  Print("sellProfit: ", NormalizeDouble(sellProfit, 2),
+        " totalSellLots: ", NormalizeDouble(totalSellLots, 2));
 
   double totalProfit = buyProfit + sellProfit;
 
