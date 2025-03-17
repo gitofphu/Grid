@@ -81,7 +81,9 @@ public:
   string GetOrderTypeStringFromTransDeal(const MqlTradeTransaction &trans);
   long GetOrderTypeFromTransDeal(const MqlTradeTransaction &trans);
   void GetAveragePriceAndLots(double &averageBuyPrice, double &totalBuyLots,
-                              double &averageSellPrice, double &totalSellLots);
+                              double &totalBuyProfit, double &averageSellPrice,
+                              double &totalSellLots, double &totalSellProfit,
+                              int &totalPositions);
 
 private:
   void deleteOrder(ulong ticket);
@@ -1049,6 +1051,11 @@ long MyUtility::GetOrderTypeFromTransDeal(const MqlTradeTransaction &trans) {
 }
 
 //+------------------------------------------------------------------+
+//| Access functions CloseAllOrdersByComment().                               |
+//+------------------------------------------------------------------+
+// TODO: Close all orders by comment
+
+//+------------------------------------------------------------------+
 //| Access functions CloseAllOrders().                               |
 //+------------------------------------------------------------------+
 void MyUtility::CloseAllOrders() {
@@ -1116,54 +1123,85 @@ bool MyUtility::IsInRange(double value, double min_value, double max_value) {
 //|         totalBuyLots         - totalBuyLots,                     |
 //|         averageSellPrice     - averageSellPrice,                 |
 //|         totalSellLots        - totalSellLots,                    |
+//|         totalPositions       - totalPositions,                    |
 //+------------------------------------------------------------------+
-void MyUtility::GetAveragePriceAndLots(double &averageBuyPrice,
-                                       double &totalBuyLots,
-                                       double &averageSellPrice,
-                                       double &totalSellLots) {
+void MyUtility::GetAveragePriceAndLots(
+    double &averageBuyPrice, double &totalBuyLots, double &totalBuyProfit,
+    double &averageSellPrice, double &totalSellLots, double &totalSellProfit,
+    int &totalPositions) {
 
   averageBuyPrice = 0;
   totalBuyLots = 0;
+  totalBuyProfit = 0;
+
   averageSellPrice = 0;
   totalSellLots = 0;
+  totalSellProfit = 0;
+
+  totalPositions = 0;
 
   CArrayDouble sellPrices;
   CArrayDouble sellLots;
+  CArrayDouble sellProfit;
 
   CArrayDouble buyPrices;
   CArrayDouble buyLots;
+  CArrayDouble buyProfit;
 
   for (int i = 0; i < PositionsTotal(); i++) {
     ulong positionTicket = PositionGetTicket(i);
     if (PositionSelectByTicket(positionTicket)) {
       double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
       double positionLots = PositionGetDouble(POSITION_VOLUME);
+      double positionSwap = PositionGetDouble(POSITION_SWAP);
+      double positionProfit = PositionGetDouble(POSITION_PROFIT);
+
       string symbol = PositionGetString(POSITION_SYMBOL);
       string positionComment = PositionGetString(POSITION_COMMENT);
       long positionType = PositionGetInteger(POSITION_TYPE);
 
+      // Print("GetAveragePriceAndLots price: ", positionPrice,
+      //       ", lot: ", positionLots, ", swap: ", positionSwap,
+      //       ", profit: ", positionProfit, ", symbol: ", symbol,
+      //       ", positionComment: ", positionComment);
+
       if (symbol != _Symbol)
         continue;
+
+      totalPositions++;
 
       if (positionType == POSITION_TYPE_BUY) {
         buyPrices.Add(positionPrice);
         buyLots.Add(positionLots);
+        buyProfit.Add(positionProfit + positionSwap);
       } else if (positionType == POSITION_TYPE_SELL) {
         sellPrices.Add(positionPrice);
         sellLots.Add(positionLots);
+        sellProfit.Add(positionProfit + positionSwap);
       }
     }
   }
 
   for (int i = 0; i < buyPrices.Total(); i++) {
+
     averageBuyPrice += buyPrices[i] * buyLots[i];
     totalBuyLots = NormalizeDoubleTwoDigits(totalBuyLots + buyLots[i]);
+    totalBuyProfit = NormalizeDoubleTwoDigits(totalBuyProfit + buyProfit[i]);
   }
   averageBuyPrice = NormalizeDoubleTwoDigits(averageBuyPrice / totalBuyLots);
 
   for (int i = 0; i < sellPrices.Total(); i++) {
+
     averageSellPrice += sellPrices[i] * sellLots[i];
     totalSellLots = NormalizeDoubleTwoDigits(totalSellLots + sellLots[i]);
+    totalSellProfit = NormalizeDoubleTwoDigits(totalSellProfit + sellProfit[i]);
   }
   averageSellPrice = NormalizeDoubleTwoDigits(averageSellPrice / totalSellLots);
+
+  // Print("GetAveragePriceAndLots averageBuyPrice: ", averageBuyPrice,
+  //       ", totalBuyLots: ", totalBuyLots, ", totalBuyProfit: ",
+  //       totalBuyProfit,
+  //       ", averageSellPrice: ", averageSellPrice,
+  //       ", totalSellLots: ", totalSellLots,
+  //       ", totalSellProfit: ", totalSellProfit);
 }

@@ -54,5 +54,6 @@
 // [x] add min max price to four way
 // [ ] alert sum of swap profit loss
 // [ ] รวบไม้ order
-// [ ] max price without min price
-// [ ] min price without max price
+// [x] max price without min price
+// [x] min price without max price
+// [ ] close order by comment
