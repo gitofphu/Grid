@@ -56,4 +56,4 @@
 // [ ] รวบไม้ order
 // [x] max price without min price
 // [x] min price without max price
-// [ ] close order by comment
+// [x] close order by comment

@@ -51,6 +51,10 @@ input double SellStopMaxPrice = NULL;  // Max price
 input double SellStopMinPrice = NULL;  // Min price
 input bool FillInSellStopLots = false; // Fill in lots
 
+input group "Misc.";
+input bool useNotification = false;   // Use notification
+input bool clearOrderAndExit = false; // Clear all orders and exit
+
 //+------------------------------------------------------------------+
 //| Global variables                                                 |
 //+------------------------------------------------------------------+
@@ -84,8 +88,6 @@ double sellStopTP = NULL;
 double sellStopMaxPrice = NULL;
 double sellStopMinPrice = NULL;
 bool fillInSellStopLots = false;
-
-input bool useNotification = false;
 
 int limitOrders;
 CArrayDouble buyStopArrayPrices;
@@ -445,12 +447,15 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
     ulong orderTicket = OrderGetTicket(i);
 
     if (OrderSelect(orderTicket)) {
-      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-      double orderVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
+
       string symbol = OrderGetString(ORDER_SYMBOL);
-      string orderComment = OrderGetString(ORDER_COMMENT);
       long orderType = OrderGetInteger(ORDER_TYPE);
 
+      if (symbol != _Symbol || orderType != type) {
+        continue;
+      }
+
+      string orderComment = OrderGetString(ORDER_COMMENT);
       string splitComment[];
       int count = StringSplit(orderComment, '|', splitComment);
 
@@ -469,9 +474,9 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
         continue;
       }
 
-      else if (symbol != _Symbol || orderType != type) {
-        continue;
-      }
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+      double orderVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
+
       Utility.getExistDealsWithLots(arrayPrices, gridGapSize, orderPrice,
                                     orderVolume, existOrders, existOrdersLots);
     }
@@ -483,11 +488,12 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
   for (int i = 0; i < PositionsTotal(); i++) {
     ulong positionTicket = PositionGetTicket(i);
     if (PositionSelectByTicket(positionTicket)) {
-      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
-      double positionVolume = PositionGetDouble(POSITION_VOLUME);
+
       string symbol = PositionGetString(POSITION_SYMBOL);
-      string positionComment = PositionGetString(POSITION_COMMENT);
-      long positionType = PositionGetInteger(POSITION_TYPE);
+
+      if (symbol != _Symbol) {
+        continue;
+      }
 
       // Print("positionPrice: ", positionPrice,
       //       ", positionVolume: ", positionVolume,
@@ -495,6 +501,9 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
       //       ", positionType: ", positionType,
       //       ", positionTicket: ", positionTicket);
 
+      long positionType = PositionGetInteger(POSITION_TYPE);
+
+      string positionComment = PositionGetString(POSITION_COMMENT);
       string splitComment[];
       int count = StringSplit(positionComment, '|', splitComment);
 
@@ -509,10 +518,6 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
         continue;
       }
 
-      else if (symbol != _Symbol) {
-        continue;
-      }
-
       else if ((type == ORDER_TYPE_BUY_LIMIT || type == ORDER_TYPE_BUY_STOP) &&
                positionType != POSITION_TYPE_BUY) {
         continue;
@@ -523,6 +528,9 @@ void FilterOpenOrdersAndPositionsByType(CArrayDouble &arrayPrices,
                positionType != POSITION_TYPE_SELL) {
         continue;
       }
+
+      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      double positionVolume = PositionGetDouble(POSITION_VOLUME);
 
       Utility.getExistDealsWithLots(arrayPrices, gridGapSize, positionPrice,
                                     positionVolume, existPositions,
@@ -659,6 +667,7 @@ void PlaceMissingDealsByType(CArrayDouble &arrayPrices, double gridGapSize,
     }
   }
 }
+
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
 //+------------------------------------------------------------------+
@@ -668,6 +677,12 @@ void OnDeinit(const int reason) {}
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
 void OnTick() {
+  if (clearOrderAndExit) {
+    Utility.CloseAllOrdersByComment(Comment);
+    Utility.AlertAndExit("Clear all orders and exit.");
+    return;
+  }
+
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 

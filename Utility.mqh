@@ -84,6 +84,7 @@ public:
                               double &totalBuyProfit, double &averageSellPrice,
                               double &totalSellLots, double &totalSellProfit,
                               int &totalPositions);
+  void CloseAllOrdersByComment(string comment);
 
 private:
   void deleteOrder(ulong ticket);
@@ -301,23 +302,20 @@ void MyUtility::CloseOrderOutsideArrayPricesByType(
     ulong orderTicket = OrderGetTicket(i);
     if (OrderSelect(orderTicket)) {
       string symbol = OrderGetString(ORDER_SYMBOL);
-      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-      string orderComment = OrderGetString(ORDER_COMMENT);
       long orderType = OrderGetInteger(ORDER_TYPE);
 
+      if (symbol != _Symbol || orderType != type)
+        continue;
+
+      string orderComment = OrderGetString(ORDER_COMMENT);
       string splitComment[];
       int count = StringSplit(orderComment, '|', splitComment);
 
       if (count == 0)
         continue;
-
       else if (count == 1 && orderComment != comment)
         continue;
-
       else if (count > 1 && splitComment[0] != comment)
-        continue;
-
-      else if (symbol != _Symbol || orderType != type)
         continue;
 
       bool isFillIn = false;
@@ -327,6 +325,8 @@ void MyUtility::CloseOrderOutsideArrayPricesByType(
       }
 
       double orderVolume = OrderGetDouble(ORDER_VOLUME_CURRENT);
+
+      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
 
       int index = arrayPrices.SearchLinear(orderPrice);
 
@@ -1053,7 +1053,39 @@ long MyUtility::GetOrderTypeFromTransDeal(const MqlTradeTransaction &trans) {
 //+------------------------------------------------------------------+
 //| Access functions CloseAllOrdersByComment().                               |
 //+------------------------------------------------------------------+
-// TODO: Close all orders by comment
+void MyUtility::CloseAllOrdersByComment(string comment) {
+  Print("CloseAllOrdersByComment, symbol: ", _Symbol, ", comment: ", comment);
+  cTrade.SetAsyncMode(true);
+  int ordersTotal = OrdersTotal();
+  CArrayLong tickets;
+  if (ordersTotal > 0) {
+    for (int i = 0; i < ordersTotal; i++) {
+      ulong orderTicket = OrderGetTicket(i);
+      if (OrderSelect(orderTicket)) {
+        if (OrderGetString(ORDER_SYMBOL) != _Symbol)
+          continue;
+
+        string orderComment = OrderGetString(ORDER_COMMENT);
+
+        string splitComment[];
+        int count = StringSplit(orderComment, '|', splitComment);
+
+        if (count == 0)
+          continue;
+        else if (count == 1 && orderComment != comment)
+          continue;
+        else if (count > 1 && splitComment[0] != comment)
+          continue;
+
+        tickets.Add(orderTicket);
+      }
+    }
+    for (int i = 0; i < tickets.Total(); i++) {
+      Print("ticket: ", tickets[i]);
+      deleteOrder(tickets[i]);
+    }
+  }
+}
 
 //+------------------------------------------------------------------+
 //| Access functions CloseAllOrders().                               |
