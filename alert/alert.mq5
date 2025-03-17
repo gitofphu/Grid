@@ -30,17 +30,25 @@ CDealInfo cDealInfo;
 
 input group "Averange Price Settings";
 input bool drawAveragePrice = false;
-double averageBuyPrice = NULL;
-double totalBuyLots = NULL;
-input color averageBuyPriceColor = clrGreen; // Buy Color
-double averageSellPrice = NULL;
-double totalSellLots = NULL;
-input color averageSellPriceColor = clrRed; // Sell Color
+input ENUM_BASE_CORNER corner = CORNER_RIGHT_LOWER; // Corner
+input color averageBuyPriceColor = clrGreen;        // Buy Color
+input color averageSellPriceColor = clrRed;         // Sell Color
+
+ENUM_BASE_CORNER Cornor;
+ENUM_ANCHOR_POINT anchor;
 
 color AverageBuyPriceColor = NULL;
 color AverageSellPriceColor = NULL;
 string buyLineName = "averageBuyPrice";
 string sellLineName = "averageSellPrice";
+
+int totalPositions = 0;
+double averageBuyPrice = NULL;
+double totalBuyLots = NULL;
+double totalBuyProfit = NULL;
+double averageSellPrice = NULL;
+double totalSellLots = NULL;
+double totalSellProfit = NULL;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -50,7 +58,7 @@ int OnInit() {
   Print("Alert initialized");
 
   if (AverageBuyPriceColor == averageBuyPriceColor &&
-      AverageSellPriceColor == averageSellPriceColor) {
+      AverageSellPriceColor == averageSellPriceColor && Cornor == corner) {
     Print("Parameters are already set.");
 
     return (INIT_SUCCEEDED);
@@ -58,6 +66,26 @@ int OnInit() {
 
   AverageBuyPriceColor = averageBuyPriceColor;
   AverageSellPriceColor = averageSellPriceColor;
+  Cornor = corner;
+
+  switch (Cornor) {
+  case CORNER_LEFT_UPPER:
+    anchor = ANCHOR_LEFT_UPPER;
+    break;
+  case CORNER_LEFT_LOWER:
+    anchor = ANCHOR_LEFT_LOWER;
+    break;
+  case CORNER_RIGHT_UPPER:
+    anchor = ANCHOR_RIGHT_UPPER;
+    break;
+  case CORNER_RIGHT_LOWER:
+    anchor = ANCHOR_RIGHT_LOWER;
+    break;
+  }
+
+  ObjectDelete(0, buyLineName + "Text");
+  ObjectDelete(0, sellLineName + "Text");
+  ObjectDelete(0, "summaryText");
 
   ReCalculateAveragePrice();
 
@@ -66,25 +94,23 @@ int OnInit() {
 
 void OnTick() {
 
+  ReCalculateAveragePrice();
+
   if (drawAveragePrice) {
 
     if (averageBuyPrice == NULL || totalBuyLots == NULL ||
         averageSellPrice == NULL || totalSellLots == NULL)
       return;
 
-    double buyProfit = cAccountInfo.OrderProfitCheck(
-        _Symbol, ORDER_TYPE_BUY, totalBuyLots, averageBuyPrice,
-        SymbolInfoDouble(_Symbol, SYMBOL_BID));
+    DrawHorizontalLine(averageBuyPrice, ORDER_TYPE_BUY, AverageBuyPriceColor,
+                       totalBuyLots, totalBuyProfit);
 
-    DrawHorizontalLine(averageBuyPrice, buyLineName, AverageBuyPriceColor,
-                       totalSellLots, buyProfit);
+    DrawHorizontalLine(averageSellPrice, ORDER_TYPE_SELL, AverageSellPriceColor,
+                       totalSellLots, totalSellProfit);
 
-    double sellProfit = cAccountInfo.OrderProfitCheck(
-        _Symbol, ORDER_TYPE_SELL, totalSellLots, averageSellPrice,
-        SymbolInfoDouble(_Symbol, SYMBOL_ASK));
+    DrawSummary(totalBuyProfit + totalSellProfit);
 
-    DrawHorizontalLine(averageSellPrice, sellLineName, AverageSellPriceColor,
-                       totalSellLots, sellProfit);
+    ChartRedraw(); // Refresh the chart
   }
 }
 
@@ -175,24 +201,34 @@ void OnDeinit(const int reason) {
     // Delete the horizontal line
     ObjectDelete(0, buyLineName);
     ObjectDelete(0, sellLineName);
+    ObjectDelete(0, buyLineName + "Text");
+    ObjectDelete(0, sellLineName + "Text");
+    ObjectDelete(0, "summaryText");
   }
 }
-
-//+------------------------------------------------------------------+
 
 void ReCalculateAveragePrice() {
   if (drawAveragePrice) {
-    Utility.GetAveragePriceAndLots(averageBuyPrice, totalBuyLots,
-                                   averageSellPrice, totalSellLots);
+    Utility.GetAveragePriceAndLots(
+        averageBuyPrice, totalBuyLots, totalBuyProfit, averageSellPrice,
+        totalSellLots, totalSellProfit, totalPositions);
   }
 }
 
-void DrawHorizontalLine(double price, string lineName, color lineColor,
+void DrawHorizontalLine(double price, ENUM_ORDER_TYPE type, color lineColor,
                         double lot, double profit) {
 
-  // Print("Price: " + price + ", LineName: " + lineName +
+  // Print("DrawHorizontalLine, Price: " + price + ", type: " + type +
   //       ", LineColor: " + lineColor + ", Lot: " + lot + ", Profit: " +
   //       profit);
+
+  string lineName;
+
+  if (type == ORDER_TYPE_BUY) {
+    lineName = buyLineName;
+  } else {
+    lineName = sellLineName;
+  }
 
   // Check if line already exists
   if (ObjectFind(0, lineName) != -1) {
@@ -220,11 +256,60 @@ void DrawHorizontalLine(double price, string lineName, color lineColor,
     ObjectSetInteger(0, lineName, OBJPROP_SELECTED, false);
     ObjectSetInteger(0, lineName, OBJPROP_HIDDEN, true);
     ObjectSetInteger(0, lineName, OBJPROP_ZORDER, 3);
-    ObjectSetString(0, lineName, OBJPROP_TEXT,
-                    "Price: " + DoubleToString(price, _Digits) +
-                        " Lot: " + DoubleToString(lot, 2) +
-                        " Profit: " + DoubleToString(profit, 2));
+    // ObjectSetString(0, lineName, OBJPROP_TEXT,
+    //                 "Price: " + DoubleToString(price, _Digits) +
+    //                     " Lot: " + DoubleToString(lot, 2) +
+    //                     " Profit: " + DoubleToString(profit, 2));
   }
 
-  ChartRedraw(); // Refresh the chart
+  string message = "Lot: " + DoubleToString(lot, 2) +
+                   " Price: " + DoubleToString(price, _Digits) +
+                   " Profit: " + DoubleToString(profit, 2);
+
+  string text;
+  string objectName;
+  int yDistance;
+
+  if (type == ORDER_TYPE_BUY) {
+    text = "Buy: " + message;
+    objectName = buyLineName + "Text";
+    yDistance = 60;
+  } else {
+    text = "Sell: " + message;
+    objectName = sellLineName + "Text";
+    yDistance = 40;
+  }
+
+  if (ObjectFind(0, objectName) < 0) {
+    ObjectCreate(0, objectName, OBJ_LABEL, 0, 0, 0);
+    ObjectSetInteger(0, objectName, OBJPROP_CORNER, Cornor);
+    ObjectSetInteger(0, objectName, OBJPROP_ANCHOR, anchor);
+    ObjectSetInteger(0, objectName, OBJPROP_XSIZE, 200);
+    ObjectSetInteger(0, objectName, OBJPROP_YSIZE, 20);
+    ObjectSetInteger(0, objectName, OBJPROP_XDISTANCE, 10);
+    ObjectSetInteger(0, objectName, OBJPROP_YDISTANCE, yDistance);
+    ObjectSetInteger(0, objectName, OBJPROP_COLOR, lineColor);
+  }
+  ObjectSetString(0, objectName, OBJPROP_TEXT, text);
+}
+
+void DrawSummary(double totalProfit) {
+
+  string text = "Total Positions: " + totalPositions + " Net Lots: " +
+                DoubleToString(totalBuyLots - totalSellLots, 2) +
+                " Profit: " + DoubleToString(totalProfit, 2);
+
+  string objectName = "summaryText";
+
+  if (ObjectFind(0, objectName) < 0) {
+    ObjectCreate(0, objectName, OBJ_LABEL, 0, 0, 0);
+    ObjectSetInteger(0, objectName, OBJPROP_CORNER, Cornor);
+    ObjectSetInteger(0, objectName, OBJPROP_ANCHOR, anchor);
+    ObjectSetInteger(0, objectName, OBJPROP_XSIZE, 200);
+    ObjectSetInteger(0, objectName, OBJPROP_YSIZE, 20);
+    ObjectSetInteger(0, objectName, OBJPROP_XDISTANCE, 10);
+    ObjectSetInteger(0, objectName, OBJPROP_YDISTANCE, 20);
+    ObjectSetInteger(0, objectName, OBJPROP_COLOR, Yellow);
+  }
+  ObjectSetString(0, objectName, OBJPROP_TEXT, text);
 }
