@@ -16,8 +16,8 @@ CDealInfo cDealInfo;
 //+------------------------------------------------------------------+
 //| Input                                                            |
 //+------------------------------------------------------------------+
-input double PriceRange = 5;
-input int MaxOrders = NULL;
+input double PriceRange = 5; // Price range
+input int MaxOrders = NULL;  // Max orders
 
 input group "Buy Stop";
 input double BuyStopLot = NULL;       // Lot size
@@ -94,6 +94,7 @@ CArrayDouble buyStopArrayPrices;
 CArrayDouble buyLimitArrayPrices;
 CArrayDouble sellLimitArrayPrices;
 CArrayDouble sellStopArrayPrices;
+
 string Comment = "dynamic_grid";
 // comment pattern: <ea_name>|<IsFillIn>
 
@@ -302,6 +303,8 @@ int OnInit() {
   CloseOrderOutSideArray();
 
   CheckAndPlaceOrders();
+
+  // TODO: draw summary OnInit
 
   return (INIT_SUCCEEDED);
 }
@@ -677,6 +680,7 @@ void OnDeinit(const int reason) {}
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
 void OnTick() {
+
   if (clearOrderAndExit) {
     Utility.CloseAllOrdersByComment(Comment);
     Utility.AlertAndExit("Clear all orders and exit.");
@@ -835,6 +839,8 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
                         const MqlTradeRequest &request,
                         const MqlTradeResult &result) {
   ENUM_TRADE_TRANSACTION_TYPE type = trans.type;
+
+  // TODO: draw summary OnTradeTransaction
 
   if (type == TRADE_TRANSACTION_DEAL_ADD) {
 

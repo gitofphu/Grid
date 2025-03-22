@@ -703,9 +703,7 @@ void MyUtility::GetArrayPrice(double startPrice, double endPrice,
         ", minPrice: ", NormalizeDoubleTwoDigits(minPrice),
         ", maxPrice: ", NormalizeDoubleTwoDigits(maxPrice));
 
-  if (arrayPrices.Total() > 0) {
-    arrayPrices.Shutdown();
-  }
+  arrayPrices.Shutdown();
 
   for (double price = NormalizeDoubleTwoDigits(endPrice);
        price >= NormalizeDoubleTwoDigits(startPrice);
@@ -985,7 +983,8 @@ string MyUtility::GetDealReasonString(ENUM_DEAL_REASON reason) {
     return "The deal was executed as a result of activation of an order "
            "placed from the web platform.";
   case DEAL_REASON_EXPERT:
-    return "The deal was executed as a result of activation of an order placed "
+    return "The deal was executed as a result of activation of an order "
+           "placed "
            "from an MQL5 program, i.e. an Expert Advisor or a script.";
   case DEAL_REASON_SL:
     return "The deal was executed as a result of Stop Loss activation.";
@@ -999,7 +998,8 @@ string MyUtility::GetDealReasonString(ENUM_DEAL_REASON reason) {
     return "The deal was executed after charging the variation margin.";
   case DEAL_REASON_SPLIT:
     return "The deal was executed after the split (price reduction) of an "
-           "instrument, which had an open position during split announcement.";
+           "instrument, which had an open position during split "
+           "announcement.";
   case DEAL_REASON_CORPORATE_ACTION:
     return "The deal was executed as a result of a corporate action: merging "
            "or "
@@ -1051,7 +1051,7 @@ long MyUtility::GetOrderTypeFromTransDeal(const MqlTradeTransaction &trans) {
 }
 
 //+------------------------------------------------------------------+
-//| Access functions CloseAllOrdersByComment().                               |
+//| Access functions CloseAllOrdersByComment().                      |
 //+------------------------------------------------------------------+
 void MyUtility::CloseAllOrdersByComment(string comment) {
   Print("CloseAllOrdersByComment, symbol: ", _Symbol, ", comment: ", comment);
@@ -1140,7 +1140,7 @@ double MyUtility::Clamp(double value, double min_value, double max_value) {
 }
 
 //+------------------------------------------------------------------+
-//| Access functions Clamp(...).                                     |
+//| Access functions IsInRange(...).                                 |
 //| INPUT:  value             - value,                               |
 //|         min_value         - min_value,                           |
 //|         max_value         - max_value,                           |
