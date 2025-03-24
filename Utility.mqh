@@ -13,6 +13,9 @@ CTrade cTrade;
 #include <Trade/AccountInfo.mqh>
 CAccountInfo cAccountInfo;
 
+#include <Trade/DealInfo.mqh>
+CDealInfo cDealInfo;
+
 #include <Arrays/ArrayDouble.mqh>
 CArrayDouble;
 
@@ -85,6 +88,7 @@ public:
                               double &totalSellLots, double &totalSellProfit,
                               int &totalPositions);
   void CloseAllOrdersByComment(string comment);
+  int GetDecimalPlaces(double value);
 
 private:
   void deleteOrder(ulong ticket);
@@ -1155,7 +1159,7 @@ bool MyUtility::IsInRange(double value, double min_value, double max_value) {
 //|         totalBuyLots         - totalBuyLots,                     |
 //|         averageSellPrice     - averageSellPrice,                 |
 //|         totalSellLots        - totalSellLots,                    |
-//|         totalPositions       - totalPositions,                    |
+//|         totalPositions       - totalPositions,                   |
 //+------------------------------------------------------------------+
 void MyUtility::GetAveragePriceAndLots(
     double &averageBuyPrice, double &totalBuyLots, double &totalBuyProfit,
@@ -1236,4 +1240,22 @@ void MyUtility::GetAveragePriceAndLots(
   //       ", averageSellPrice: ", averageSellPrice,
   //       ", totalSellLots: ", totalSellLots,
   //       ", totalSellProfit: ", totalSellProfit);
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetDecimalPlaces(...).                          |
+//| INPUT:  number      - double number,                             |
+//+------------------------------------------------------------------+
+int GetDecimalPlaces(double number) {
+  string str =
+      DoubleToString(number, 16); // Convert to string with max precision
+  int pos = StringFind(str, "."); // Find the decimal point
+  if (pos == -1)
+    return 0; // No decimal point means 0 decimals
+
+  // Remove trailing zeros
+  while (StringGetCharacter(str, StringLen(str) - 1) == '0')
+    str = StringSubstr(str, 0, StringLen(str) - 1);
+
+  return StringLen(str) - pos - 1; // Count digits after decimal
 }

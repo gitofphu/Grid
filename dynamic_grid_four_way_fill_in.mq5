@@ -10,9 +10,6 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
-#include <Trade/DealInfo.mqh>
-CDealInfo cDealInfo;
-
 //+------------------------------------------------------------------+
 //| Input                                                            |
 //+------------------------------------------------------------------+
@@ -690,11 +687,7 @@ void OnTick() {
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-  if (buyStopLot && buyStopGapSize &&
-      Utility.NormalizeDoubleTwoDigits(
-          buyStopArrayPrices[buyStopArrayPrices.Total() - 1] - ask) >
-          buyStopGapSize) {
-
+  if (buyStopArrayPrices.Total() > 0) {
     Print("buyStop ask: ", ask,
           ", last price: ", buyStopArrayPrices[buyStopArrayPrices.Total() - 1],
           ", diff: ",
@@ -702,6 +695,12 @@ void OnTick() {
               buyStopArrayPrices[buyStopArrayPrices.Total() - 1] - ask),
           ", gap: ", buyStopGapSize, ", buyStop maxPrice: ", buyStopMaxPrice,
           ", buyStop minPrice: ", buyStopMinPrice);
+  }
+
+  if (buyStopArrayPrices.Total() > 0 &&
+      Utility.NormalizeDoubleTwoDigits(
+          buyStopArrayPrices[buyStopArrayPrices.Total() - 1] - ask) >
+          buyStopGapSize) {
 
     double startPrice = ask + buyStopGapSize;
     double endPrice = ask + priceRange;
@@ -726,15 +725,17 @@ void OnTick() {
                             orderPriceInvalid);
   }
 
-  if (buyLimitLot && buyLimitGapSize &&
-      Utility.NormalizeDoubleTwoDigits(bid - buyLimitArrayPrices[0]) >
-          buyLimitGapSize) {
-
+  if (buyLimitArrayPrices.Total() > 0) {
     Print("buyLimit bid: ", bid, ", first price: ", buyLimitArrayPrices[0],
           ", diff: ",
           Utility.NormalizeDoubleTwoDigits(bid - buyLimitArrayPrices[0]),
           ", gap: ", buyLimitGapSize, ", buyLimit maxPrice: ", buyLimitMaxPrice,
           ", buyLimit minPrice: ", buyLimitMinPrice);
+  }
+
+  if (buyLimitArrayPrices.Total() > 0 &&
+      Utility.NormalizeDoubleTwoDigits(bid - buyLimitArrayPrices[0]) >
+          buyLimitGapSize) {
 
     double startPrice = bid - priceRange;
     double endPrice = bid - buyLimitGapSize;
@@ -760,11 +761,7 @@ void OnTick() {
                             fillInBuyLimitLots, orderPriceInvalid);
   }
 
-  if (sellLimitLot && sellLimitGapSize &&
-      Utility.NormalizeDoubleTwoDigits(
-          sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask) >
-          sellLimitGapSize) {
-
+  if (sellLimitArrayPrices.Total() > 0) {
     Print("sellLimit ask: ", ask, ", last price: ",
           sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1], ", diff: ",
           Utility.NormalizeDoubleTwoDigits(
@@ -772,6 +769,12 @@ void OnTick() {
           ", gap: ", sellLimitGapSize,
           ", sellLimit maxPrice: ", sellLimitMaxPrice,
           ", sellLimit minPrice: ", sellLimitMinPrice);
+  }
+
+  if (sellLimitArrayPrices.Total() > 0 &&
+      Utility.NormalizeDoubleTwoDigits(
+          sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask) >
+          sellLimitGapSize) {
 
     double startPrice = ask + sellLimitGapSize;
     double endPrice = ask + priceRange;
@@ -797,15 +800,17 @@ void OnTick() {
                             fillInSellLimitLots, orderPriceInvalid);
   }
 
-  if (sellStopLot && sellStopGapSize &&
-      Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]) >
-          sellStopGapSize) {
-
+  if (sellStopArrayPrices.Total() > 0) {
     Print("sellStop bid: ", bid, ", first price: ", sellStopArrayPrices[0],
           ", diff: ",
           Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]),
           ", gap: ", sellStopGapSize, ", sellStop maxPrice: ", sellStopMaxPrice,
           ", sellStop minPrice: ", sellStopMinPrice);
+  }
+
+  if (sellStopArrayPrices.Total() > 0 &&
+      Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]) >
+          sellStopGapSize) {
 
     double startPrice = bid - priceRange;
     double endPrice = bid - sellStopGapSize;
