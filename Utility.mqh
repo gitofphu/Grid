@@ -66,6 +66,12 @@ public:
   void getExistDealsWithLots(CArrayDouble &arrayPrices, double gridGapSize,
                              double price, double lot, CArrayDouble &existDeals,
                              CArrayDouble &existDealsLots);
+  void getExistDealsWithLotsAndTP(CArrayDouble &arrayPrices,
+                                  CArrayDouble &arrayTP, double gridGapSize,
+                                  double price, double lot, double TP,
+                                  CArrayDouble &existDeals,
+                                  CArrayDouble &existDealsLots,
+                                  CArrayDouble &existDealsTP);
 
   void PlaceBuyLimitOrder(double price, double lot, double tp, string comment,
                           bool &orderPriceInvalid);
@@ -89,6 +95,9 @@ public:
                               int &totalPositions);
   void CloseAllOrdersByComment(string comment);
   int GetDecimalPlaces(double value);
+  bool ConfirmInputMessageBox(ENUM_ORDER_TYPE type, double lot, double gapSize,
+                              double TPSize, double maxPrice, double minPrice,
+                              bool fillInLots);
 
 private:
   void deleteOrder(ulong ticket);
@@ -410,6 +419,31 @@ void MyUtility::getExistDealsWithLots(CArrayDouble &arrayPrices,
         price <= arrayPrices[j] + gridGapSize - _Point) {
       existDeals.Add(arrayPrices[j]);
       existDealsLots.Add(lot);
+    }
+  }
+}
+//+------------------------------------------------------------------+
+//| Access functions getExistDealsWithLotsAndTP(...).                |
+//| INPUT:  arrayPrices     - grid price array,                      |
+//|         arrayTP         - grid TP array,                         |
+//|         gridGapSize     - grid gap size,                         |
+//|         price           - current price,                         |
+//|         lot             - current price lot,                     |
+//|         TP              - current price TP,                     |
+//|         existDeals      - existing deal array,                   |
+//|         existDealsLots  - existing deal lots array,              |
+//|         existDealsTP    - existing deal TP array,                |
+//+------------------------------------------------------------------+
+void MyUtility::getExistDealsWithLotsAndTP(
+    CArrayDouble &arrayPrices, CArrayDouble &arrayTP, double gridGapSize,
+    double price, double lot, double TP, CArrayDouble &existDeals,
+    CArrayDouble &existDealsLots, CArrayDouble &existDealsTP) {
+  for (int j = 0; j < arrayPrices.Total(); j++) {
+    if (price >= arrayPrices[j] &&
+        price <= arrayPrices[j] + gridGapSize - _Point && TP == arrayTP[j]) {
+      existDeals.Add(arrayPrices[j]);
+      existDealsLots.Add(lot);
+      existDealsTP.Add(TP);
     }
   }
 }
@@ -812,7 +846,7 @@ void MyUtility::PlaceBuyLimitOrder(double price, double lot, double tp,
 void MyUtility::PlaceBuyStopOrder(double price, double lot, double tp,
                                   string comment, bool &orderPriceInvalid) {
 
-  Print("Basic info: PlaceBuyStopOrder = ", price,
+  Print("Basic info: PlaceBuyStopOrder = ", price, ". lot = ", lot,
         ", TP = ", NormalizeDoubleTwoDigits(tp));
 
   if (cTrade.BuyStop(lot, price, _Symbol, 0, NormalizeDoubleTwoDigits(tp),
@@ -1246,7 +1280,7 @@ void MyUtility::GetAveragePriceAndLots(
 //| Access functions GetDecimalPlaces(...).                          |
 //| INPUT:  number      - double number,                             |
 //+------------------------------------------------------------------+
-int GetDecimalPlaces(double number) {
+int MyUtility::GetDecimalPlaces(double number) {
   string str =
       DoubleToString(number, 16); // Convert to string with max precision
   int pos = StringFind(str, "."); // Find the decimal point
@@ -1258,4 +1292,54 @@ int GetDecimalPlaces(double number) {
     str = StringSubstr(str, 0, StringLen(str) - 1);
 
   return StringLen(str) - pos - 1; // Count digits after decimal
+}
+
+//+------------------------------------------------------------------+
+//| Access functions ConfirmInputMessageBox(...).                    |
+//| INPUT:  type      - order type,                                  |
+//|         lot       - lot size,                                    |
+//|         gapSize   - grid gap size,                               |
+//|         TPSize    - TP size,                                     |
+//|         maxPrice  - max price,                                   |
+//|         minPrice  - min price,                                   |
+//|         fillInLots- fill in lots,                                |
+//+------------------------------------------------------------------+
+bool MyUtility::ConfirmInputMessageBox(ENUM_ORDER_TYPE type, double lot,
+                                       double gapSize, double TPSize,
+                                       double maxPrice, double minPrice,
+                                       bool fillInLots) {
+
+  string typeStr = "";
+  switch (type) {
+  case ORDER_TYPE_BUY_STOP:
+    typeStr = "Buy Stop";
+    break;
+  case ORDER_TYPE_BUY_LIMIT:
+    typeStr = "Buy Limit  ";
+    break;
+  case ORDER_TYPE_SELL_LIMIT:
+    typeStr = "Sell Limit ";
+    break;
+  case ORDER_TYPE_SELL_STOP:
+    typeStr = "Sell Stop  ";
+    break;
+  }
+
+  string message = "Type: " + typeStr + "\nLot: " + DoubleToString(lot, 2) +
+                   "\nGap: " + DoubleToString(gapSize, 2) +
+                   "\nTP: " + DoubleToString(TPSize, 2) +
+                   "\nMax: " + DoubleToString(maxPrice, 2) +
+                   "\nMin: " + DoubleToString(minPrice, 2) +
+                   "\nFill in lots: " + (fillInLots ? "Yes" : "No");
+
+  int result = MessageBox(message, "Confirm " + typeStr + " input",
+                          MB_OKCANCEL | MB_ICONQUESTION);
+
+  if (result == IDCANCEL) {
+    return false; // Prevent EA from running
+  } else if (result == IDNO) {
+    return false; // Prevent EA from running
+  } else {
+    return true; // Continue EA execution
+  }
 }

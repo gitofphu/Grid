@@ -49,8 +49,8 @@ input double SellStopMinPrice = NULL;  // Min price
 input bool FillInSellStopLots = false; // Fill in lots
 
 input group "Misc.";
-input bool useNotification = false;   // Use notification
-input bool clearOrderAndExit = false; // Clear all orders and exit
+input bool UseNotification = false;   // Use notification
+input bool ClearOrderAndExit = false; // Clear all orders and exit
 
 //+------------------------------------------------------------------+
 //| Global variables                                                 |
@@ -99,6 +99,16 @@ string Comment = "dynamic_grid";
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit() {
+
+  if (ClearOrderAndExit) {
+    int result = MessageBox("Clear all orders and exit?", "Confirm",
+                            MB_OKCANCEL | MB_ICONQUESTION);
+
+    if (result == IDOK) {
+      Utility.CloseAllOrdersByComment(Comment);
+      Utility.AlertAndExit("Clear all orders and exit.");
+    }
+  }
 
   if (PriceRange == priceRange && MaxOrders == maxOrders &&
       BuyStopLot == buyStopLot && BuyStopGapSize == buyStopGapSize &&
@@ -168,7 +178,7 @@ int OnInit() {
     sellStopArrayPrices.Shutdown();
   }
 
-  if (useNotification && !TerminalInfoInteger(TERMINAL_NOTIFICATIONS_ENABLED)) {
+  if (UseNotification && !TerminalInfoInteger(TERMINAL_NOTIFICATIONS_ENABLED)) {
     Utility.AlertAndExit("Error. The client terminal does not have permission "
                          "to send notifications");
     return (INIT_PARAMETERS_INCORRECT);
@@ -194,6 +204,13 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
+  if (buyStopLot && buyStopGapSize &&
+      Utility.ConfirmInputMessageBox(
+          ORDER_TYPE_BUY_STOP, buyStopLot, buyStopGapSize, buyStopTP,
+          buyStopMaxPrice, buyStopMinPrice, fillInBuyStopLots) == false) {
+    return INIT_FAILED;
+  }
+
   if ((buyLimitLot != NULL && buyLimitGapSize == NULL) ||
       (buyLimitLot == NULL && buyLimitGapSize != NULL) ||
       (buyLimitLot == NULL && buyLimitGapSize == NULL && buyLimitTP != NULL)) {
@@ -206,6 +223,13 @@ int OnInit() {
     Utility.AlertAndExit(
         "buyLimitMaxPrice must be greater than buyLimitMinPrice!");
     return (INIT_PARAMETERS_INCORRECT);
+  }
+
+  if (buyLimitLot && buyLimitGapSize &&
+      Utility.ConfirmInputMessageBox(
+          ORDER_TYPE_BUY_LIMIT, buyLimitLot, buyLimitGapSize, buyLimitTP,
+          buyLimitMaxPrice, buyLimitMinPrice, fillInBuyLimitLots) == false) {
+    return INIT_FAILED;
   }
 
   if ((sellLimitLot != NULL && sellLimitGapSize == NULL) ||
@@ -223,6 +247,13 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
+  if (sellLimitLot && sellLimitGapSize &&
+      Utility.ConfirmInputMessageBox(
+          ORDER_TYPE_SELL_LIMIT, sellLimitLot, sellLimitGapSize, sellLimitTP,
+          sellLimitMaxPrice, sellLimitMinPrice, fillInSellLimitLots) == false) {
+    return INIT_FAILED;
+  }
+
   if ((sellStopLot != NULL && sellStopGapSize == NULL) ||
       (sellStopLot == NULL && sellStopGapSize != NULL) ||
       (sellStopLot == NULL && sellStopGapSize == NULL && sellStopTP != NULL)) {
@@ -235,6 +266,14 @@ int OnInit() {
     Utility.AlertAndExit(
         "sellStopMaxPrice must be greater than sellStopMinPrice!");
     return (INIT_PARAMETERS_INCORRECT);
+  }
+
+  // TODO: add message box for sell stop
+  if (sellStopLot && sellStopGapSize &&
+      Utility.ConfirmInputMessageBox(
+          ORDER_TYPE_SELL_STOP, sellStopLot, sellStopGapSize, sellStopTP,
+          sellStopMaxPrice, sellStopMinPrice, fillInSellStopLots) == false) {
+    return INIT_FAILED;
   }
 
   if (priceRange < buyStopGapSize || priceRange < buyLimitGapSize ||
@@ -269,15 +308,25 @@ int OnInit() {
 
   GetArrayPrices();
 
-  Print("limitOrders: ", limitOrders,
-        ", buyStopArrayPrices.Total(): ", buyStopArrayPrices.Total(),
-        ", buyLimitArrayPrices.Total(): ", buyLimitArrayPrices.Total(),
-        ", sellLimitArrayPrices.Total(): ", sellLimitArrayPrices.Total(),
-        ", sellStopArrayPrices.Total(): ", sellStopArrayPrices.Total());
+  int totalBuyStopOrders = buyStopArrayPrices.Total();
+  int totalBuyLimitOrders = buyLimitArrayPrices.Total();
+  int totalSellLimitOrders = sellLimitArrayPrices.Total();
+  int totalSellStopOrders = sellStopArrayPrices.Total();
+  int totalOrders = totalBuyStopOrders + totalBuyLimitOrders +
+                    totalSellLimitOrders + totalSellStopOrders;
 
-  if (limitOrders <
-      (buyStopArrayPrices.Total() + buyLimitArrayPrices.Total() +
-       sellLimitArrayPrices.Total() + sellStopArrayPrices.Total())) {
+  Print("limitOrders: ", limitOrders,
+        ", totalBuyStopOrders: ", totalBuyStopOrders,
+        ", totalBuyLimitOrders: ", totalBuyLimitOrders,
+        ", totalSellLimitOrders: ", totalSellLimitOrders,
+        ", totalSellStopOrders: ", totalSellStopOrders,
+        ", totalOrders: ", totalOrders);
+
+  if ((limitOrders < totalOrders) &&
+      MessageBox("Limit Orders: " + IntegerToString(limitOrders) +
+                     "\nTotal Orders: " + IntegerToString(totalOrders) +
+                     "\n\nAre you sure you want to continue?",
+                 "Confirm", MB_OKCANCEL | MB_ICONQUESTION) != IDOK) {
     Utility.AlertAndExit(
         "limitOrders must be greater than the sum of all orders.");
     return (INIT_PARAMETERS_INCORRECT);
@@ -285,12 +334,30 @@ int OnInit() {
 
   double volumeLimit = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT);
 
-  Print("volumeLimit: ", volumeLimit);
+  double totalBuyStopLots =
+      Utility.NormalizeDoubleTwoDigits(buyStopArrayPrices.Total() * buyStopLot);
+  double totalBuyLimitLots = Utility.NormalizeDoubleTwoDigits(
+      buyLimitArrayPrices.Total() * buyLimitLot);
+  double totalSellLimitLots = Utility.NormalizeDoubleTwoDigits(
+      sellLimitArrayPrices.Total() * sellLimitLot);
+  double totalSellStopLots = Utility.NormalizeDoubleTwoDigits(
+      sellStopArrayPrices.Total() * sellStopLot);
+  double totalLots =
+      Utility.NormalizeDoubleTwoDigits(totalBuyStopLots + totalBuyLimitLots +
+                                       totalSellLimitLots + totalSellStopLots);
 
-  if (volumeLimit < (buyStopArrayPrices.Total() * buyStopLot +
-                     buyLimitArrayPrices.Total() * buyLimitLot +
-                     sellLimitArrayPrices.Total() * sellLimitLot +
-                     sellStopArrayPrices.Total() * sellStopLot)) {
+  Print("volumeLimit: ", volumeLimit,
+        ", totalBuyStopLots: ", DoubleToString(totalBuyStopLots, 2),
+        ", totalBuyLimitLots: ", DoubleToString(totalBuyLimitLots, 2),
+        ", totalSellLimitLots: ", DoubleToString(totalSellLimitLots, 2),
+        ", totalSellStopLots: ", DoubleToString(totalSellStopLots, 2),
+        ", totalLots: ", DoubleToString(totalLots, 2));
+
+  if ((volumeLimit < totalLots) &&
+      MessageBox("Volume Limit: " + DoubleToString(volumeLimit, 2) +
+                     "\nTotal Lots: " + DoubleToString(totalLots, 2) +
+                     "\n\nAre you sure you want to continue?",
+                 "Confirm", MB_OKCANCEL | MB_ICONQUESTION) != IDOK) {
     Utility.AlertAndExit("Totals lots must be less then volume limit.");
     return (INIT_PARAMETERS_INCORRECT);
   }
@@ -678,12 +745,6 @@ void OnDeinit(const int reason) {}
 //+------------------------------------------------------------------+
 void OnTick() {
 
-  if (clearOrderAndExit) {
-    Utility.CloseAllOrdersByComment(Comment);
-    Utility.AlertAndExit("Clear all orders and exit.");
-    return;
-  }
-
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
@@ -877,7 +938,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
       Alert(message);
 
-      if (useNotification)
+      if (UseNotification)
         SendNotification(message);
 
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_TP) {
@@ -886,7 +947,7 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
       Alert(message);
 
-      if (useNotification)
+      if (UseNotification)
         SendNotification(message);
 
       Order66();
