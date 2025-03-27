@@ -11,6 +11,7 @@
 struct PriceVolume {
   double price;  // Price value
   double volume; // Volume value
+  double TP;     // Take profit value
 };
 
 void OnStart() {

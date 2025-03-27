@@ -10,9 +10,6 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
-#include <Trade/DealInfo.mqh>
-CDealInfo cDealInfo;
-
 #resource "buy_entry_alert.wav"
 #define BUY_ENTRY_ALERT_FILE "::buy_entry_alert.wav"
 

@@ -21,21 +21,22 @@ void OnStart() {
   Print("OrdersTotal(): ", OrdersTotal());
   Print("PositionsTotal(): ", PositionsTotal());
 
-  for (int i = 0; i < OrdersTotal(); i++) {
-    ulong orderTicket = OrderGetTicket(i);
-    if (OrderSelect(orderTicket)) {
-      double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
-      double orderTP = OrderGetDouble(ORDER_TP);
-      long orderType = OrderGetInteger(ORDER_TYPE);
-      string symbol = OrderGetString(ORDER_SYMBOL);
+  // for (int i = 0; i < OrdersTotal(); i++) {
+  //   ulong orderTicket = OrderGetTicket(i);
+  //   if (OrderSelect(orderTicket)) {
+  //     double orderPrice = OrderGetDouble(ORDER_PRICE_OPEN);
+  //     double orderTP = OrderGetDouble(ORDER_TP);
+  //     long orderType = OrderGetInteger(ORDER_TYPE);
+  //     string symbol = OrderGetString(ORDER_SYMBOL);
 
-      if (symbol != _Symbol)
-        continue;
+  //     if (symbol != _Symbol)
+  //       continue;
 
-      Print("orderTicket: ", orderTicket, ", orderPrice: ", orderPrice,
-            ", orderTP: ", orderTP, ", type: ", GetOrderTypeString(orderType));
-    }
-  }
+  //     Print("orderTicket: ", orderTicket, ", orderPrice: ", orderPrice,
+  //           ", orderTP: ", orderTP, ", type: ",
+  //           GetOrderTypeString(orderType));
+  //   }
+  // }
 }
 
 string GetOrderTypeString(long orderType) {

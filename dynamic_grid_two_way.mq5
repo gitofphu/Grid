@@ -10,9 +10,6 @@
 #include <../Experts/Grid/Utility.mqh>
 MyUtility Utility;
 
-#include <Trade/DealInfo.mqh>
-CDealInfo cDealInfo;
-
 //+------------------------------------------------------------------+
 //| EA Dynamic Buy Grid                                                      |
 //+------------------------------------------------------------------+

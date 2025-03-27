@@ -7,17 +7,14 @@
 #property link "https://www.mysite.com/"
 #property version "1.00"
 
-#include <Trade/DealInfo.mqh>
-CDealInfo cDealInfo;
+#include <../Experts/Grid/Utility.mqh>
+MyUtility Utility;
 
 #include <Trade/OrderInfo.mqh>
 COrderInfo cOrderInfo;
 
 #include <Trade/HistoryOrderInfo.mqh>
 CHistoryOrderInfo cObject;
-
-#include <../Experts/Grid/Utility.mqh>
-MyUtility Utility;
 
 #include <Trade/SymbolInfo.mqh>
 CSymbolInfo cSymbolInfo;
