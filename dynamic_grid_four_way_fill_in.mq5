@@ -11,6 +11,10 @@
 MyUtility Utility;
 
 //+------------------------------------------------------------------+
+//| bundle Description                                               |
+//+------------------------------------------------------------------+
+
+//+------------------------------------------------------------------+
 //| Input                                                            |
 //+------------------------------------------------------------------+
 input double PriceRange = 5; // Price range
@@ -52,6 +56,14 @@ input group "Misc.";
 input bool UseNotification = false;   // Use notification
 input bool ClearOrderAndExit = false; // Clear all orders and exit
 
+input group "Draw Input Summary";
+input bool DrawInputSummary = true;                 // Draw input summary
+input color BuyStopColor = clrAqua;                 // Buy Stop Color
+input color BuyLimitColor = clrYellow;              // Buy Limit Color
+input color SellLimitColor = clrOrange;             // Sell Limit Color
+input color SellStopColor = clrDeepPink;            // Sell Stop Color
+input ENUM_BASE_CORNER Corner = CORNER_RIGHT_LOWER; // corner
+
 //+------------------------------------------------------------------+
 //| Global variables                                                 |
 //+------------------------------------------------------------------+
@@ -92,6 +104,9 @@ CArrayDouble buyLimitArrayPrices;
 CArrayDouble sellLimitArrayPrices;
 CArrayDouble sellStopArrayPrices;
 
+bool drawInputSummary = NULL;
+ENUM_BASE_CORNER corner = NULL;
+
 string Comment = "dynamic_grid";
 // comment pattern: <ea_name>|<IsFillIn>
 
@@ -126,7 +141,8 @@ int OnInit() {
       SellStopLot == sellStopLot && SellStopGapSize == sellStopGapSize &&
       SellStopTP == sellStopTP && SellStopMaxPrice == sellStopMaxPrice &&
       SellStopMinPrice == sellStopMinPrice &&
-      FillInSellStopLots == fillInSellStopLots) {
+      FillInSellStopLots == fillInSellStopLots &&
+      DrawInputSummary == drawInputSummary && Corner == corner) {
     Print("Parameters are already set.");
     return (INIT_SUCCEEDED);
   }
@@ -161,6 +177,9 @@ int OnInit() {
   sellStopMaxPrice = SellStopMaxPrice;
   sellStopMinPrice = SellStopMinPrice;
   fillInSellStopLots = FillInSellStopLots;
+
+  drawInputSummary = DrawInputSummary;
+  corner = Corner;
 
   if (buyStopArrayPrices.Total() > 0) {
     buyStopArrayPrices.Shutdown();
@@ -362,6 +381,12 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
+  if (drawInputSummary) {
+    DrawSummary();
+  } else {
+    ClearSummary();
+  }
+
   // Utility.CloseAllOrders();
 
   CloseOrderOutSideArray();
@@ -452,9 +477,6 @@ void GetArrayPrices() {
   }
 }
 
-/**
- * Check orders and positions
- */
 void CheckAndPlaceOrders() {
   Print("CheckAndPlaceOrders");
   bool orderPriceInvalid = false;
@@ -735,10 +757,148 @@ void PlaceMissingDealsByType(CArrayDouble &arrayPrices, double gridGapSize,
   }
 }
 
+void DraySummaryObject(string objectName, string text, int yDistance,
+                       ENUM_ANCHOR_POINT anchor, long textColor) {
+
+  if (ObjectFind(0, objectName) < 0) {
+    ObjectCreate(0, objectName, OBJ_LABEL, 0, 0, 0);
+    ObjectSetInteger(0, objectName, OBJPROP_CORNER, corner);
+    ObjectSetInteger(0, objectName, OBJPROP_ANCHOR, anchor);
+    ObjectSetInteger(0, objectName, OBJPROP_XSIZE, 200);
+    ObjectSetInteger(0, objectName, OBJPROP_YSIZE, 20);
+    ObjectSetInteger(0, objectName, OBJPROP_XDISTANCE, 10);
+    ObjectSetInteger(0, objectName, OBJPROP_YDISTANCE, yDistance);
+    ObjectSetInteger(0, objectName, OBJPROP_COLOR, textColor);
+  }
+  ObjectSetString(0, objectName, OBJPROP_TEXT, text);
+}
+
+void DrawSummary() {
+
+  ClearSummary();
+
+  ENUM_ANCHOR_POINT anchor;
+
+  switch (corner) {
+  case CORNER_LEFT_UPPER:
+    anchor = ANCHOR_LEFT_UPPER;
+    break;
+  case CORNER_LEFT_LOWER:
+    anchor = ANCHOR_LEFT_LOWER;
+    break;
+  case CORNER_RIGHT_UPPER:
+    anchor = ANCHOR_RIGHT_UPPER;
+    break;
+  default:
+    anchor = ANCHOR_RIGHT_LOWER;
+    break;
+  }
+
+  CArrayString objectNames;
+  CArrayString texts;
+  CArrayLong colors;
+
+  if (buyStopGapSize) {
+
+    texts.Add("Buy Stop, Lot:" + DoubleToString(buyStopLot, 2) +
+              ", Gap:" + DoubleToString(buyStopGapSize, 2) +
+              ", TP:" + DoubleToString(buyStopTP, 2));
+    objectNames.Add("Buy_Stop_Summary_1");
+    colors.Add(BuyStopColor);
+
+    texts.Add(",Max:" + DoubleToString(buyStopMaxPrice, 2) +
+              ", Min:" + DoubleToString(buyStopMinPrice, 2) +
+              ", Fill In:" + (fillInBuyStopLots ? "True" : "False"));
+    objectNames.Add("Buy_Stop_Summary_2");
+    colors.Add(BuyStopColor);
+  }
+
+  if (buyLimitGapSize) {
+
+    texts.Add("Buy Limit, Lot:" + DoubleToString(buyLimitLot, 2) +
+              ", Gap:" + DoubleToString(buyLimitGapSize, 2) +
+              ", TP:" + DoubleToString(buyLimitTP, 2));
+    objectNames.Add("Buy_Limit_Summary_1");
+    colors.Add(BuyLimitColor);
+
+    texts.Add(",Max:" + DoubleToString(buyLimitMaxPrice, 2) +
+              ", Min:" + DoubleToString(buyLimitMinPrice, 2) +
+              ", Fill In:" + (fillInBuyLimitLots ? "True" : "False"));
+    objectNames.Add("Buy_Limit_Summary_2");
+    colors.Add(BuyLimitColor);
+  }
+
+  if (sellLimitGapSize) {
+
+    texts.Add("Sell Limit, Lot:" + DoubleToString(sellLimitLot, 2) +
+              ", Gap:" + DoubleToString(sellLimitGapSize, 2) +
+              ", TP:" + DoubleToString(sellLimitTP, 2));
+    objectNames.Add("Sell_Limit_Summary_1");
+    colors.Add(SellLimitColor);
+
+    texts.Add(",Max:" + DoubleToString(sellLimitMaxPrice, 2) +
+              ", Min:" + DoubleToString(sellLimitMinPrice, 2) +
+              ", Fill In:" + (fillInSellLimitLots ? "True" : "False"));
+    objectNames.Add("Sell_Limit_Summary_2");
+    colors.Add(SellLimitColor);
+  }
+
+  if (sellStopGapSize) {
+
+    texts.Add("Sell Stop, Lot:" + DoubleToString(sellStopLot, 2) +
+              ", Gap:" + DoubleToString(sellStopGapSize, 2) +
+              ", TP:" + DoubleToString(sellStopTP, 2));
+    objectNames.Add("Sell_Stop_Summary_1");
+    colors.Add(SellStopColor);
+
+    texts.Add(",Max:" + DoubleToString(sellStopMaxPrice, 2) +
+              ", Min:" + DoubleToString(sellStopMinPrice, 2) +
+              ", Fill In:" + (fillInSellStopLots ? "True" : "False"));
+    objectNames.Add("Sell_Stop_Summary_2");
+    colors.Add(SellStopColor);
+  }
+
+  switch (corner) {
+  case CORNER_LEFT_UPPER:
+  case CORNER_RIGHT_UPPER:
+    for (int i = 0; i < objectNames.Total(); i++) {
+      DraySummaryObject(objectNames[i], texts[i], (i * 25) + 25, anchor,
+                        colors[i]);
+    }
+    break;
+  case CORNER_LEFT_LOWER:
+  case CORNER_RIGHT_LOWER:
+    for (int i = 0, yDistance = objectNames.Total() * 25;
+         i < objectNames.Total(); i++, yDistance -= 25) {
+      DraySummaryObject(objectNames[i], texts[i], yDistance, anchor, colors[i]);
+    }
+    break;
+  }
+
+  ChartRedraw();
+}
+
+void ClearSummary() {
+  ObjectDelete(0, "Buy_Stop_Summary_1");
+  ObjectDelete(0, "Buy_Stop_Summary_2");
+  ObjectDelete(0, "Buy_Limit_Summary_1");
+  ObjectDelete(0, "Buy_Limit_Summary_2");
+  ObjectDelete(0, "Sell_Limit_Summary_1");
+  ObjectDelete(0, "Sell_Limit_Summary_2");
+  ObjectDelete(0, "Sell_Stop_Summary_1");
+  ObjectDelete(0, "Sell_Stop_Summary_2");
+
+  ChartRedraw();
+}
+
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
 //+------------------------------------------------------------------+
-void OnDeinit(const int reason) {}
+void OnDeinit(const int reason) {
+  if (reason != REASON_CHARTCHANGE && drawInputSummary) {
+    ClearSummary();
+  }
+}
 
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
@@ -748,15 +908,16 @@ void OnTick() {
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
 
-  if (buyStopArrayPrices.Total() > 0) {
-    Print("buyStop ask: ", ask,
-          ", last price: ", buyStopArrayPrices[buyStopArrayPrices.Total() - 1],
-          ", diff: ",
-          Utility.NormalizeDoubleTwoDigits(
-              buyStopArrayPrices[buyStopArrayPrices.Total() - 1] - ask),
-          ", gap: ", buyStopGapSize, ", buyStop maxPrice: ", buyStopMaxPrice,
-          ", buyStop minPrice: ", buyStopMinPrice);
-  }
+  // if (buyStopArrayPrices.Total() > 0) {
+  //   Print("buyStop ask: ", ask,
+  //         ", last price: ", buyStopArrayPrices[buyStopArrayPrices.Total() -
+  //         1],
+  //         ", diff: ",
+  //         Utility.NormalizeDoubleTwoDigits(
+  //             buyStopArrayPrices[buyStopArrayPrices.Total() - 1] - ask),
+  //         ", gap: ", buyStopGapSize, ", buyStop maxPrice: ", buyStopMaxPrice,
+  //         ", buyStop minPrice: ", buyStopMinPrice);
+  // }
 
   if (buyStopArrayPrices.Total() > 0 &&
       Utility.NormalizeDoubleTwoDigits(
@@ -786,13 +947,14 @@ void OnTick() {
                             orderPriceInvalid);
   }
 
-  if (buyLimitArrayPrices.Total() > 0) {
-    Print("buyLimit bid: ", bid, ", first price: ", buyLimitArrayPrices[0],
-          ", diff: ",
-          Utility.NormalizeDoubleTwoDigits(bid - buyLimitArrayPrices[0]),
-          ", gap: ", buyLimitGapSize, ", buyLimit maxPrice: ", buyLimitMaxPrice,
-          ", buyLimit minPrice: ", buyLimitMinPrice);
-  }
+  // if (buyLimitArrayPrices.Total() > 0) {
+  //   Print("buyLimit bid: ", bid, ", first price: ", buyLimitArrayPrices[0],
+  //         ", diff: ",
+  //         Utility.NormalizeDoubleTwoDigits(bid - buyLimitArrayPrices[0]),
+  //         ", gap: ", buyLimitGapSize, ", buyLimit maxPrice: ",
+  //         buyLimitMaxPrice,
+  //         ", buyLimit minPrice: ", buyLimitMinPrice);
+  // }
 
   if (buyLimitArrayPrices.Total() > 0 &&
       Utility.NormalizeDoubleTwoDigits(bid - buyLimitArrayPrices[0]) >
@@ -822,15 +984,15 @@ void OnTick() {
                             fillInBuyLimitLots, orderPriceInvalid);
   }
 
-  if (sellLimitArrayPrices.Total() > 0) {
-    Print("sellLimit ask: ", ask, ", last price: ",
-          sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1], ", diff: ",
-          Utility.NormalizeDoubleTwoDigits(
-              sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask),
-          ", gap: ", sellLimitGapSize,
-          ", sellLimit maxPrice: ", sellLimitMaxPrice,
-          ", sellLimit minPrice: ", sellLimitMinPrice);
-  }
+  // if (sellLimitArrayPrices.Total() > 0) {
+  //   Print("sellLimit ask: ", ask, ", last price: ",
+  //         sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1], ", diff: ",
+  //         Utility.NormalizeDoubleTwoDigits(
+  //             sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask),
+  //         ", gap: ", sellLimitGapSize,
+  //         ", sellLimit maxPrice: ", sellLimitMaxPrice,
+  //         ", sellLimit minPrice: ", sellLimitMinPrice);
+  // }
 
   if (sellLimitArrayPrices.Total() > 0 &&
       Utility.NormalizeDoubleTwoDigits(
@@ -861,13 +1023,14 @@ void OnTick() {
                             fillInSellLimitLots, orderPriceInvalid);
   }
 
-  if (sellStopArrayPrices.Total() > 0) {
-    Print("sellStop bid: ", bid, ", first price: ", sellStopArrayPrices[0],
-          ", diff: ",
-          Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]),
-          ", gap: ", sellStopGapSize, ", sellStop maxPrice: ", sellStopMaxPrice,
-          ", sellStop minPrice: ", sellStopMinPrice);
-  }
+  // if (sellStopArrayPrices.Total() > 0) {
+  //   Print("sellStop bid: ", bid, ", first price: ", sellStopArrayPrices[0],
+  //         ", diff: ",
+  //         Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]),
+  //         ", gap: ", sellStopGapSize, ", sellStop maxPrice: ",
+  //         sellStopMaxPrice,
+  //         ", sellStop minPrice: ", sellStopMinPrice);
+  // }
 
   if (sellStopArrayPrices.Total() > 0 &&
       Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]) >

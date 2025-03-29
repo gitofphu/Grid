@@ -22,6 +22,9 @@ CArrayDouble;
 #include <Arrays/ArrayLong.mqh>
 CArrayLong;
 
+#include <Arrays/ArrayString.mqh>
+CArrayString;
+
 class MyUtility {
 public:
   MyUtility();
@@ -439,11 +442,17 @@ void MyUtility::getExistDealsWithLotsAndTP(
     double price, double lot, double TP, CArrayDouble &existDeals,
     CArrayDouble &existDealsLots, CArrayDouble &existDealsTP) {
   for (int j = 0; j < arrayPrices.Total(); j++) {
+    Print("getExistDealsWithLotsAndTP arrayPrices[j]: ", arrayPrices[j],
+          ", arrayTP[j]: ", arrayTP[j], ", price: ", price, ", TP: ", TP,
+          ", lot: ", lot, ", gridGapSize: ", gridGapSize);
     if (price >= arrayPrices[j] &&
         price <= arrayPrices[j] + gridGapSize - _Point && TP == arrayTP[j]) {
+
+      Print("add this one to existDeals.");
+
       existDeals.Add(arrayPrices[j]);
       existDealsLots.Add(lot);
-      existDealsTP.Add(TP);
+      existDealsTP.Add(arrayTP[j]);
     }
   }
 }
@@ -666,7 +675,7 @@ void MyUtility::GetAllTimeHighLow(double &all_time_high, double &all_time_low) {
   }
 
   // Loop through all bars to find the high and low
-  for (long i = 0; i < total_bars; i++) {
+  for (int i = 0; i < total_bars; i++) {
     double high = iHigh(_Symbol, PERIOD_MN1, i);
     double low = iLow(_Symbol, PERIOD_MN1, i);
 
@@ -1330,7 +1339,7 @@ bool MyUtility::ConfirmInputMessageBox(ENUM_ORDER_TYPE type, double lot,
                    "\nTP: " + DoubleToString(TPSize, 2) +
                    "\nMax: " + DoubleToString(maxPrice, 2) +
                    "\nMin: " + DoubleToString(minPrice, 2) +
-                   "\nFill in lots: " + (fillInLots ? "Yes" : "No");
+                   "\nFill in lots: " + (fillInLots ? "True" : "False");
 
   int result = MessageBox(message, "Confirm " + typeStr + " input",
                           MB_OKCANCEL | MB_ICONQUESTION);

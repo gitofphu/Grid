@@ -31,7 +31,7 @@ input ENUM_BASE_CORNER corner = CORNER_RIGHT_LOWER; // Corner
 input color averageBuyPriceColor = clrGreen;        // Buy Color
 input color averageSellPriceColor = clrRed;         // Sell Color
 
-ENUM_BASE_CORNER Cornor;
+ENUM_BASE_CORNER Corner;
 ENUM_ANCHOR_POINT anchor;
 
 color AverageBuyPriceColor = NULL;
@@ -55,7 +55,7 @@ int OnInit() {
   Print("Alert initialized");
 
   if (AverageBuyPriceColor == averageBuyPriceColor &&
-      AverageSellPriceColor == averageSellPriceColor && Cornor == corner) {
+      AverageSellPriceColor == averageSellPriceColor && Corner == corner) {
     Print("Parameters are already set.");
 
     return (INIT_SUCCEEDED);
@@ -63,9 +63,9 @@ int OnInit() {
 
   AverageBuyPriceColor = averageBuyPriceColor;
   AverageSellPriceColor = averageSellPriceColor;
-  Cornor = corner;
+  Corner = corner;
 
-  switch (Cornor) {
+  switch (Corner) {
   case CORNER_LEFT_UPPER:
     anchor = ANCHOR_LEFT_UPPER;
     break;
@@ -279,7 +279,7 @@ void DrawHorizontalLine(double price, ENUM_ORDER_TYPE type, color lineColor,
 
   if (ObjectFind(0, objectName) < 0) {
     ObjectCreate(0, objectName, OBJ_LABEL, 0, 0, 0);
-    ObjectSetInteger(0, objectName, OBJPROP_CORNER, Cornor);
+    ObjectSetInteger(0, objectName, OBJPROP_CORNER, Corner);
     ObjectSetInteger(0, objectName, OBJPROP_ANCHOR, anchor);
     ObjectSetInteger(0, objectName, OBJPROP_XSIZE, 200);
     ObjectSetInteger(0, objectName, OBJPROP_YSIZE, 20);
@@ -292,15 +292,16 @@ void DrawHorizontalLine(double price, ENUM_ORDER_TYPE type, color lineColor,
 
 void DrawSummary(double totalProfit) {
 
-  string text = "Total Positions: " + totalPositions + " Net Lots: " +
-                DoubleToString(totalBuyLots - totalSellLots, 2) +
-                " Profit: " + DoubleToString(totalProfit, 2);
+  string text =
+      "Total Positions: " + IntegerToString(totalPositions) +
+      " Net Lots: " + DoubleToString(totalBuyLots - totalSellLots, 2) +
+      " Profit: " + DoubleToString(totalProfit, 2);
 
   string objectName = "summaryText";
 
   if (ObjectFind(0, objectName) < 0) {
     ObjectCreate(0, objectName, OBJ_LABEL, 0, 0, 0);
-    ObjectSetInteger(0, objectName, OBJPROP_CORNER, Cornor);
+    ObjectSetInteger(0, objectName, OBJPROP_CORNER, Corner);
     ObjectSetInteger(0, objectName, OBJPROP_ANCHOR, anchor);
     ObjectSetInteger(0, objectName, OBJPROP_XSIZE, 200);
     ObjectSetInteger(0, objectName, OBJPROP_YSIZE, 20);
