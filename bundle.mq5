@@ -337,27 +337,44 @@ int OnInit() {
   drawInputSummary = DrawInputSummary;
   corner = Corner;
 
-  GetArrayPrices();
+  int buyStopNumberOrders =
+      !buyStopGapSize ? 0
+                      : GetNumberOfPossibleOrders(
+                            buyStopMinPrice, buyStopMaxPrice, buyStopGapSize);
 
-  int totalBuyStopOrders = buyStopArrayPrices.Total();
-  int totalBuyLimitOrders = buyLimitArrayPrices.Total();
-  int totalSellLimitOrders = sellLimitArrayPrices.Total();
-  int totalSellStopOrders = sellStopArrayPrices.Total();
-  int totalOrders = totalBuyStopOrders + totalBuyLimitOrders +
-                    totalSellLimitOrders + totalSellStopOrders;
+  int buyLimitNumberOrders =
+      !buyLimitGapSize
+          ? 0
+          : GetNumberOfPossibleOrders(buyLimitMinPrice, buyLimitMaxPrice,
+                                      buyLimitGapSize);
 
-  Print("limitOrders: ", limitOrders,
-        ", totalBuyStopOrders: ", totalBuyStopOrders,
-        ", totalBuyLimitOrders: ", totalBuyLimitOrders,
-        ", totalSellLimitOrders: ", totalSellLimitOrders,
-        ", totalSellStopOrders: ", totalSellStopOrders,
-        ", totalOrders: ", totalOrders);
+  int sellLimitNumberOrders =
+      !sellLimitGapSize
+          ? 0
+          : GetNumberOfPossibleOrders(sellLimitMinPrice, sellLimitMaxPrice,
+                                      sellLimitGapSize);
 
-  if ((limitOrders < totalOrders) &&
-      MessageBox("Limit Orders: " + IntegerToString(limitOrders) +
-                     "\nTotal Orders: " + IntegerToString(totalOrders) +
-                     "\n\nAre you sure you want to continue?",
-                 "Confirm", MB_OKCANCEL | MB_ICONQUESTION) != IDOK) {
+  int sellStopNumberOrders =
+      !sellStopGapSize
+          ? 0
+          : GetNumberOfPossibleOrders(sellStopMinPrice, sellStopMaxPrice,
+                                      sellStopGapSize);
+
+  int totalNumberOrders = buyStopNumberOrders + buyLimitNumberOrders +
+                          sellLimitNumberOrders + sellStopNumberOrders;
+
+  Print("buyStopNumberOrders: ", buyStopNumberOrders,
+        ", buyLimitNumberOrders: ", buyLimitNumberOrders,
+        ", sellLimitNumberOrders: ", sellLimitNumberOrders,
+        ", sellStopNumberOrders: ", sellStopNumberOrders,
+        ", totalNumberOrders: ", totalNumberOrders);
+
+  if ((limitOrders < totalNumberOrders) &&
+      MessageBox(
+          "Limit Orders: " + IntegerToString(limitOrders) +
+              "\nTotal Number Orders: " + IntegerToString(totalNumberOrders) +
+              "\n\nAre you sure you want to continue?",
+          "Confirm", MB_OKCANCEL | MB_ICONQUESTION) != IDOK) {
     Utility.AlertAndExit(
         "limitOrders must be greater than the sum of all orders.");
     return (INIT_PARAMETERS_INCORRECT);
@@ -366,13 +383,13 @@ int OnInit() {
   double volumeLimit = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_LIMIT);
 
   double totalBuyStopLots =
-      Utility.NormalizeDoubleTwoDigits(buyStopArrayPrices.Total() * buyStopLot);
-  double totalBuyLimitLots = Utility.NormalizeDoubleTwoDigits(
-      buyLimitArrayPrices.Total() * buyLimitLot);
-  double totalSellLimitLots = Utility.NormalizeDoubleTwoDigits(
-      sellLimitArrayPrices.Total() * sellLimitLot);
-  double totalSellStopLots = Utility.NormalizeDoubleTwoDigits(
-      sellStopArrayPrices.Total() * sellStopLot);
+      Utility.NormalizeDoubleTwoDigits(buyStopNumberOrders * buyStopLot);
+  double totalBuyLimitLots =
+      Utility.NormalizeDoubleTwoDigits(buyStopNumberOrders * buyLimitLot);
+  double totalSellLimitLots =
+      Utility.NormalizeDoubleTwoDigits(sellLimitNumberOrders * sellLimitLot);
+  double totalSellStopLots =
+      Utility.NormalizeDoubleTwoDigits(sellStopNumberOrders * sellStopLot);
   double totalLots =
       Utility.NormalizeDoubleTwoDigits(totalBuyStopLots + totalBuyLimitLots +
                                        totalSellLimitLots + totalSellStopLots);
@@ -387,6 +404,7 @@ int OnInit() {
   if ((volumeLimit < totalLots) &&
       MessageBox("Volume Limit: " + DoubleToString(volumeLimit, 2) +
                      "\nTotal Lots: " + DoubleToString(totalLots, 2) +
+                     "\n Filled in not included!" +
                      "\n\nAre you sure you want to continue?",
                  "Confirm", MB_OKCANCEL | MB_ICONQUESTION) != IDOK) {
     Utility.AlertAndExit("Totals lots must be less then volume limit.");
@@ -399,11 +417,25 @@ int OnInit() {
     ClearSummary();
   }
 
+  GetArrayPrices();
+
   CloseOrderOutSideArray();
 
   CheckAndPlaceOrders();
 
   return (INIT_SUCCEEDED);
+}
+
+int GetNumberOfPossibleOrders(double minPrice, double maxPrice,
+                              double gapSize) {
+  int n = int((maxPrice - minPrice) / gapSize) + 1;
+  int totalOrders = 0;
+
+  for (int i = 0; i < n - 1; i++) {
+    totalOrders += (n - 1 - i);
+  }
+
+  return totalOrders;
 }
 
 void GetBuyStopArrayPrices(double aboveRangeStart, double aboveRangeEnd,
@@ -1220,14 +1252,6 @@ void OnTick() {
   double belowRangeEnd = MathCeil(bid);
   double belowRangeStart = NormalizeDouble(belowRangeEnd - priceRange, 0);
 
-  if (buyStopArrayPrices.Total() > 0) {
-    Print("buyStop ask: ", ask, ", first price: ", buyStopArrayPrices[0],
-          ", diff: ",
-          Utility.NormalizeDoubleTwoDigits(buyStopArrayPrices[0] - ask),
-          ", gap: ", buyStopGapSize, ", buyStop maxPrice: ", buyStopMaxPrice,
-          ", buyStop minPrice: ", buyStopMinPrice);
-  }
-
   if (buyStopArrayPrices.Total() > 0 &&
       Utility.NormalizeDoubleTwoDigits(buyStopArrayPrices[0] - ask) >
           buyStopGapSize) {
@@ -1251,15 +1275,6 @@ void OnTick() {
                             fillInBuyStopLots, orderPriceInvalid);
   }
 
-  if (buyLimitArrayPrices.Total() > 0) {
-    Print("buyLimit bid: ", bid, ", last price: ",
-          buyLimitArrayPrices[buyLimitArrayPrices.Total() - 1], ", diff: ",
-          Utility.NormalizeDoubleTwoDigits(
-              bid - (buyLimitArrayPrices[buyLimitArrayPrices.Total() - 1])),
-          ", gap: ", buyLimitGapSize, ", buyLimit maxPrice: ", buyLimitMaxPrice,
-          ", buyLimit minPrice: ", buyLimitMinPrice);
-  }
-
   if (buyLimitArrayPrices.Total() > 0 &&
       Utility.NormalizeDoubleTwoDigits(
           bid - (buyLimitArrayPrices[buyLimitArrayPrices.Total() - 1])) >
@@ -1279,16 +1294,6 @@ void OnTick() {
     PlaceMissingDealsByType(buyLimitArrayPrices, buyLimitArrayTP,
                             buyLimitGapSize, Comment, ORDER_TYPE_BUY_LIMIT,
                             buyLimitLot, fillInBuyLimitLots, orderPriceInvalid);
-  }
-
-  if (sellLimitArrayPrices.Total() > 0) {
-    Print("sellLimit ask: ", ask, ", last price: ",
-          sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1], ", diff: ",
-          Utility.NormalizeDoubleTwoDigits(
-              sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask),
-          ", gap: ", sellLimitGapSize,
-          ", sellLimit maxPrice: ", sellLimitMaxPrice,
-          ", sellLimit minPrice: ", sellLimitMinPrice);
   }
 
   if (sellLimitArrayPrices.Total() > 0 &&
@@ -1311,14 +1316,6 @@ void OnTick() {
                             sellLimitGapSize, Comment, ORDER_TYPE_SELL_LIMIT,
                             sellLimitLot, fillInSellLimitLots,
                             orderPriceInvalid);
-  }
-
-  if (sellStopArrayPrices.Total() > 0) {
-    Print("sellStop bid: ", bid, ", first price: ", sellStopArrayPrices[0],
-          ", diff: ",
-          Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]),
-          ", gap: ", sellStopGapSize, ", sellStop maxPrice: ", sellStopMaxPrice,
-          ", sellStop minPrice: ", sellStopMinPrice);
   }
 
   if (sellStopArrayPrices.Total() > 0 &&
