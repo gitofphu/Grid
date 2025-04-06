@@ -120,6 +120,8 @@ public:
                                     double minPrice, double priceRange,
                                     CArrayDouble &arrayPrices,
                                     CArrayDouble &arrayTPs);
+  int GetBundleNumberOfPossibleOrders(double minPrice, double maxPrice,
+                                      double gapSize);
 
 private:
   void deleteOrder(ulong ticket);
@@ -1543,4 +1545,22 @@ void MyUtility::GetBundleSellStopArrayPrices(double bid, double gapSize,
       arrayTPs.Add(NormalizeDoubleTwoDigits(tp));
     }
   }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetBundleNumberOfPossibleOrders(...).           |
+//| INPUT:  maxPrice      - max price,                               |
+//|         maxPrice      - max price,                               |
+//|         gapSize       - array gap size,                          |
+//+------------------------------------------------------------------+
+int MyUtility::GetBundleNumberOfPossibleOrders(double minPrice, double maxPrice,
+                                               double gapSize) {
+  int n = int((maxPrice - minPrice) / gapSize) + 1;
+  int totalOrders = 0;
+
+  for (int i = 0; i < n - 1; i++) {
+    totalOrders += (n - 1 - i);
+  }
+
+  return totalOrders;
 }

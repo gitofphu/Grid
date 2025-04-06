@@ -341,26 +341,26 @@ int OnInit() {
 
   int buyStopNumberOrders =
       !buyStopGapSize ? 0
-                      : GetNumberOfPossibleOrders(
+                      : Utility.GetBundleNumberOfPossibleOrders(
                             buyStopMinPrice, buyStopMaxPrice, buyStopGapSize);
 
   int buyLimitNumberOrders =
       !buyLimitGapSize
           ? 0
-          : GetNumberOfPossibleOrders(buyLimitMinPrice, buyLimitMaxPrice,
-                                      buyLimitGapSize);
+          : Utility.GetBundleNumberOfPossibleOrders(
+                buyLimitMinPrice, buyLimitMaxPrice, buyLimitGapSize);
 
   int sellLimitNumberOrders =
       !sellLimitGapSize
           ? 0
-          : GetNumberOfPossibleOrders(sellLimitMinPrice, sellLimitMaxPrice,
-                                      sellLimitGapSize);
+          : Utility.GetBundleNumberOfPossibleOrders(
+                sellLimitMinPrice, sellLimitMaxPrice, sellLimitGapSize);
 
   int sellStopNumberOrders =
       !sellStopGapSize
           ? 0
-          : GetNumberOfPossibleOrders(sellStopMinPrice, sellStopMaxPrice,
-                                      sellStopGapSize);
+          : Utility.GetBundleNumberOfPossibleOrders(
+                sellStopMinPrice, sellStopMaxPrice, sellStopGapSize);
 
   int totalNumberOrders = buyStopNumberOrders + buyLimitNumberOrders +
                           sellLimitNumberOrders + sellStopNumberOrders;
@@ -415,9 +415,6 @@ int OnInit() {
 
   GetArrayPrices();
 
-  Utility.AlertAndExit("Test Ended.");
-  return (INIT_PARAMETERS_INCORRECT);
-
   if (OnlyCheckOrders) {
     Utility.AlertAndExit("Check orders successfully.");
     return (INIT_SUCCEEDED);
@@ -434,18 +431,6 @@ int OnInit() {
   CheckAndPlaceOrders();
 
   return (INIT_SUCCEEDED);
-}
-
-int GetNumberOfPossibleOrders(double minPrice, double maxPrice,
-                              double gapSize) {
-  int n = int((maxPrice - minPrice) / gapSize) + 1;
-  int totalOrders = 0;
-
-  for (int i = 0; i < n - 1; i++) {
-    totalOrders += (n - 1 - i);
-  }
-
-  return totalOrders;
 }
 
 void GetArrayPrices() {
