@@ -101,6 +101,25 @@ public:
   bool ConfirmInputMessageBox(ENUM_ORDER_TYPE type, double lot, double gapSize,
                               double TPSize, double maxPrice, double minPrice,
                               bool fillInLots);
+  void GetBundleBuyStopArrayPrices(double ask, double gapSize, double maxTPSize,
+                                   double maxPrice, double minPrice,
+                                   double priceRange, CArrayDouble &arrayPrices,
+                                   CArrayDouble &arrayTPs);
+  void GetBundleBuyLimitArrayPrices(double bid, double gapSize,
+                                    double maxTPSize, double maxPrice,
+                                    double minPrice, double priceRange,
+                                    CArrayDouble &arrayPrices,
+                                    CArrayDouble &arrayTPs);
+  void GetBundleSellLimitArrayPrices(double ask, double gapSize,
+                                     double maxTPSize, double maxPrice,
+                                     double minPrice, double priceRange,
+                                     CArrayDouble &arrayPrices,
+                                     CArrayDouble &arrayTPs);
+  void GetBundleSellStopArrayPrices(double bid, double gapSize,
+                                    double maxTPSize, double maxPrice,
+                                    double minPrice, double priceRange,
+                                    CArrayDouble &arrayPrices,
+                                    CArrayDouble &arrayTPs);
 
 private:
   void deleteOrder(ulong ticket);
@@ -1350,5 +1369,178 @@ bool MyUtility::ConfirmInputMessageBox(ENUM_ORDER_TYPE type, double lot,
     return false; // Prevent EA from running
   } else {
     return true; // Continue EA execution
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetBundleBuyStopArrayPrices(...).               |
+//| INPUT:  ask           - ask price,                               |
+//|         gapSize       - array gap size,                          |
+//|         maxTPSize     - max TP size,                             |
+//|         maxPrice      - max price,                               |
+//|         maxTPSize     - max TP size,                             |
+//|         arrayPrices   - array of prices,                         |
+//|         arrayPrices   - array of TPs,                            |
+//+------------------------------------------------------------------+
+void MyUtility::GetBundleBuyStopArrayPrices(double ask, double gapSize,
+                                            double maxTPSize, double maxPrice,
+                                            double minPrice, double priceRange,
+                                            CArrayDouble &arrayPrices,
+                                            CArrayDouble &arrayTPs) {
+
+  Print("GetBundleBuyStopArrayPrices ask: ", ask, ", minPrice: ", minPrice,
+        ", maxPrice: ", maxPrice, ", gapSize: ", gapSize,
+        ", maxTPSize: ", maxTPSize, ", priceRange: ", priceRange);
+
+  arrayPrices.Shutdown();
+  arrayTPs.Shutdown();
+
+  for (double i = minPrice; i <= maxPrice;
+       i = NormalizeDoubleTwoDigits(i + gapSize)) {
+
+    if (i < ask ||
+        (priceRange && i > NormalizeDoubleTwoDigits(ask + priceRange)))
+      continue;
+
+    double entry = i == 0 ? _Point : i;
+
+    for (double j = NormalizeDoubleTwoDigits(i + gapSize); j <= maxPrice;
+         j = NormalizeDoubleTwoDigits(j + gapSize)) {
+
+      if (maxTPSize && j > NormalizeDoubleTwoDigits(entry + maxTPSize))
+        break;
+
+      arrayPrices.Add(NormalizeDoubleTwoDigits(entry));
+      arrayTPs.Add(NormalizeDoubleTwoDigits(j));
+    }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetBundleBuyLimitArrayPrices(...).              |
+//| INPUT:  bid           - bid price,                               |
+//|         gapSize       - array gap size,                          |
+//|         maxTPSize     - max TP size,                             |
+//|         maxPrice      - max price,                               |
+//|         maxTPSize     - max TP size,                             |
+//|         arrayPrices   - array of prices,                         |
+//|         arrayPrices   - array of TPs,                            |
+//+------------------------------------------------------------------+
+void MyUtility::GetBundleBuyLimitArrayPrices(double bid, double gapSize,
+                                             double maxTPSize, double maxPrice,
+                                             double minPrice, double priceRange,
+                                             CArrayDouble &arrayPrices,
+                                             CArrayDouble &arrayTPs) {
+  Print("GetBundleBuyLimitArrayPrices bid: ", bid, ", minPrice: ", minPrice,
+        ", maxPrice: ", maxPrice, ", gapSize: ", gapSize,
+        ", maxTPSize: ", maxTPSize, ", priceRange: ", priceRange);
+
+  arrayPrices.Shutdown();
+  arrayTPs.Shutdown();
+
+  for (double i = minPrice; i <= maxPrice;
+       i = NormalizeDoubleTwoDigits(i + gapSize)) {
+
+    if (i > bid ||
+        (priceRange && i < NormalizeDoubleTwoDigits(bid - priceRange)))
+      continue;
+
+    double entry = i == 0 ? _Point : i;
+
+    for (double j = NormalizeDoubleTwoDigits(i + gapSize); j <= maxPrice;
+         j = NormalizeDoubleTwoDigits(j + gapSize)) {
+
+      if (maxTPSize && j > NormalizeDoubleTwoDigits(entry + maxTPSize))
+        break;
+
+      arrayPrices.Add(NormalizeDoubleTwoDigits(entry));
+      arrayTPs.Add(NormalizeDoubleTwoDigits(j));
+    }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetBundleSellLimitArrayPrices(...).             |
+//| INPUT:  ask           - ask price,                               |
+//|         gapSize       - array gap size,                          |
+//|         maxTPSize     - max TP size,                             |
+//|         maxPrice      - max price,                               |
+//|         maxTPSize     - max TP size,                             |
+//|         arrayPrices   - array of prices,                         |
+//|         arrayPrices   - array of TPs,                            |
+//+------------------------------------------------------------------+
+void MyUtility::GetBundleSellLimitArrayPrices(double ask, double gapSize,
+                                              double maxTPSize, double maxPrice,
+                                              double minPrice,
+                                              double priceRange,
+                                              CArrayDouble &arrayPrices,
+                                              CArrayDouble &arrayTPs) {
+  Print("GetBundleSellLimitArrayPrices ask: ", ask, ", minPrice: ", minPrice,
+        ", maxPrice: ", maxPrice, ", gapSize: ", gapSize,
+        ", maxTPSize: ", maxTPSize, ", priceRange: ", priceRange);
+
+  arrayPrices.Shutdown();
+  arrayTPs.Shutdown();
+
+  for (double i = maxPrice; i > minPrice;
+       i = NormalizeDoubleTwoDigits(i - gapSize)) {
+
+    if (i < ask || (priceRange && i > ask + priceRange))
+      continue;
+
+    for (double j = NormalizeDoubleTwoDigits(i - gapSize); j >= minPrice;
+         j = NormalizeDoubleTwoDigits(j - gapSize)) {
+
+      double tp = j == 0 ? _Point : j;
+
+      if (maxTPSize && tp < NormalizeDoubleTwoDigits(i - maxTPSize))
+        break;
+
+      arrayPrices.Add(NormalizeDoubleTwoDigits(i));
+      arrayTPs.Add(NormalizeDoubleTwoDigits(tp));
+    }
+  }
+}
+
+//+------------------------------------------------------------------+
+//| Access functions GetBundleSellStopArrayPrices(...).              |
+//| INPUT:  bid           - bid price,                               |
+//|         gapSize       - array gap size,                          |
+//|         maxTPSize     - max TP size,                             |
+//|         maxPrice      - max price,                               |
+//|         maxTPSize     - max TP size,                             |
+//|         arrayPrices   - array of prices,                         |
+//|         arrayPrices   - array of TPs,                            |
+//+------------------------------------------------------------------+
+void MyUtility::GetBundleSellStopArrayPrices(double bid, double gapSize,
+                                             double maxTPSize, double maxPrice,
+                                             double minPrice, double priceRange,
+                                             CArrayDouble &arrayPrices,
+                                             CArrayDouble &arrayTPs) {
+  Print("GetBundleSellStopArrayPrices bid: ", bid, ", minPrice: ", minPrice,
+        ", maxPrice: ", maxPrice, ", gapSize: ", gapSize,
+        ", maxTPSize: ", maxTPSize, ", priceRange: ", priceRange);
+
+  arrayPrices.Shutdown();
+  arrayTPs.Shutdown();
+
+  for (double i = maxPrice; i > minPrice;
+       i = NormalizeDoubleTwoDigits(i - gapSize)) {
+
+    if (i > bid ||
+        (priceRange && i < NormalizeDoubleTwoDigits(bid - priceRange)))
+      continue;
+
+    for (double j = NormalizeDoubleTwoDigits(i - gapSize); j >= minPrice;
+         j = NormalizeDoubleTwoDigits(j - gapSize)) {
+
+      double tp = j == 0 ? _Point : j;
+
+      if (maxTPSize && tp < NormalizeDoubleTwoDigits(i - maxTPSize))
+        break;
+
+      arrayPrices.Add(NormalizeDoubleTwoDigits(i));
+      arrayTPs.Add(NormalizeDoubleTwoDigits(tp));
+    }
   }
 }

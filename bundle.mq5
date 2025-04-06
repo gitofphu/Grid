@@ -415,6 +415,9 @@ int OnInit() {
 
   GetArrayPrices();
 
+  Utility.AlertAndExit("Test Ended.");
+  return (INIT_PARAMETERS_INCORRECT);
+
   if (OnlyCheckOrders) {
     Utility.AlertAndExit("Check orders successfully.");
     return (INIT_SUCCEEDED);
@@ -445,144 +448,6 @@ int GetNumberOfPossibleOrders(double minPrice, double maxPrice,
   return totalOrders;
 }
 
-void GetBuyStopArrayPrices(double ask) {
-
-  Print("GetBuyStopArrayPrices ask: ", ask,
-        ", buyStopMinPrice: ", buyStopMinPrice,
-        ", buyStopMaxPrice: ", buyStopMaxPrice,
-        ", buyStopGapSize: ", buyStopGapSize,
-        ", buyStopMaxTPSize: ", buyStopMaxTPSize, ", priceRange: ", priceRange);
-
-  buyStopArrayPrices.Shutdown();
-  buyStopArrayTP.Shutdown();
-
-  for (double i = buyStopMinPrice; i <= buyStopMaxPrice;
-       i = Utility.NormalizeDoubleTwoDigits(i + buyStopGapSize)) {
-
-    if (i < ask ||
-        (priceRange && i > Utility.NormalizeDoubleTwoDigits(ask + priceRange)))
-      continue;
-
-    double entry = i == 0 ? _Point : i;
-
-    for (double j = Utility.NormalizeDoubleTwoDigits(i + buyStopGapSize);
-         j <= buyStopMaxPrice;
-         j = Utility.NormalizeDoubleTwoDigits(j + buyStopGapSize)) {
-
-      if (buyStopMaxTPSize &&
-          j > Utility.NormalizeDoubleTwoDigits(entry + buyStopMaxTPSize))
-        break;
-
-      buyStopArrayPrices.Add(Utility.NormalizeDoubleTwoDigits(entry));
-      buyStopArrayTP.Add(Utility.NormalizeDoubleTwoDigits(j));
-    }
-  }
-}
-
-void GetBuyLimitArrayPrices(double bid) {
-
-  Print("GetBuyLimitArrayPrices bid: ", bid,
-        ", buyLimitMinPrice: ", buyLimitMinPrice,
-        ", buyLimitMaxPrice: ", buyLimitMaxPrice,
-        ", buyLimitGapSize: ", buyLimitGapSize,
-        ", buyLimitMaxTPSize: ", buyLimitMaxTPSize,
-        ", priceRange: ", priceRange);
-
-  buyLimitArrayPrices.Shutdown();
-  buyLimitArrayTP.Shutdown();
-
-  for (double i = buyLimitMinPrice; i <= buyLimitMaxPrice;
-       i = Utility.NormalizeDoubleTwoDigits(i + buyLimitGapSize)) {
-
-    if (i > bid ||
-        (priceRange && i < Utility.NormalizeDoubleTwoDigits(bid - priceRange)))
-      continue;
-
-    double entry = i == 0 ? _Point : i;
-
-    for (double j = Utility.NormalizeDoubleTwoDigits(i + buyLimitGapSize);
-         j <= buyLimitMaxPrice;
-         j = Utility.NormalizeDoubleTwoDigits(j + buyLimitGapSize)) {
-
-      if (buyLimitMaxTPSize &&
-          j > Utility.NormalizeDoubleTwoDigits(entry + buyLimitMaxTPSize))
-        break;
-
-      buyLimitArrayPrices.Add(Utility.NormalizeDoubleTwoDigits(entry));
-      buyLimitArrayTP.Add(Utility.NormalizeDoubleTwoDigits(j));
-    }
-  }
-}
-
-void GetSellLimitArrayPrices(double ask) {
-
-  Print("GetSellLimitArrayPrices ask: ", ask,
-        ", sellLimitMinPrice: ", sellLimitMinPrice,
-        ", sellLimitMaxPrice: ", sellLimitMaxPrice,
-        ", sellLimitGapSize: ", sellLimitGapSize,
-        ", sellLimitMaxTPSize: ", sellLimitMaxTPSize,
-        ", priceRange: ", priceRange);
-
-  sellLimitArrayPrices.Shutdown();
-  sellLimitArrayTP.Shutdown();
-
-  for (double i = sellLimitMaxPrice; i > sellLimitMinPrice;
-       i = Utility.NormalizeDoubleTwoDigits(i - sellLimitGapSize)) {
-
-    if (i < ask || (priceRange && i > ask + priceRange))
-      continue;
-
-    for (double j = Utility.NormalizeDoubleTwoDigits(i - sellLimitGapSize);
-         j >= sellLimitMinPrice;
-         j = Utility.NormalizeDoubleTwoDigits(j - sellLimitGapSize)) {
-
-      double tp = j == 0 ? _Point : j;
-
-      if (sellLimitMaxTPSize &&
-          tp < Utility.NormalizeDoubleTwoDigits(i - sellLimitMaxTPSize))
-        break;
-
-      sellLimitArrayPrices.Add(Utility.NormalizeDoubleTwoDigits(i));
-      sellLimitArrayTP.Add(Utility.NormalizeDoubleTwoDigits(tp));
-    }
-  }
-}
-
-void GetSellStopArrayPrices(double bid) {
-
-  Print("GetSellStopArrayPrices bid: ", bid,
-        ", sellStopMinPrice: ", sellStopMinPrice,
-        ", sellStopMaxPrice: ", sellStopMaxPrice,
-        ", sellStopGapSize: ", sellStopGapSize,
-        ", sellStopMaxTPSize: ", sellStopMaxTPSize,
-        ", priceRange: ", priceRange);
-
-  sellStopArrayPrices.Shutdown();
-  sellStopArrayTP.Shutdown();
-
-  for (double i = sellStopMaxPrice; i > sellStopMinPrice;
-       i = Utility.NormalizeDoubleTwoDigits(i - sellStopGapSize)) {
-
-    if (i > bid ||
-        (priceRange && i < Utility.NormalizeDoubleTwoDigits(bid - priceRange)))
-      continue;
-
-    for (double j = Utility.NormalizeDoubleTwoDigits(i - sellStopGapSize);
-         j >= sellStopMinPrice;
-         j = Utility.NormalizeDoubleTwoDigits(j - sellStopGapSize)) {
-
-      double tp = j == 0 ? _Point : j;
-
-      if (sellStopMaxTPSize &&
-          tp < Utility.NormalizeDoubleTwoDigits(i - sellStopMaxTPSize))
-        break;
-
-      sellStopArrayPrices.Add(Utility.NormalizeDoubleTwoDigits(i));
-      sellStopArrayTP.Add(Utility.NormalizeDoubleTwoDigits(tp));
-    }
-  }
-}
-
 void GetArrayPrices() {
   double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
   double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
@@ -591,7 +456,9 @@ void GetArrayPrices() {
 
   if (buyStopGapSize) {
 
-    GetBuyStopArrayPrices(ask);
+    Utility.GetBundleBuyStopArrayPrices(
+        ask, buyStopGapSize, buyStopMaxTPSize, buyStopMaxPrice, buyStopMinPrice,
+        priceRange, buyStopArrayPrices, buyStopArrayTP);
 
     for (int i = 0; i < buyStopArrayPrices.Total(); i++) {
       Print("buyStopArrayPrices: ", i, ", Entry:", buyStopArrayPrices[i],
@@ -601,7 +468,9 @@ void GetArrayPrices() {
 
   if (buyLimitGapSize) {
 
-    GetBuyLimitArrayPrices(bid);
+    Utility.GetBundleBuyLimitArrayPrices(
+        bid, buyLimitGapSize, buyLimitMaxTPSize, buyLimitMaxPrice,
+        buyLimitMinPrice, priceRange, buyLimitArrayPrices, buyLimitArrayTP);
 
     for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
       Print("buyLimitArrayPrices: ", i, ", Entry:", buyLimitArrayPrices[i],
@@ -611,7 +480,9 @@ void GetArrayPrices() {
 
   if (sellLimitGapSize) {
 
-    GetSellLimitArrayPrices(ask);
+    Utility.GetBundleSellLimitArrayPrices(
+        ask, sellLimitGapSize, sellLimitMaxTPSize, sellLimitMaxPrice,
+        sellLimitMinPrice, priceRange, sellLimitArrayPrices, sellLimitArrayTP);
 
     for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
       Print("sellLimitArrayPrices: ", i, ", Entry:", sellLimitArrayPrices[i],
@@ -621,7 +492,9 @@ void GetArrayPrices() {
 
   if (sellStopGapSize) {
 
-    GetSellStopArrayPrices(bid);
+    Utility.GetBundleSellStopArrayPrices(
+        bid, sellStopGapSize, sellStopMaxTPSize, sellStopMaxPrice,
+        sellStopMinPrice, priceRange, sellStopArrayPrices, sellStopArrayTP);
 
     for (int i = 0; i < sellStopArrayPrices.Total(); i++) {
       Print("sellStopArrayPrices: ", i, ", Entry:", sellStopArrayPrices[i],
@@ -1195,7 +1068,9 @@ void OnTick() {
       Utility.NormalizeDoubleTwoDigits(buyStopArrayPrices[0] - ask) >
           buyStopGapSize) {
 
-    GetBuyStopArrayPrices(ask);
+    Utility.GetBundleBuyStopArrayPrices(
+        ask, buyStopGapSize, buyStopMaxTPSize, buyStopMaxPrice, buyStopMinPrice,
+        priceRange, buyStopArrayPrices, buyStopArrayTP);
 
     for (int i = 0; i < buyStopArrayPrices.Total(); i++) {
       Print("buyStopArrayPrices: ", i, ", TP", buyStopArrayPrices[i],
@@ -1217,7 +1092,9 @@ void OnTick() {
           bid - (buyLimitArrayPrices[buyLimitArrayPrices.Total() - 1])) >
           buyLimitGapSize) {
 
-    GetBuyLimitArrayPrices(bid);
+    Utility.GetBundleBuyLimitArrayPrices(
+        bid, buyLimitGapSize, buyLimitMaxTPSize, buyLimitMaxPrice,
+        buyLimitMinPrice, priceRange, buyLimitArrayPrices, buyLimitArrayTP);
 
     for (int i = 0; i < buyLimitArrayPrices.Total(); i++) {
       Print("buyLimitArrayPrices: ", i, ", Entry:", buyLimitArrayPrices[i],
@@ -1236,7 +1113,9 @@ void OnTick() {
           sellLimitArrayPrices[sellLimitArrayPrices.Total() - 1] - ask) >
           sellLimitGapSize) {
 
-    GetSellLimitArrayPrices(ask);
+    Utility.GetBundleSellLimitArrayPrices(
+        ask, sellLimitGapSize, sellLimitMaxTPSize, sellLimitMaxPrice,
+        sellLimitMinPrice, priceRange, sellLimitArrayPrices, sellLimitArrayTP);
 
     for (int i = 0; i < sellLimitArrayPrices.Total(); i++) {
       Print("sellLimitArrayPrices: ", i, ", Entry:", sellLimitArrayPrices[i],
@@ -1255,7 +1134,9 @@ void OnTick() {
       Utility.NormalizeDoubleTwoDigits(bid - sellStopArrayPrices[0]) >
           sellStopGapSize) {
 
-    GetSellStopArrayPrices(bid);
+    Utility.GetBundleSellStopArrayPrices(
+        bid, sellStopGapSize, sellStopMaxTPSize, sellStopMaxPrice,
+        sellStopMinPrice, priceRange, sellStopArrayPrices, sellStopArrayTP);
 
     for (int i = 0; i < sellStopArrayPrices.Total(); i++) {
       Print("sellStopArrayPrices: ", i, ", Entry:", sellStopArrayPrices[i],
