@@ -17,8 +17,8 @@ MyUtility Utility;
 //+------------------------------------------------------------------+
 //| Input                                                            |
 //+------------------------------------------------------------------+
-input double PriceRange = 5; // Price range
-input int MaxOrders = NULL;  // Max orders
+input double PriceRange = 5;  // Price range
+input int LimitOrders = NULL; // Limit orders
 
 input group "Buy Stop";
 input double BuyStopLot = NULL;       // Lot size
@@ -68,7 +68,7 @@ input ENUM_BASE_CORNER Corner = CORNER_RIGHT_LOWER; // corner
 //| Global variables                                                 |
 //+------------------------------------------------------------------+
 double priceRange = NULL;
-int maxOrders = NULL;
+int limitOrders = NULL;
 
 double buyStopLot = NULL;
 double buyStopGapSize = NULL;
@@ -98,7 +98,6 @@ double sellStopMaxPrice = NULL;
 double sellStopMinPrice = NULL;
 bool fillInSellStopLots = false;
 
-int limitOrders;
 CArrayDouble buyStopArrayPrices;
 CArrayDouble buyLimitArrayPrices;
 CArrayDouble sellLimitArrayPrices;
@@ -125,9 +124,9 @@ int OnInit() {
     }
   }
 
-  if (PriceRange == priceRange && MaxOrders == maxOrders &&
-      BuyStopLot == buyStopLot && BuyStopGapSize == buyStopGapSize &&
-      BuyStopTP == buyStopTP && BuyStopMaxPrice == buyStopMaxPrice &&
+  if (PriceRange == priceRange && BuyStopLot == buyStopLot &&
+      BuyStopGapSize == buyStopGapSize && BuyStopTP == buyStopTP &&
+      BuyStopMaxPrice == buyStopMaxPrice &&
       BuyStopMinPrice == buyStopMinPrice &&
       FillInBuyStopLots == fillInBuyStopLots && BuyLimitLot == buyLimitLot &&
       BuyLimitGapSize == buyLimitGapSize && BuyLimitTP == buyLimitTP &&
@@ -147,8 +146,22 @@ int OnInit() {
     return (INIT_SUCCEEDED);
   }
 
+  const int accoutnLimitOrders = (int)AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
+
+  Print("accoutnLimitOrders: ", accoutnLimitOrders);
+
+  if (LimitOrders && LimitOrders > accoutnLimitOrders) {
+    Utility.AlertAndExit("limitOrders must be less than ACCOUNT_LIMIT_ORDERS.");
+    return (INIT_PARAMETERS_INCORRECT);
+  }
+
+  if (LimitOrders) {
+    limitOrders = LimitOrders;
+  } else {
+    limitOrders = accoutnLimitOrders;
+  }
+
   priceRange = PriceRange;
-  maxOrders = MaxOrders;
 
   buyStopLot = BuyStopLot;
   buyStopGapSize = BuyStopGapSize;
@@ -223,7 +236,8 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  if (buyStopLot && buyStopGapSize &&
+  if (buyStopLot && buyStopGapSize && BuyStopLot != buyStopLot &&
+      BuyStopGapSize != buyStopGapSize &&
       Utility.ConfirmInputMessageBox(
           ORDER_TYPE_BUY_STOP, buyStopLot, buyStopGapSize, buyStopTP,
           buyStopMaxPrice, buyStopMinPrice, fillInBuyStopLots) == false) {
@@ -244,7 +258,8 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  if (buyLimitLot && buyLimitGapSize &&
+  if (buyLimitLot && buyLimitGapSize && BuyLimitLot != buyLimitLot &&
+      BuyLimitGapSize != buyLimitGapSize &&
       Utility.ConfirmInputMessageBox(
           ORDER_TYPE_BUY_LIMIT, buyLimitLot, buyLimitGapSize, buyLimitTP,
           buyLimitMaxPrice, buyLimitMinPrice, fillInBuyLimitLots) == false) {
@@ -266,7 +281,8 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  if (sellLimitLot && sellLimitGapSize &&
+  if (sellLimitLot && sellLimitGapSize && SellLimitLot != sellLimitLot &&
+      SellLimitGapSize != sellLimitGapSize &&
       Utility.ConfirmInputMessageBox(
           ORDER_TYPE_SELL_LIMIT, sellLimitLot, sellLimitGapSize, sellLimitTP,
           sellLimitMaxPrice, sellLimitMinPrice, fillInSellLimitLots) == false) {
@@ -287,8 +303,8 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  // TODO: add message box for sell stop
-  if (sellStopLot && sellStopGapSize &&
+  if (sellStopLot && sellStopGapSize && SellStopLot != sellStopLot &&
+      SellStopGapSize != sellStopGapSize &&
       Utility.ConfirmInputMessageBox(
           ORDER_TYPE_SELL_STOP, sellStopLot, sellStopGapSize, sellStopTP,
           sellStopMaxPrice, sellStopMinPrice, fillInSellStopLots) == false) {
@@ -310,19 +326,6 @@ int OnInit() {
       (sellStopLot != NULL && sellStopLot < volumeMin)) {
     Utility.AlertAndExit("Lots must be greater than volume min.");
     return (INIT_PARAMETERS_INCORRECT);
-  }
-
-  const int accoutnLimitOrders = (int)AccountInfoInteger(ACCOUNT_LIMIT_ORDERS);
-
-  Print("accoutnLimitOrders: ", accoutnLimitOrders);
-
-  if (maxOrders == NULL) {
-    limitOrders = accoutnLimitOrders;
-  } else if (maxOrders > accoutnLimitOrders) {
-    Utility.AlertAndExit("maxOrders must be less than ACCOUNT_LIMIT_ORDERS.");
-    return (INIT_PARAMETERS_INCORRECT);
-  } else {
-    limitOrders = maxOrders;
   }
 
   GetArrayPrices();
@@ -392,8 +395,6 @@ int OnInit() {
   CloseOrderOutSideArray();
 
   CheckAndPlaceOrders();
-
-  // TODO: draw summary OnInit
 
   return (INIT_SUCCEEDED);
 }

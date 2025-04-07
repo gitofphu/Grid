@@ -17,8 +17,8 @@ MyUtility Utility;
 //+------------------------------------------------------------------+
 //| Input                                                            |
 //+------------------------------------------------------------------+
-input double PriceRange = 2; // Price range
-input int MaxOrders = NULL;  // Max orders
+input double PriceRange = 2;  // Price range
+input int LimitOrders = NULL; // Limit orders
 
 input group "Buy Stop";
 input double BuyStopLot = NULL;       // Lot size
@@ -69,7 +69,7 @@ input ENUM_BASE_CORNER Corner = CORNER_RIGHT_LOWER; // corner
 //| Global variables                                                 |
 //+------------------------------------------------------------------+
 double priceRange = NULL;
-int maxOrders = NULL;
+int limitOrders = NULL;
 
 double buyStopLot = NULL;
 double buyStopGapSize = NULL;
@@ -99,7 +99,6 @@ double sellStopMaxPrice = NULL;
 double sellStopMinPrice = NULL;
 bool fillInSellStopLots = false;
 
-int limitOrders;
 CArrayDouble buyStopArrayPrices;
 CArrayDouble buyStopArrayTP;
 CArrayDouble buyLimitArrayPrices;
@@ -130,8 +129,8 @@ int OnInit() {
     }
   }
 
-  if (PriceRange == priceRange && MaxOrders == maxOrders &&
-      BuyStopLot == buyStopLot && BuyStopGapSize == buyStopGapSize &&
+  if (PriceRange == priceRange && BuyStopLot == buyStopLot &&
+      BuyStopGapSize == buyStopGapSize &&
       BuyStopMaxTPSize == buyStopMaxTPSize &&
       BuyStopMaxPrice == buyStopMaxPrice &&
       BuyStopMinPrice == buyStopMinPrice &&
@@ -201,7 +200,8 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  if (BuyStopLot && BuyStopGapSize &&
+  if (BuyStopLot && BuyStopGapSize && BuyStopLot != buyStopLot &&
+      BuyStopGapSize != buyStopGapSize &&
       Utility.ConfirmInputMessageBox(
           ORDER_TYPE_BUY_STOP, BuyStopLot, BuyStopGapSize, BuyStopMaxTPSize,
           BuyStopMaxPrice, BuyStopMinPrice, FillInBuyStopLots) == false) {
@@ -221,7 +221,8 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  if (BuyLimitLot && BuyLimitGapSize &&
+  if (BuyLimitLot && BuyLimitGapSize && BuyLimitLot != buyLimitLot &&
+      BuyLimitGapSize != buyLimitGapSize &&
       Utility.ConfirmInputMessageBox(
           ORDER_TYPE_BUY_LIMIT, BuyLimitLot, BuyLimitGapSize, BuyLimitMaxTPSize,
           BuyLimitMaxPrice, BuyLimitMinPrice, FillInBuyLimitLots) == false) {
@@ -241,7 +242,8 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  if (SellLimitLot && SellLimitGapSize &&
+  if (SellLimitLot && SellLimitGapSize && SellLimitLot != sellLimitLot &&
+      SellLimitGapSize != sellLimitGapSize &&
       Utility.ConfirmInputMessageBox(ORDER_TYPE_SELL_LIMIT, SellLimitLot,
                                      SellLimitGapSize, SellLimitMaxTPSize,
                                      SellLimitMaxPrice, SellLimitMinPrice,
@@ -262,7 +264,8 @@ int OnInit() {
     return (INIT_PARAMETERS_INCORRECT);
   }
 
-  if (SellStopLot && SellStopGapSize &&
+  if (SellStopLot && SellStopGapSize && SellStopLot != sellStopLot &&
+      SellStopGapSize != sellStopGapSize &&
       Utility.ConfirmInputMessageBox(
           ORDER_TYPE_SELL_STOP, SellStopLot, SellStopGapSize, SellStopMaxTPSize,
           SellStopMaxPrice, SellStopMinPrice, FillInSellStopLots) == false) {
@@ -296,17 +299,20 @@ int OnInit() {
 
   Print("accoutnLimitOrders: ", accoutnLimitOrders);
 
-  priceRange = PriceRange;
-  maxOrders = MaxOrders;
-
-  if (maxOrders == NULL) {
-    limitOrders = accoutnLimitOrders;
-  } else if (maxOrders > accoutnLimitOrders) {
-    Utility.AlertAndExit("maxOrders must be less than ACCOUNT_LIMIT_ORDERS.");
+  if (LimitOrders && LimitOrders > accoutnLimitOrders) {
+    Utility.AlertAndExit("limitOrders must be less than ACCOUNT_LIMIT_ORDERS.");
     return (INIT_PARAMETERS_INCORRECT);
-  } else {
-    limitOrders = maxOrders;
   }
+
+  if (LimitOrders) {
+    limitOrders = LimitOrders;
+  } else {
+    limitOrders = accoutnLimitOrders;
+  }
+
+  Print("limitOrders: ", limitOrders);
+
+  priceRange = PriceRange;
 
   buyStopLot = BuyStopLot;
   buyStopGapSize = BuyStopGapSize;

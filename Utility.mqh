@@ -463,13 +463,13 @@ void MyUtility::getExistDealsWithLotsAndTP(
     double price, double lot, double TP, CArrayDouble &existDeals,
     CArrayDouble &existDealsLots, CArrayDouble &existDealsTP) {
   for (int j = 0; j < arrayPrices.Total(); j++) {
-    Print("getExistDealsWithLotsAndTP arrayPrices[j]: ", arrayPrices[j],
-          ", arrayTP[j]: ", arrayTP[j], ", price: ", price, ", TP: ", TP,
-          ", lot: ", lot, ", gridGapSize: ", gridGapSize);
+    // Print("getExistDealsWithLotsAndTP arrayPrices[j]: ", arrayPrices[j],
+    //       ", arrayTP[j]: ", arrayTP[j], ", price: ", price, ", TP: ", TP,
+    //       ", lot: ", lot, ", gridGapSize: ", gridGapSize);
     if (price >= arrayPrices[j] &&
         price <= arrayPrices[j] + gridGapSize - _Point && TP == arrayTP[j]) {
 
-      Print("add this one to existDeals.");
+      // Print("add this one to existDeals.");
 
       existDeals.Add(arrayPrices[j]);
       existDealsLots.Add(lot);
