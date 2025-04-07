@@ -466,8 +466,32 @@ void MyUtility::getExistDealsWithLotsAndTP(
     // Print("getExistDealsWithLotsAndTP arrayPrices[j]: ", arrayPrices[j],
     //       ", arrayTP[j]: ", arrayTP[j], ", price: ", price, ", TP: ", TP,
     //       ", lot: ", lot, ", gridGapSize: ", gridGapSize);
-    if (price >= arrayPrices[j] &&
-        price <= arrayPrices[j] + gridGapSize - _Point && TP == arrayTP[j]) {
+
+    // Print("getExistDealsWithLotsAndTP price: ", price,
+    //       ", arrayPrices[j]: ", arrayPrices[j],
+    //       ", arrayPrices[j] + gridGapSize - _Point: ",
+    //       arrayPrices[j] + gridGapSize - _Point, ", TP: ", TP,
+    //       ", arrayTP[j]: ", arrayTP[j]);
+    // Print("top: ",
+    //       arrayPrices[j] + NormalizeDoubleTwoDigits(gridGapSize / 2) -
+    //       _Point);
+    // Print("bottom: ",
+    //       arrayPrices[j] - NormalizeDoubleTwoDigits(gridGapSize / 2));
+
+    // if (price >= arrayPrices[j] &&
+    //     price <= arrayPrices[j] + gridGapSize - _Point && TP == arrayTP[j]) {
+
+    //   Print("add this one to existDeals.");
+
+    //   existDeals.Add(arrayPrices[j]);
+    //   existDealsLots.Add(lot);
+    //   existDealsTP.Add(arrayTP[j]);
+    // }
+
+    if (price >= arrayPrices[j] - NormalizeDoubleTwoDigits(gridGapSize / 2) &&
+        price <= arrayPrices[j] + NormalizeDoubleTwoDigits(gridGapSize / 2) -
+                     _Point &&
+        TP == arrayTP[j]) {
 
       // Print("add this one to existDeals.");
 
