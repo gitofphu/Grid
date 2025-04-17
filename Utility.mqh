@@ -25,6 +25,8 @@ CArrayLong;
 #include <Arrays/ArrayString.mqh>
 CArrayString;
 
+#include <Strings/String.mqh>
+
 class MyUtility {
 public:
   MyUtility();
@@ -122,6 +124,7 @@ public:
                                     CArrayDouble &arrayTPs);
   int GetBundleNumberOfPossibleOrders(double minPrice, double maxPrice,
                                       double gapSize);
+  string NumberToString(double number, int digits = 0, string sep = ",");
 
 private:
   void deleteOrder(ulong ticket);
@@ -1587,4 +1590,29 @@ int MyUtility::GetBundleNumberOfPossibleOrders(double minPrice, double maxPrice,
   }
 
   return totalOrders;
+}
+
+//+------------------------------------------------------------------+
+//| Access functions NumberToString(...).                            |
+//| INPUT:  number      - input number,                              |
+//|         digits      - number of digits,                          |
+//|         sep         - string separation,                         |
+//+------------------------------------------------------------------+
+string MyUtility::NumberToString(double number, int digits = 0,
+                                 string sep = ",") {
+  CString num_str;
+  string prepend = number < 0 ? "-" : "";
+  number = number < 0 ? -number : number;
+  int decimal_index = -1;
+  if (typename(number) == "double" || typename(number) == "float") {
+    num_str.Assign(DoubleToString((double)number, digits));
+    decimal_index = num_str.Find(0, ".");
+  } else
+    num_str.Assign(string(number));
+  int len = (int)num_str.Len();
+  decimal_index = decimal_index > 0 ? decimal_index : len;
+  int res = len - (len - decimal_index);
+  for (int i = res - 3; i > 0; i -= 3)
+    num_str.Insert(i, sep);
+  return prepend + num_str.Str();
 }

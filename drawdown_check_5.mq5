@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                           checkBuyBundleSize.mq5 |
+//|                                             drawdown_check_5.mq5 |
 //|                                           Copyright 20XX, MyName |
 //|                                          https://www.mysite.com/ |
 //+------------------------------------------------------------------+
@@ -14,7 +14,6 @@ MyUtility Utility;
 //| Input                                                            |
 //+------------------------------------------------------------------+
 input int LimitOrders = NULL; // Limit orders
-input double Banalce = 100;   // Balance
 input double Lot = 0.01;      // Lot size
 input double MaxPrice = 80;   // Max price
 input double MinPrice = 0;    // Min price
@@ -28,7 +27,8 @@ int limitOrders = NULL;
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 int OnInit() {
-  if (Banalce == NULL || Lot == NULL || MaxPrice == NULL) {
+
+  if (Lot == NULL || MaxPrice == NULL) {
     Utility.AlertAndExit("All parameters are required.");
     return (INIT_PARAMETERS_INCORRECT);
   }
@@ -41,6 +41,9 @@ int OnInit() {
     Utility.AlertAndExit("LimitOrders must be less than ACCOUNT_LIMIT_ORDERS.");
     return (INIT_PARAMETERS_INCORRECT);
   }
+
+  Print("LimitOrders: ", limitOrders, ", Lot: ", Lot, ", MaxPrice: ", MaxPrice,
+        ", MinPrice: ", MinPrice);
 
   for (double gapSize = 0.01;
        gapSize <= Utility.NormalizeDoubleTwoDigits(MaxPrice - MinPrice);
@@ -55,26 +58,24 @@ int OnInit() {
     CArrayDouble Prices;
     CArrayDouble TPs;
 
+    double maximumDrawdown = 0;
+
     for (double i = MinPrice; i <= MaxPrice;
          i = Utility.NormalizeDoubleTwoDigits(i + gapSize)) {
 
       double entry = i == 0 ? _Point : i;
+      double TP = i + gapSize;
 
-      for (double j = i + gapSize; j <= MaxPrice;
-           j = Utility.NormalizeDoubleTwoDigits(j + gapSize)) {
-
-        Prices.Add(Utility.NormalizeDoubleTwoDigits(entry));
-        TPs.Add(Utility.NormalizeDoubleTwoDigits(j));
+      if (TP > MaxPrice) {
+        break;
       }
+
+      Prices.Add(Utility.NormalizeDoubleTwoDigits(entry));
+      TPs.Add(Utility.NormalizeDoubleTwoDigits(TP));
     }
 
-    if (Prices.Total() == 1)
-      break;
-
-    double maximumDrawdown = 0;
-
     for (int i = 0; i < Prices.Total(); i++) {
-      // Print("Price: ", Prices[i], ", TP: ", TPs[i]);
+      Print("Price: ", Prices[i], ", TPs: ", TPs[i]);
 
       double loss = cAccountInfo.OrderProfitCheck(_Symbol, ORDER_TYPE_BUY, Lot,
                                                   Prices[i], _Point);
