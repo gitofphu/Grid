@@ -57,3 +57,4 @@
 // [x] max price without min price
 // [x] min price without max price
 // [x] close order by comment
+// [ ] noti display symbol
