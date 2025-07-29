@@ -833,7 +833,7 @@ void FilterOpenOrdersAndPositionsByType(
   }
 }
 
-void DraySummaryObject(string objectName, string text, int yDistance,
+void DrawSummaryObject(string objectName, string text, int yDistance,
                        ENUM_ANCHOR_POINT anchor, long textColor) {
 
   if (ObjectFind(0, objectName) < 0) {
@@ -938,7 +938,7 @@ void DrawSummary() {
   case CORNER_LEFT_UPPER:
   case CORNER_RIGHT_UPPER:
     for (int i = 0; i < objectNames.Total(); i++) {
-      DraySummaryObject(objectNames[i], texts[i], (i * 25) + 25, anchor,
+      DrawSummaryObject(objectNames[i], texts[i], (i * 25) + 25, anchor,
                         colors[i]);
     }
     break;
@@ -946,7 +946,7 @@ void DrawSummary() {
   case CORNER_RIGHT_LOWER:
     for (int i = 0, yDistance = objectNames.Total() * 25;
          i < objectNames.Total(); i++, yDistance -= 25) {
-      DraySummaryObject(objectNames[i], texts[i], yDistance, anchor, colors[i]);
+      DrawSummaryObject(objectNames[i], texts[i], yDistance, anchor, colors[i]);
     }
     break;
   }
