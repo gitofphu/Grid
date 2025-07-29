@@ -71,4 +71,6 @@ void OnStart() {
         SymbolInfoDouble(_Symbol, SYMBOL_MARGIN_INITIAL));
   Print("SYMBOL_MARGIN_MAINTENANCE: ",
         SymbolInfoDouble(_Symbol, SYMBOL_MARGIN_MAINTENANCE));
+  Print("SYMBOL_TRADE_CONTRACT_SIZE : ",
+        SymbolInfoDouble(_Symbol, SYMBOL_TRADE_CONTRACT_SIZE ));
 }
