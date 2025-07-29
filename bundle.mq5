@@ -58,11 +58,15 @@ input bool ClearOrderAndExit = false; // Clear all orders and exit
 input bool OnlyCheckOrders = false;   // Only check orders
 
 input group "Draw Input Summary";
-input bool DrawInputSummary = true;                 // Draw input summary
-input color BuyStopColor = clrAqua;                 // Buy Stop Color
-input color BuyLimitColor = clrYellow;              // Buy Limit Color
-input color SellLimitColor = clrOrange;             // Sell Limit Color
-input color SellStopColor = clrDeepPink;            // Sell Stop Color
+input bool DrawInputSummary = true;      // Draw input summary
+input color BuyStopColor = clrAqua;      // Buy Stop Color
+input color BuyLimitColor = clrYellow;   // Buy Limit Color
+input color SellLimitColor = clrOrange;  // Sell Limit Color
+input color SellStopColor = clrDeepPink; // Sell Stop Color
+input color RealizeBalancePositiveColor =
+    clrSpringGreen; // Realize Balance Positive Color
+input color RealizeBalanceNegativeColor =
+    clrRed; // Realize Balance Negative Color
 input ENUM_BASE_CORNER Corner = CORNER_RIGHT_LOWER; // corner
 
 //+------------------------------------------------------------------+
@@ -934,6 +938,20 @@ void DrawSummary() {
     colors.Add(SellStopColor);
   }
 
+  double equity = Utility.GetRealizeBalance();
+  string balanceText = "";
+
+  if (equity > 0) {
+    balanceText = "Balance is surplus by " + DoubleToString(equity, 2);
+  } else {
+    balanceText = "Balance is short of by " + DoubleToString(equity, 2);
+  }
+
+  texts.Add(balanceText);
+  objectNames.Add("Balance_Summary");
+  colors.Add(equity > 0 ? RealizeBalancePositiveColor
+                        : RealizeBalanceNegativeColor);
+
   switch (corner) {
   case CORNER_LEFT_UPPER:
   case CORNER_RIGHT_UPPER:
@@ -963,6 +981,7 @@ void ClearSummary() {
   ObjectDelete(0, "Sell_Limit_Summary_2");
   ObjectDelete(0, "Sell_Stop_Summary_1");
   ObjectDelete(0, "Sell_Stop_Summary_2");
+  ObjectDelete(0, "Balance_Summary");
 
   ChartRedraw();
 }
@@ -1198,6 +1217,9 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
       Order66();
     }
+
+    if (drawInputSummary)
+      DrawSummary();
   }
 }
 
