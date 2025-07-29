@@ -125,6 +125,7 @@ public:
   int GetBundleNumberOfPossibleOrders(double minPrice, double maxPrice,
                                       double gapSize);
   string NumberToString(double number, int digits = 0, string sep = ",");
+  double GetRealizeBalance();
 
 private:
   void deleteOrder(ulong ticket);
@@ -1615,4 +1616,38 @@ string MyUtility::NumberToString(double number, int digits = 0,
   for (int i = res - 3; i > 0; i -= 3)
     num_str.Insert(i, sep);
   return prepend + num_str.Str();
+}
+//+------------------------------------------------------------------+
+//| Access functions GetRealizeBalance(...).                         |
+//+------------------------------------------------------------------+
+double MyUtility::GetRealizeBalance() {
+  double totalDrawdown = 0;
+
+  for (int i = 0; i < PositionsTotal(); i++) {
+    ulong positionTicket = PositionGetTicket(i);
+    if (PositionSelectByTicket(positionTicket)) {
+      double positionPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      string symbol = PositionGetString(POSITION_SYMBOL);
+      long positionType = PositionGetInteger(POSITION_TYPE);
+      double positionVolume = PositionGetDouble(POSITION_VOLUME);
+
+      if (symbol != _Symbol || positionType != POSITION_TYPE_BUY)
+        continue;
+
+      double drawdown = cAccountInfo.OrderProfitCheck(
+          _Symbol, ORDER_TYPE_BUY, positionVolume, positionPrice, _Point);
+
+      Print("positionPrice: ", positionPrice,
+            ", positionVolume: ", positionVolume, ", drawdown: ", drawdown);
+
+      totalDrawdown =
+          Utility.NormalizeDoubleTwoDigits(totalDrawdown + drawdown);
+    }
+  }
+
+  double balance = cAccountInfo.Balance();
+
+  double equity = Utility.NormalizeDoubleTwoDigits(balance + totalDrawdown);
+
+  return equity;
 }
