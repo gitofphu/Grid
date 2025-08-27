@@ -7,7 +7,7 @@
 #property link "Link"
 #property version "1.02"
 
-#include <../Experts/Grid/Utility.mqh>
+#include "../Utility.mqh"
 MyUtility Utility;
 
 
