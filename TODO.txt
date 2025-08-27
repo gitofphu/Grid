@@ -58,3 +58,4 @@
 // [x] min price without max price
 // [x] close order by comment
 // [ ] noti display symbol
+// [x] bundle real balance at price

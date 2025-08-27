@@ -115,7 +115,7 @@ CArrayDouble sellStopArrayTP;
 bool drawInputSummary = NULL;
 ENUM_BASE_CORNER corner = NULL;
 
-string Comment = "bundle";
+string MyComment = "bundle";
 // comment pattern: <ea_name>|<IsFillIn>
 
 //+------------------------------------------------------------------+
@@ -128,7 +128,7 @@ int OnInit() {
                             MB_OKCANCEL | MB_ICONQUESTION);
 
     if (result == IDOK) {
-      Utility.CloseAllOrdersByComment(Comment);
+      Utility.CloseAllOrdersByComment(MyComment);
       Utility.AlertAndExit("Clear all orders and exit.");
     }
   }
@@ -500,13 +500,13 @@ void GetArrayPrices() {
 
 void CloseOrderOutSideArray() {
   Print("CloseOrderOutSideArray");
-  Utility.CloseOrderOutsideArrayPricesByType(buyStopArrayPrices, Comment,
+  Utility.CloseOrderOutsideArrayPricesByType(buyStopArrayPrices, MyComment,
                                              buyStopLot, ORDER_TYPE_BUY_STOP);
-  Utility.CloseOrderOutsideArrayPricesByType(buyLimitArrayPrices, Comment,
+  Utility.CloseOrderOutsideArrayPricesByType(buyLimitArrayPrices, MyComment,
                                              buyLimitLot, ORDER_TYPE_BUY_LIMIT);
   Utility.CloseOrderOutsideArrayPricesByType(
-      sellLimitArrayPrices, Comment, sellLimitLot, ORDER_TYPE_SELL_LIMIT);
-  Utility.CloseOrderOutsideArrayPricesByType(sellStopArrayPrices, Comment,
+      sellLimitArrayPrices, MyComment, sellLimitLot, ORDER_TYPE_SELL_LIMIT);
+  Utility.CloseOrderOutsideArrayPricesByType(sellStopArrayPrices, MyComment,
                                              sellStopLot, ORDER_TYPE_SELL_STOP);
 }
 
@@ -525,7 +525,7 @@ void CheckAndPlaceOrders() {
     if (buyStopArrayPrices.Total() > 0) {
 
       PlaceMissingDealsByType(buyStopArrayPrices, buyStopArrayTP,
-                              buyStopGapSize, Comment, ORDER_TYPE_BUY_STOP,
+                              buyStopGapSize, MyComment, ORDER_TYPE_BUY_STOP,
                               buyStopLot, fillInBuyStopLots, orderPriceInvalid);
     }
 
@@ -537,7 +537,7 @@ void CheckAndPlaceOrders() {
     if (buyLimitArrayPrices.Total() > 0) {
 
       PlaceMissingDealsByType(buyLimitArrayPrices, buyLimitArrayTP,
-                              buyLimitGapSize, Comment, ORDER_TYPE_BUY_LIMIT,
+                              buyLimitGapSize, MyComment, ORDER_TYPE_BUY_LIMIT,
                               buyLimitLot, fillInBuyLimitLots,
                               orderPriceInvalid);
     }
@@ -550,7 +550,7 @@ void CheckAndPlaceOrders() {
     if (sellLimitArrayPrices.Total() > 0) {
 
       PlaceMissingDealsByType(sellLimitArrayPrices, sellLimitArrayTP,
-                              sellLimitGapSize, Comment, ORDER_TYPE_SELL_LIMIT,
+                              sellLimitGapSize, MyComment, ORDER_TYPE_SELL_LIMIT,
                               sellLimitLot, fillInSellLimitLots,
                               orderPriceInvalid);
     }
@@ -563,7 +563,7 @@ void CheckAndPlaceOrders() {
     if (sellStopArrayPrices.Total() > 0) {
 
       PlaceMissingDealsByType(sellStopArrayPrices, sellStopArrayTP,
-                              sellStopGapSize, Comment, ORDER_TYPE_SELL_STOP,
+                              sellStopGapSize, MyComment, ORDER_TYPE_SELL_STOP,
                               sellStopLot, fillInSellStopLots,
                               orderPriceInvalid);
     }
@@ -620,28 +620,28 @@ void PlaceMissingDealsByType(CArrayDouble &arrayPrices, CArrayDouble &arrayTP,
     case ORDER_TYPE_BUY_STOP:
       Utility.PlaceBuyStopOrder(
           missingDeals[i], missingDealsLots[i], missingDealsTP[i],
-          missingDealsLots[i] == BuyStopLot ? Comment + "|F" : Comment + "|T",
+          missingDealsLots[i] == BuyStopLot ? MyComment + "|F" : MyComment + "|T",
           orderPriceInvalid);
       break;
 
     case ORDER_TYPE_BUY_LIMIT:
       Utility.PlaceBuyLimitOrder(
           missingDeals[i], missingDealsLots[i], missingDealsTP[i],
-          missingDealsLots[i] == BuyLimitLot ? Comment + "|F" : Comment + "|T",
+          missingDealsLots[i] == BuyLimitLot ? MyComment + "|F" : MyComment + "|T",
           orderPriceInvalid);
       break;
 
     case ORDER_TYPE_SELL_LIMIT:
       Utility.PlaceSellLimitOrder(
           missingDeals[i], missingDealsLots[i], missingDealsTP[i],
-          missingDealsLots[i] == SellLimitLot ? Comment + "|F" : Comment + "|T",
+          missingDealsLots[i] == SellLimitLot ? MyComment + "|F" : MyComment + "|T",
           orderPriceInvalid);
       break;
 
     case ORDER_TYPE_SELL_STOP:
       Utility.PlaceSellStopOrder(
           missingDeals[i], missingDealsLots[i], missingDealsTP[i],
-          missingDealsLots[i] == SellStopLot ? Comment + "|F" : Comment + "|T",
+          missingDealsLots[i] == SellStopLot ? MyComment + "|F" : MyComment + "|T",
           orderPriceInvalid);
       break;
     }
@@ -1087,13 +1087,13 @@ void OnTick() {
             ", Entry:: ", buyStopArrayTP[i]);
     }
 
-    Utility.CloseOrderOutsideArrayPricesByType(buyStopArrayPrices, Comment,
+    Utility.CloseOrderOutsideArrayPricesByType(buyStopArrayPrices, MyComment,
                                                buyStopLot, ORDER_TYPE_BUY_STOP);
 
     bool orderPriceInvalid = false;
 
     PlaceMissingDealsByType(buyStopArrayPrices, buyStopArrayTP, buyStopGapSize,
-                            Comment, ORDER_TYPE_BUY_STOP, buyStopLot,
+                            MyComment, ORDER_TYPE_BUY_STOP, buyStopLot,
                             fillInBuyStopLots, orderPriceInvalid);
   }
 
@@ -1114,7 +1114,7 @@ void OnTick() {
     bool orderPriceInvalid = false;
 
     PlaceMissingDealsByType(buyLimitArrayPrices, buyLimitArrayTP,
-                            buyLimitGapSize, Comment, ORDER_TYPE_BUY_LIMIT,
+                            buyLimitGapSize, MyComment, ORDER_TYPE_BUY_LIMIT,
                             buyLimitLot, fillInBuyLimitLots, orderPriceInvalid);
   }
 
@@ -1135,7 +1135,7 @@ void OnTick() {
     bool orderPriceInvalid = false;
 
     PlaceMissingDealsByType(sellLimitArrayPrices, sellLimitArrayTP,
-                            sellLimitGapSize, Comment, ORDER_TYPE_SELL_LIMIT,
+                            sellLimitGapSize, MyComment, ORDER_TYPE_SELL_LIMIT,
                             sellLimitLot, fillInSellLimitLots,
                             orderPriceInvalid);
   }
@@ -1156,7 +1156,7 @@ void OnTick() {
     bool orderPriceInvalid = false;
 
     PlaceMissingDealsByType(sellStopArrayPrices, sellStopArrayTP,
-                            sellStopGapSize, Comment, ORDER_TYPE_SELL_STOP,
+                            sellStopGapSize, MyComment, ORDER_TYPE_SELL_STOP,
                             sellStopLot, fillInSellStopLots, orderPriceInvalid);
   }
 }

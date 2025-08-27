@@ -28,7 +28,7 @@ bool isInit = false;
 
 int limitOrders;
 CArrayDouble ArrayPrices;
-string Comment = "dynamic_grid";
+string MyComment = "dynamic_grid";
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -53,7 +53,7 @@ int OnInit() {
 
   ValidateInputAndVariables();
 
-  Utility.CloseOrderOutsideArrayPrices(ArrayPrices, Comment, LotSize);
+  Utility.CloseOrderOutsideArrayPrices(ArrayPrices, MyComment, LotSize);
 
   CheckAndPlaceOrders();
 
@@ -147,7 +147,7 @@ void CheckAndPlaceOrders() {
     if (TradeBuy) {
       CArrayDouble buyLimitPrices;
       CArrayDouble buyStopPrices;
-      Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, Comment,
+      Utility.FilterOpenBuyOrderAndPosition(ArrayPrices, GridGapSize, MyComment,
                                             buyLimitPrices, buyStopPrices);
       Print("Basic info: buyLimitPrices = ", buyLimitPrices.Total());
       Print("Basic info: buyStopPrices = ", buyStopPrices.Total());
@@ -160,13 +160,13 @@ void CheckAndPlaceOrders() {
       }
 
       Utility.PlaceBuyOrders(buyLimitPrices, buyStopPrices, LotSize,
-                             GridGapSize, Comment, OrderPriceInvalid);
+                             GridGapSize, MyComment, OrderPriceInvalid);
     }
 
     if (TradeSell) {
       CArrayDouble sellLimitPrices;
       CArrayDouble sellStopPrices;
-      Utility.FilterOpenSellOrderAndPosition(ArrayPrices, GridGapSize, Comment,
+      Utility.FilterOpenSellOrderAndPosition(ArrayPrices, GridGapSize, MyComment,
                                              sellLimitPrices, sellStopPrices);
       Print("Basic info: sellLimitPrices = ", sellLimitPrices.Total());
       Print("Basic info: sellStopPrices = ", sellStopPrices.Total());
@@ -179,7 +179,7 @@ void CheckAndPlaceOrders() {
       }
 
       Utility.PlaceSellOrders(sellLimitPrices, sellStopPrices, LotSize,
-                              GridGapSize, Comment, OrderPriceInvalid);
+                              GridGapSize, MyComment, OrderPriceInvalid);
     }
 
     if (OrderPriceInvalid)
@@ -289,14 +289,14 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
 
       GetArrayPrices();
 
-      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, Comment, LotSize);
+      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, MyComment, LotSize);
 
       CheckAndPlaceOrders();
     } else if ((ENUM_DEAL_REASON)reason == DEAL_REASON_EXPERT) {
 
       GetArrayPrices();
 
-      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, Comment, LotSize);
+      Utility.CloseOrderOutsideArrayPrices(ArrayPrices, MyComment, LotSize);
 
       CheckAndPlaceOrders();
     }

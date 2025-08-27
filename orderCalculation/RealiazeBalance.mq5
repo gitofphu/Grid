@@ -79,6 +79,7 @@ void DrawSummaryObject(string objectName, string text, int yDistance,
 }
 
 void DrawSummary() {
+  Print("Drawing summary...");
 
   ClearSummary();
 
