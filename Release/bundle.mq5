@@ -314,7 +314,7 @@ int OnInit() {
     limitOrders = accoutnLimitOrders;
   }
 
-  // Print("limitOrders: ", limitOrders);
+  Print("limitOrders: ", limitOrders);
 
   priceRange = PriceRange;
 
