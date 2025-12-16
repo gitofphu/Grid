@@ -90,14 +90,21 @@ int OnInit() {
 }
 
 void OnTick() {
+  Print("OnTick called.");
 
   ReCalculateAveragePrice();
+  
+  Print("drawAveragePrice", drawAveragePrice);
 
   if (drawAveragePrice) {
+      Print("averageBuyPrice: ", averageBuyPrice, ", averageBuyPrice == NULL: " , averageBuyPrice == NULL);
+      Print("totalBuyLots: ", totalBuyLots, ", totalBuyLots == NULL: ", totalBuyLots == NULL);
+      Print("averageSellPrice: ", averageSellPrice, ", averageSellPrice == NULL: ", averageSellPrice == NULL);
+      Print("totalSellLots: ", totalSellLots, ", totalSellLots == NULL: ", totalSellLots == NULL);
 
-    if (averageBuyPrice == NULL || totalBuyLots == NULL ||
-        averageSellPrice == NULL || totalSellLots == NULL)
-      return;
+  //  if (averageBuyPrice == NULL || totalBuyLots == NULL ||
+  //      averageSellPrice == NULL || totalSellLots == NULL)
+  //    return;
 
     DrawHorizontalLine(averageBuyPrice, ORDER_TYPE_BUY, AverageBuyPriceColor,
                        totalBuyLots, totalBuyProfit);
@@ -205,6 +212,7 @@ void OnDeinit(const int reason) {
 }
 
 void ReCalculateAveragePrice() {
+   Print("ReCalculateAveragePrice");
   if (drawAveragePrice) {
     Utility.GetAveragePriceAndLots(
         averageBuyPrice, totalBuyLots, totalBuyProfit, averageSellPrice,
@@ -291,6 +299,7 @@ void DrawHorizontalLine(double price, ENUM_ORDER_TYPE type, color lineColor,
 }
 
 void DrawSummary(double totalProfit) {
+   Print("DrawSummary ", totalProfit);
 
   string text =
       "Total Positions: " + IntegerToString(totalPositions) +
