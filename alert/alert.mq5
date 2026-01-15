@@ -7,7 +7,7 @@
 #property link "https://www.mysite.com/"
 #property version "1.00"
 
-#include <../Experts/Grid/Utility.mqh>
+#include "../Utility.mqh"
 MyUtility Utility;
 
 #resource "buy_entry_alert.wav"
@@ -316,7 +316,7 @@ void DrawSummary(double totalProfit) {
     ObjectSetInteger(0, objectName, OBJPROP_YSIZE, 20);
     ObjectSetInteger(0, objectName, OBJPROP_XDISTANCE, 10);
     ObjectSetInteger(0, objectName, OBJPROP_YDISTANCE, 20);
-    ObjectSetInteger(0, objectName, OBJPROP_COLOR, Yellow);
+    ObjectSetInteger(0, objectName, OBJPROP_COLOR, clrYellow);
   }
   ObjectSetString(0, objectName, OBJPROP_TEXT, text);
 }
