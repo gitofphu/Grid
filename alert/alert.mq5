@@ -30,6 +30,10 @@ input bool drawAveragePrice = false;
 input ENUM_BASE_CORNER corner = CORNER_RIGHT_LOWER; // Corner
 input color averageBuyPriceColor = clrGreen;        // Buy Color
 input color averageSellPriceColor = clrRed;         // Sell Color
+input color RealizeBalancePositiveColor =
+    clrCyan; // Realize Balance Positive Color
+input color RealizeBalanceNegativeColor =
+    clrOrange; // Realize Balance Negative Color
 
 ENUM_BASE_CORNER Corner;
 ENUM_ANCHOR_POINT anchor;
@@ -285,17 +289,7 @@ void DrawHorizontalLine(double price, ENUM_ORDER_TYPE type, color lineColor,
     yDistance = 40;
   }
 
-  if (ObjectFind(0, objectName) < 0) {
-    ObjectCreate(0, objectName, OBJ_LABEL, 0, 0, 0);
-    ObjectSetInteger(0, objectName, OBJPROP_CORNER, Corner);
-    ObjectSetInteger(0, objectName, OBJPROP_ANCHOR, anchor);
-    ObjectSetInteger(0, objectName, OBJPROP_XSIZE, 200);
-    ObjectSetInteger(0, objectName, OBJPROP_YSIZE, 20);
-    ObjectSetInteger(0, objectName, OBJPROP_XDISTANCE, 10);
-    ObjectSetInteger(0, objectName, OBJPROP_YDISTANCE, yDistance);
-    ObjectSetInteger(0, objectName, OBJPROP_COLOR, lineColor);
-  }
-  ObjectSetString(0, objectName, OBJPROP_TEXT, text);
+  DrawTextLabel(objectName, text, yDistance, lineColor);
 }
 
 void DrawSummary(double totalProfit) {
@@ -308,15 +302,19 @@ void DrawSummary(double totalProfit) {
 
   string objectName = "summaryText";
 
-  if (ObjectFind(0, objectName) < 0) {
-    ObjectCreate(0, objectName, OBJ_LABEL, 0, 0, 0);
-    ObjectSetInteger(0, objectName, OBJPROP_CORNER, Corner);
-    ObjectSetInteger(0, objectName, OBJPROP_ANCHOR, anchor);
-    ObjectSetInteger(0, objectName, OBJPROP_XSIZE, 200);
-    ObjectSetInteger(0, objectName, OBJPROP_YSIZE, 20);
-    ObjectSetInteger(0, objectName, OBJPROP_XDISTANCE, 10);
-    ObjectSetInteger(0, objectName, OBJPROP_YDISTANCE, 20);
-    ObjectSetInteger(0, objectName, OBJPROP_COLOR, clrYellow);
+  DrawTextLabel(objectName, text, 20, clrYellow);
+}
+
+void DrawTextLabel(string name, string text, int yDistance, color textColor) {
+  if (ObjectFind(0, name) < 0) {
+    ObjectCreate(0, name, OBJ_LABEL, 0, 0, 0);
+    ObjectSetInteger(0, name, OBJPROP_CORNER, Corner);
+    ObjectSetInteger(0, name, OBJPROP_ANCHOR, anchor);
+    ObjectSetInteger(0, name, OBJPROP_XSIZE, 200);
+    ObjectSetInteger(0, name, OBJPROP_YSIZE, 20);
+    ObjectSetInteger(0, name, OBJPROP_XDISTANCE, 10);
+    ObjectSetInteger(0, name, OBJPROP_YDISTANCE, yDistance);
+    ObjectSetInteger(0, name, OBJPROP_COLOR, textColor);
   }
-  ObjectSetString(0, objectName, OBJPROP_TEXT, text);
+  ObjectSetString(0, name, OBJPROP_TEXT, text);
 }
