@@ -97,18 +97,22 @@ void OnTick() {
   Print("OnTick called.");
 
   ReCalculateAveragePrice();
-  
+
   Print("drawAveragePrice", drawAveragePrice);
 
   if (drawAveragePrice) {
-      Print("averageBuyPrice: ", averageBuyPrice, ", averageBuyPrice == NULL: " , averageBuyPrice == NULL);
-      Print("totalBuyLots: ", totalBuyLots, ", totalBuyLots == NULL: ", totalBuyLots == NULL);
-      Print("averageSellPrice: ", averageSellPrice, ", averageSellPrice == NULL: ", averageSellPrice == NULL);
-      Print("totalSellLots: ", totalSellLots, ", totalSellLots == NULL: ", totalSellLots == NULL);
+    Print("averageBuyPrice: ", averageBuyPrice,
+          ", averageBuyPrice == NULL: ", averageBuyPrice == NULL);
+    Print("totalBuyLots: ", totalBuyLots,
+          ", totalBuyLots == NULL: ", totalBuyLots == NULL);
+    Print("averageSellPrice: ", averageSellPrice,
+          ", averageSellPrice == NULL: ", averageSellPrice == NULL);
+    Print("totalSellLots: ", totalSellLots,
+          ", totalSellLots == NULL: ", totalSellLots == NULL);
 
-  //  if (averageBuyPrice == NULL || totalBuyLots == NULL ||
-  //      averageSellPrice == NULL || totalSellLots == NULL)
-  //    return;
+    //  if (averageBuyPrice == NULL || totalBuyLots == NULL ||
+    //      averageSellPrice == NULL || totalSellLots == NULL)
+    //    return;
 
     DrawHorizontalLine(averageBuyPrice, ORDER_TYPE_BUY, AverageBuyPriceColor,
                        totalBuyLots, totalBuyProfit);
@@ -117,6 +121,8 @@ void OnTick() {
                        totalSellLots, totalSellProfit);
 
     DrawSummary(totalBuyProfit + totalSellProfit);
+
+    DrawRealizeBalance();
 
     ChartRedraw(); // Refresh the chart
   }
@@ -216,7 +222,7 @@ void OnDeinit(const int reason) {
 }
 
 void ReCalculateAveragePrice() {
-   Print("ReCalculateAveragePrice");
+  Print("ReCalculateAveragePrice");
   if (drawAveragePrice) {
     Utility.GetAveragePriceAndLots(
         averageBuyPrice, totalBuyLots, totalBuyProfit, averageSellPrice,
@@ -282,18 +288,18 @@ void DrawHorizontalLine(double price, ENUM_ORDER_TYPE type, color lineColor,
   if (type == ORDER_TYPE_BUY) {
     text = "Buy: " + message;
     objectName = buyLineName + "Text";
-    yDistance = 60;
+    yDistance = 80;
   } else {
     text = "Sell: " + message;
     objectName = sellLineName + "Text";
-    yDistance = 40;
+    yDistance = 60;
   }
 
   DrawTextLabel(objectName, text, yDistance, lineColor);
 }
 
 void DrawSummary(double totalProfit) {
-   Print("DrawSummary ", totalProfit);
+  Print("DrawSummary ", totalProfit);
 
   string text =
       "Total Positions: " + IntegerToString(totalPositions) +
@@ -302,7 +308,33 @@ void DrawSummary(double totalProfit) {
 
   string objectName = "summaryText";
 
-  DrawTextLabel(objectName, text, 20, clrYellow);
+  DrawTextLabel(objectName, text, 40, clrYellow);
+}
+
+void DrawRealizeBalance() {
+
+  string objectName = "Balance_Summary";
+  CArrayString texts;
+  CArrayLong colors;
+
+  double equity = Utility.GetRealizeBalance();
+  string balanceText = "";
+
+  if (equity > 0) {
+    balanceText = "Balance is surplus by " + DoubleToString(equity, 2);
+  } else {
+    balanceText = "Balance is short of by " + DoubleToString(equity, 2);
+  }
+
+  DrawTextLabel(objectName, balanceText, 20,
+                equity > 0 ? RealizeBalancePositiveColor
+                           : RealizeBalanceNegativeColor);
+}
+
+void ClearSummary() {
+  ObjectDelete(0, "Balance_Summary");
+
+  ChartRedraw();
 }
 
 void DrawTextLabel(string name, string text, int yDistance, color textColor) {
