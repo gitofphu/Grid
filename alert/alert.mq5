@@ -218,6 +218,7 @@ void OnDeinit(const int reason) {
     ObjectDelete(0, buyLineName + "Text");
     ObjectDelete(0, sellLineName + "Text");
     ObjectDelete(0, "summaryText");
+    ObjectDelete(0, "Balance_Summary");
   }
 }
 
