@@ -7,7 +7,7 @@
 #property link "https://www.mysite.com/"
 #property version "1.00"
 
-#include <../Experts/Grid/Utility.mqh>
+#include "./Utility.mqh"
 MyUtility Utility;
 
 struct PriceVolume {
@@ -55,7 +55,6 @@ void OnStart() {
         ArrayResize(positionSell, ArraySize(positionSell) + 1);
         positionSell[ArraySize(positionSell) - 1] = item;
       }
-
     }
   }
 
